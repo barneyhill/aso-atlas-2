@@ -1,0 +1,29 @@
+{
+  "sugar": {
+    "d": "DC2",
+    "[moe]": "MOE",
+    "[cet]": "CET",
+    "[lna]": "LNA",
+    "[fR]": "AF2",
+    "[m]": "OME",
+    "": "RC3"
+  },
+  "backbone": {
+    "[sp]": "PS1",
+    ".": "RPO",
+    "[am]": "NS1",
+    "": "RPO"
+  },
+  "base": {
+    "A": {"rna": "RAA", "dna": "DAA"},
+    "G": {"rna": "RGG", "dna": "DGG"},
+    "C": {"rna": "RCC", "dna": "DCC"},
+    "T": {"dna": "DTT"},
+    "U": {"rna": "RUU"},
+    "5meC": {"rna": "M5C", "dna": "M5C"},
+    "5MeC": {"rna": "M5C", "dna": "M5C"}
+  },
+  "terminal_backbone": {
+    "5prime": "5PO"
+  }
+}
