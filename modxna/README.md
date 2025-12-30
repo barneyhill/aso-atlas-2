@@ -38,6 +38,31 @@ uv run python -m modxna.cli input.helm -o output/
 uv run python -m modxna.cli --help
 ```
 
+## Scripts
+
+The `scripts/` directory contains utilities for installation and running simulations:
+
+| Script | Description |
+|--------|-------------|
+| `install.sh` | Install AmberTools and modXNA to `bin/` |
+| `setup_env.sh` | Set up environment variables for AMBER |
+| `run_example_aso.py` | Run a complete MD simulation with AMBER |
+
+### Running AMBER Simulations
+
+After building a system, you can run MD simulations using AMBER:
+
+```bash
+# Run the example ASO simulation (builds system, runs MD, exports video)
+uv run python scripts/run_example_aso.py
+
+# Customize simulation settings
+uv run python scripts/run_example_aso.py --simulation-ns 10 --threads 8
+
+# Skip steps if you've already run them
+uv run python scripts/run_example_aso.py --skip-build --skip-video
+```
+
 ## HELM Notation Reference
 
 | Notation | Chemistry | modXNA Code |

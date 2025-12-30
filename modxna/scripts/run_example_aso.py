@@ -8,10 +8,10 @@ This script demonstrates the full modXNA workflow:
 
 Usage:
     # From modxna directory:
-    uv run python examples/run_example_aso.py
+    uv run python scripts/run_example_aso.py
 
     # Or with custom settings:
-    uv run python examples/run_example_aso.py --simulation-ns 1 --threads 16
+    uv run python scripts/run_example_aso.py --simulation-ns 1 --threads 16
 """
 
 import argparse
@@ -63,7 +63,7 @@ def main():
     # Get paths
     script_dir = Path(__file__).parent
     project_dir = script_dir.parent
-    helm_file = script_dir / "example_aso.helm"
+    helm_file = project_dir / "examples" / "example_aso.helm"
     output_dir = args.output_dir.resolve()
 
     print("=" * 60)
