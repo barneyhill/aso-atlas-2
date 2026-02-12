@@ -1,9 +1,7 @@
-"""Training loop for OligoAI2 multi-task ASO regression model.
+"""Training loop for OligoAI2 simplified multi-task ASO regression model.
 
-3-phase training:
-  Phase 1: Pre-train on in vitro (~249K samples) with CCC loss
-  Phase 2: Train in vivo heads (~32K samples) with multi-task CCC
-  Phase 3: Joint end-to-end fine-tuning (optional)
+Single joint training loop: each step samples one in vitro + one in vivo batch,
+computes combined CCC loss, and takes one optimizer step.
 """
 
 import argparse
@@ -29,107 +27,29 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-# ── Phase 1: Pre-train on In Vitro ─────────────────────────────────────
+# ── Joint Training Loop ────────────────────────────────────────────────
 
-def train_phase1(model, train_ds, val_ds, device, epochs=30, bs=512, lr=3e-4,
-                 patience=5):
-    """Phase 1: Pre-train encoder + bottleneck + in_vitro head on inhibition data."""
-    n_train = math.ceil(len(train_ds) / bs)
-    n_val = math.ceil(len(val_ds) / bs)
+def train(model, train_iv, train_vivo, val_iv, val_vivo, device,
+          epochs=80, bs_iv=512, bs_vivo=128, lr=3e-4, patience=12,
+          warmup_epochs=10, encoder_lr=1e-5):
+    """Joint training with IV-only warmup and differential encoder LR."""
+    n_iv_batches = math.ceil(len(train_iv) / bs_iv)
     print(f"\n{'='*60}")
-    print(f"Phase 1: Pre-train on in vitro ({len(train_ds):,} samples, {n_train} batches)")
+    print(f"Training: {len(train_iv):,} IV + {len(train_vivo):,} vivo samples")
+    print(f"  {n_iv_batches} IV batches/epoch, lr={lr}, patience={patience}")
+    print(f"  warmup={warmup_epochs} epochs (IV-only), then joint (encoder_lr={encoder_lr})")
     print(f"{'='*60}")
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-5)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    has_vivo = len(train_vivo) > 0
 
-    best_val_ccc = -float("inf")
-    best_state = None
-    stale = 0
+    # Separate encoder params (protected LR during joint phase) from rest
+    encoder_params = list(model.encoder.parameters())
+    encoder_ids = {id(p) for p in encoder_params}
+    head_params = [p for p in model.parameters() if id(p) not in encoder_ids]
 
-    for epoch in range(epochs):
-        t0 = time.time()
-        model.train()
-        train_loss_acc = torch.zeros(1, device=device)
-        n_batches = 0
-
-        for batch in iter_batches(train_ds, bs):
-            pred = model.forward_invitro(batch)
-            loss = ccc_loss(pred, batch["target"])
-            optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            optimizer.step()
-            train_loss_acc += loss.detach()
-            n_batches += 1
-
-        scheduler.step()
-        t_train = time.time() - t0
-
-        # Validation
-        t_val = time.time()
-        model.eval()
-        val_preds, val_targets = [], []
-        with torch.no_grad():
-            for batch in iter_batches(val_ds, bs, shuffle=False):
-                pred = model.forward_invitro(batch)
-                val_preds.append(pred)
-                val_targets.append(batch["target"])
-
-        val_preds = torch.cat(val_preds)
-        val_targets = torch.cat(val_targets)
-        val_ccc = 1.0 - ccc_loss(val_preds, val_targets).item()
-        t_val = time.time() - t_val
-
-        print(
-            f"  Epoch {epoch+1:3d}/{epochs}: "
-            f"train_loss={train_loss_acc.item()/n_batches:.4f}  "
-            f"val_CCC={val_ccc:.4f}  "
-            f"lr={optimizer.param_groups[0]['lr']:.2e}  "
-            f"(train={t_train:.1f}s val={t_val:.1f}s)"
-        )
-
-        if val_ccc > best_val_ccc:
-            best_val_ccc = val_ccc
-            best_state = {k: v.clone() for k, v in model.state_dict().items()}
-            stale = 0
-        else:
-            stale += 1
-            if stale >= patience:
-                print(f"  Early stopping at epoch {epoch+1} (patience={patience})")
-                break
-
-    if best_state is not None:
-        model.load_state_dict(best_state)
-        print(f"  Restored best model (val CCC = {best_val_ccc:.4f})")
-
-    return best_val_ccc
-
-
-# ── Phase 2: Train In Vivo Heads ────────────────────────────────────────
-
-def train_phase2(model, train_ds, val_ds, device, epochs=100, bs=128,
-                 encoder_lr=3e-6, head_lr=3e-4, patience=15):
-    """Phase 2: Train in vivo heads with frozen/slow encoder."""
-    print(f"\n{'='*60}")
-    print(f"Phase 2: Train in vivo heads ({len(train_ds):,} samples, bs={bs})")
-    print(f"{'='*60}")
-
-    if len(train_ds) == 0:
-        print("  No in vivo training data, skipping.")
-        return 0.0
-
-    # Differential LR: encoder slow, heads fast
-    encoder_params = list(model.encoder.parameters()) + list(model.bottleneck.parameters())
-    head_params = (
-        list(model.cov_hepatic.parameters())
-        + list(model.cov_neuro.parameters())
-        + list(model.head.parameters())
-        + [model.log_var]
-    )
     optimizer = torch.optim.AdamW([
-        {"params": encoder_params, "lr": encoder_lr},
-        {"params": head_params, "lr": head_lr},
+        {"params": encoder_params, "lr": lr},
+        {"params": head_params, "lr": lr},
     ], weight_decay=1e-5)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
@@ -138,109 +58,39 @@ def train_phase2(model, train_ds, val_ds, device, epochs=100, bs=128,
     stale = 0
 
     for epoch in range(epochs):
-        t0 = time.time()
-        model.train()
-        train_loss_acc = torch.zeros(1, device=device)
-        n_batches = 0
+        # Transition: warmup → joint (drop encoder LR)
+        if epoch == warmup_epochs and warmup_epochs > 0:
+            scheduler.base_lrs[0] = encoder_lr
+            optimizer.param_groups[0]["lr"] = encoder_lr
+            print(f"\n  → Joint phase: encoder LR {lr} → {encoder_lr}")
 
-        for batch in iter_batches(train_ds, bs):
-            pred = model.forward_invivo(batch)
-            loss, per_task = multitask_loss(pred, batch["target"], batch["task_id"], model.log_var)
-            if not per_task:
-                continue
-            optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            optimizer.step()
-            train_loss_acc += loss.detach()
-            n_batches += 1
-
-        scheduler.step()
-        t_train = time.time() - t0
-
-        # Validation
-        t_val = time.time()
-        model.eval()
-        val_preds, val_targets, val_tids = [], [], []
-        with torch.no_grad():
-            for batch in iter_batches(val_ds, bs, shuffle=False):
-                pred = model.forward_invivo(batch)
-                val_preds.append(pred)
-                val_targets.append(batch["target"])
-                val_tids.append(batch["task_id"])
-
-        val_preds = torch.cat(val_preds)
-        val_targets = torch.cat(val_targets)
-        val_tids = torch.cat(val_tids)
-        val_loss, val_per_task = multitask_loss(
-            val_preds, val_targets, val_tids, model.log_var.detach(),
-        )
-        t_val = time.time() - t_val
-
-        task_str = "  ".join(f"{TASK_NAMES[t]}={l:.3f}" for t, l in sorted(val_per_task.items()))
-        print(
-            f"  Epoch {epoch+1:3d}/{epochs}: "
-            f"train={train_loss_acc.item()/max(n_batches,1):.4f}  val={val_loss.item():.4f}  "
-            f"[{task_str}]  (train={t_train:.1f}s val={t_val:.1f}s)"
-        )
-
-        if val_loss.item() < best_val_loss:
-            best_val_loss = val_loss.item()
-            best_state = {k: v.clone() for k, v in model.state_dict().items()}
-            stale = 0
-        else:
-            stale += 1
-            if stale >= patience:
-                print(f"  Early stopping at epoch {epoch+1} (patience={patience})")
-                break
-
-    if best_state is not None:
-        model.load_state_dict(best_state)
-        print(f"  Restored best model (val loss = {best_val_loss:.4f})")
-
-    return best_val_loss
-
-
-# ── Phase 3: Joint Fine-tuning ──────────────────────────────────────────
-
-def train_phase3(model, train_iv_ds, train_vivo_ds,
-                 val_iv_ds, val_vivo_ds, device,
-                 epochs=20, bs_iv=512, bs_vivo=128, lr=1e-5,
-                 max_iv_batches=100, patience=7):
-    """Phase 3: Joint end-to-end fine-tuning with very low LR."""
-    print(f"\n{'='*60}")
-    print(f"Phase 3: Joint fine-tuning ({epochs} epochs, lr={lr})")
-    print(f"{'='*60}")
-
-    if len(train_vivo_ds) == 0:
-        print("  No in vivo data, skipping.")
-        return
-
-    n_iv = max_iv_batches or math.ceil(len(train_iv_ds) / bs_iv)
-    print(f"  {n_iv} iv batches/epoch, {math.ceil(len(train_vivo_ds)/bs_vivo)} vivo batches/epoch")
-
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-5)
-
-    best_val_loss = float("inf")
-    best_state = None
-    stale = 0
-
-    for epoch in range(epochs):
         t0 = time.time()
         model.train()
         loss_acc = torch.zeros(1, device=device)
         n_steps = 0
+        in_joint = epoch >= warmup_epochs
 
-        iv_gen = iter_batches(train_iv_ds, bs_iv)
-        vivo_gen = iter_batches(train_vivo_ds, bs_vivo)
+        iv_gen = iter_batches(train_iv, bs_iv)
+        vivo_gen = iter_batches(train_vivo, bs_vivo) if has_vivo and in_joint else None
 
-        for i, batch_iv in enumerate(iv_gen):
-            if i >= n_iv:
-                break
+        for batch_iv in iv_gen:
+            # In vitro loss
+            iv_pred = model.forward_invitro(batch_iv)
+            loss = ccc_loss(iv_pred, batch_iv["target"])
 
-            # In vitro step
-            pred = model.forward_invitro(batch_iv)
-            loss = ccc_loss(pred, batch_iv["target"])
+            # In vivo loss (skip during warmup)
+            if vivo_gen is not None:
+                batch_vivo = next(vivo_gen, None)
+                if batch_vivo is None:
+                    vivo_gen = iter_batches(train_vivo, bs_vivo)
+                    batch_vivo = next(vivo_gen)
+                vivo_pred = model.forward_invivo(batch_vivo)
+                vivo_loss, per_task = multitask_loss(
+                    vivo_pred, batch_vivo["target"], batch_vivo["task_id"], model.log_var,
+                )
+                if per_task:
+                    loss = loss + vivo_loss
+
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -248,63 +98,41 @@ def train_phase3(model, train_iv_ds, train_vivo_ds,
             loss_acc += loss.detach()
             n_steps += 1
 
-            # In vivo step (cycle when exhausted)
-            batch_vivo = next(vivo_gen, None)
-            if batch_vivo is None:
-                vivo_gen = iter_batches(train_vivo_ds, bs_vivo)
-                batch_vivo = next(vivo_gen)
-
-            pred = model.forward_invivo(batch_vivo)
-            loss, per_task = multitask_loss(pred, batch_vivo["target"], batch_vivo["task_id"], model.log_var)
-            if per_task:
-                optimizer.zero_grad(set_to_none=True)
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                optimizer.step()
-                loss_acc += loss.detach()
-                n_steps += 1
-
+        scheduler.step()
         t_train = time.time() - t0
 
         # Validation
-        model.eval()
-        with torch.no_grad():
-            # In vitro val
-            iv_preds, iv_targets = [], []
-            for batch in iter_batches(val_iv_ds, bs_iv, shuffle=False):
-                iv_preds.append(model.forward_invitro(batch))
-                iv_targets.append(batch["target"])
-            val_iv_ccc_loss = ccc_loss(torch.cat(iv_preds), torch.cat(iv_targets)).item()
+        val_loss, val_iv_ccc, val_vivo_loss, val_per_task = _validate(
+            model, val_iv, val_vivo, bs_iv, bs_vivo,
+        )
+        t_total = time.time() - t0
 
-            # In vivo val
-            vivo_preds, vivo_targets, vivo_tids = [], [], []
-            for batch in iter_batches(val_vivo_ds, bs_vivo, shuffle=False):
-                vivo_preds.append(model.forward_invivo(batch))
-                vivo_targets.append(batch["target"])
-                vivo_tids.append(batch["task_id"])
-            val_vivo_loss, val_per_task = multitask_loss(
-                torch.cat(vivo_preds), torch.cat(vivo_targets),
-                torch.cat(vivo_tids), model.log_var.detach(),
-            )
-            val_vivo_loss = val_vivo_loss.item()
-
-        val_combined = val_iv_ccc_loss + val_vivo_loss
-        task_str = "  ".join(f"{TASK_NAMES[t]}={l:.3f}" for t, l in sorted(val_per_task.items()))
+        task_str = ""
+        if val_per_task:
+            task_str = "  [" + "  ".join(
+                f"{TASK_NAMES[t]}={l:.3f}" for t, l in sorted(val_per_task.items())
+            ) + "]"
 
         marker = ""
-        if val_combined < best_val_loss:
-            best_val_loss = val_combined
-            best_state = {k: v.clone() for k, v in model.state_dict().items()}
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            if device.type == "mps":
+                torch.mps.synchronize()
+            best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
             stale = 0
             marker = " *"
         else:
             stale += 1
 
+        phase = "WU" if not in_joint else "JT"
         print(
-            f"  Epoch {epoch+1:3d}/{epochs}: "
+            f"  {phase} {epoch+1:3d}/{epochs}: "
             f"train={loss_acc.item()/max(n_steps,1):.4f}  "
-            f"val_iv={1-val_iv_ccc_loss:.4f}  val_vivo={val_vivo_loss:.4f}  "
-            f"[{task_str}]  ({t_train:.1f}s){marker}"
+            f"val_iv_CCC={1-val_iv_ccc:.4f}  val_vivo={val_vivo_loss:.4f}"
+            f"{task_str}  "
+            f"lr={optimizer.param_groups[1]['lr']:.2e}"
+            f"/{optimizer.param_groups[0]['lr']:.2e}  "
+            f"({t_total:.1f}s){marker}"
         )
 
         if stale >= patience:
@@ -313,13 +141,43 @@ def train_phase3(model, train_iv_ds, train_vivo_ds,
 
     if best_state is not None:
         model.load_state_dict(best_state)
+        model.to(device)
         print(f"  Restored best model (val combined = {best_val_loss:.4f})")
+
+
+def _validate(model, val_iv, val_vivo, bs_iv, bs_vivo):
+    """Compute combined validation loss. Returns (combined, iv_ccc_loss, vivo_loss, per_task)."""
+    model.eval()
+    with torch.no_grad():
+        # In vitro
+        iv_preds, iv_targets = [], []
+        for batch in iter_batches(val_iv, bs_iv, shuffle=False):
+            iv_preds.append(model.forward_invitro(batch))
+            iv_targets.append(batch["target"])
+        val_iv_ccc_loss = ccc_loss(torch.cat(iv_preds), torch.cat(iv_targets)).item()
+
+        # In vivo
+        val_vivo_loss = 0.0
+        val_per_task = {}
+        if len(val_vivo) > 0:
+            vivo_preds, vivo_targets, vivo_tids = [], [], []
+            for batch in iter_batches(val_vivo, bs_vivo, shuffle=False):
+                vivo_preds.append(model.forward_invivo(batch))
+                vivo_targets.append(batch["target"])
+                vivo_tids.append(batch["task_id"])
+            vl, val_per_task = multitask_loss(
+                torch.cat(vivo_preds), torch.cat(vivo_targets),
+                torch.cat(vivo_tids), model.log_var.detach(),
+            )
+            val_vivo_loss = vl.item()
+
+    return val_iv_ccc_loss + val_vivo_loss, val_iv_ccc_loss, val_vivo_loss, val_per_task
 
 
 # ── Evaluation ──────────────────────────────────────────────────────────
 
 def median_spearman(preds, targets, group_ids, min_n=3):
-    """Spearman ρ per target-gene group, return median. Measures within-target ranking."""
+    """Spearman rho per target-gene group, return median. Measures within-target ranking."""
     p, t, g = preds.cpu().numpy(), targets.cpu().numpy(), group_ids.cpu().numpy()
     rhos = []
     for gid in np.unique(g):
@@ -426,10 +284,9 @@ def evaluate(model, test_ds, device, norm_stats, dataset_type="invivo"):
 # ── Main ────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="OligoAI2 Training")
+    parser = argparse.ArgumentParser(description="OligoAI2 Simplified Training")
     parser.add_argument("--smoke-test", action="store_true", help="Quick 2-epoch run")
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--skip-phase3", action="store_true", help="Skip joint fine-tuning")
     args = parser.parse_args()
 
     t_start = time.time()
@@ -438,10 +295,7 @@ def main():
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
-    p1_epochs = 2 if args.smoke_test else 30
-    p2_epochs = 2 if args.smoke_test else 100
-    p3_epochs = 2 if args.smoke_test else 20
-    p3_max_iv = 170 if args.smoke_test else 100
+    epochs = 2 if args.smoke_test else 80
 
     # Load data + pre-move to device (eliminates per-batch transfers)
     data = load_all(seed=args.seed)
@@ -459,19 +313,11 @@ def main():
     ).to(device)
     print(f"\nModel parameters: {model.count_parameters():,}")
 
-    # Phase 1
-    train_phase1(model, data["train_invitro"], data["val_invitro"], device,
-                 epochs=p1_epochs)
-
-    # Phase 2
-    train_phase2(model, data["train_invivo"], data["val_invivo"], device,
-                 epochs=p2_epochs)
-
-    # Phase 3
-    if not args.skip_phase3:
-        train_phase3(model, data["train_invitro"], data["train_invivo"],
-                     data["val_invitro"], data["val_invivo"], device,
-                     epochs=p3_epochs, max_iv_batches=p3_max_iv)
+    # Train
+    warmup_epochs = 1 if args.smoke_test else 10
+    train(model, data["train_invitro"], data["train_invivo"],
+          data["val_invitro"], data["val_invivo"], device,
+          epochs=epochs, warmup_epochs=warmup_epochs)
 
     # Evaluate
     model.to(device)

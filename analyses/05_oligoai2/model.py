@@ -1,7 +1,7 @@
-"""OligoAI2 model architecture.
+"""OligoAI2 simplified model architecture.
 
-Transformer encoder with factored embeddings and RoPE, perceiver bottleneck
-for fixed-size latent, covariate encoders, and FiLM-gated multi-task heads.
+Transformer encoder with factored embeddings and RoPE, masked mean pooling,
+covariate encoders, and independent task heads.
 """
 
 import math
@@ -24,8 +24,6 @@ class ModelConfig:
     d_ff: int = 384
     dropout: float = 0.1
     max_len: int = 40
-    n_latents: int = 4
-    d_latent: int = 64
     d_cov: int = 32
     d_head_hidden: int = 64
     n_bases: int = N_BASES
@@ -165,38 +163,28 @@ class TransformerEncoder(nn.Module):
         return self.final_ln(x)
 
 
-# ── Perceiver Bottleneck ────────────────────────────────────────────────
+# ── Masked Mean Pooling ────────────────────────────────────────────────
 
-class PerceiverBottleneck(nn.Module):
-    """Cross-attend K learned latents into encoder output, project to d_latent."""
+def masked_mean_pool(h: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """Pool encoder output via masked mean. (batch, seq_len, d_model) -> (batch, d_model)."""
+    return (h * mask.unsqueeze(-1)).sum(1) / mask.sum(1, keepdim=True).clamp(min=1)
 
-    def __init__(self, cfg: ModelConfig):
+
+# ── Attention Pooling ──────────────────────────────────────────────────
+
+class AttentionPool(nn.Module):
+    """Single-query cross-attention pooling. Learns position-aware weighting."""
+
+    def __init__(self, d_model: int, n_heads: int):
         super().__init__()
-        self.latent_queries = nn.Parameter(torch.randn(cfg.n_latents, cfg.d_model) * 0.02)
-        self.cross_attn = nn.MultiheadAttention(
-            embed_dim=cfg.d_model,
-            num_heads=cfg.n_heads,
-            dropout=cfg.dropout,
-            batch_first=True,
-        )
-        self.proj = nn.Linear(cfg.n_latents * cfg.d_model, cfg.d_latent)
+        self.query = nn.Parameter(torch.randn(1, 1, d_model) * 0.02)
+        self.attn = nn.MultiheadAttention(d_model, n_heads, batch_first=True)
 
     def forward(self, h: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            h: (batch, seq_len, d_model) encoder output
-            mask: (batch, seq_len) bool, True = valid
-        Returns: (batch, d_latent)
-        """
-        B = h.shape[0]
-        queries = self.latent_queries.unsqueeze(0).expand(B, -1, -1)  # (B, K, d_model)
-
-        # nn.MultiheadAttention uses key_padding_mask where True = ignore
-        key_padding_mask = ~mask  # invert: True means padding
-
-        z, _ = self.cross_attn(queries, h, h, key_padding_mask=key_padding_mask)  # (B, K, d_model)
-        z = z.reshape(B, -1)  # (B, K * d_model)
-        return F.gelu(self.proj(z))  # (B, d_latent)
+        """(batch, seq_len, d_model) -> (batch, d_model)."""
+        q = self.query.expand(h.shape[0], -1, -1)
+        out, _ = self.attn(q, h, h, key_padding_mask=~mask)
+        return out.squeeze(1)
 
 
 # ── Covariate Encoder ──────────────────────────────────────────────────
@@ -231,32 +219,35 @@ class CovariateEncoder(nn.Module):
         return self.mlp(x)
 
 
-# ── FiLM Head ──────────────────────────────────────────────────────────
+# ── Task Heads ──────────────────────────────────────────────────────────
 
-class FiLMHead(nn.Module):
-    """FiLM-gated regression head shared across all tasks."""
+class TaskHeads(nn.Module):
+    """Independent 2-layer MLP per task."""
 
-    def __init__(self, cfg: ModelConfig, n_tasks: int = N_TASKS):
+    def __init__(self, d_in: int, d_cov: int, d_hidden: int, n_tasks: int):
         super().__init__()
-        self.task_emb = nn.Embedding(n_tasks, cfg.d_latent)
-        self.gate = nn.Linear(cfg.d_latent + cfg.d_cov, cfg.d_latent)
-        self.mlp = nn.Sequential(
-            nn.Linear(cfg.d_latent, cfg.d_head_hidden),
-            nn.GELU(),
-            nn.Linear(cfg.d_head_hidden, 1),
-        )
+        self.heads = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(d_in + d_cov, d_hidden),
+                nn.GELU(),
+                nn.Linear(d_hidden, 1),
+            )
+            for _ in range(n_tasks)
+        ])
 
-    def forward(self, z: torch.Tensor, task_id: torch.Tensor, cov: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            z: (batch, d_latent) - ASO representation
-            task_id: (batch,) LongTensor
-            cov: (batch, d_cov) - covariate encoding
-        Returns: (batch,) predictions
-        """
-        t = self.task_emb(task_id)  # (batch, d_latent)
-        gamma = torch.sigmoid(self.gate(torch.cat([t, cov], dim=-1)))  # (batch, d_latent)
-        return self.mlp(z * gamma).squeeze(-1)  # (batch,)
+    def forward(self, z: torch.Tensor, task_id: int, cov: torch.Tensor) -> torch.Tensor:
+        """Single-task forward (all samples share same task_id)."""
+        x = torch.cat([z, cov], dim=-1)
+        return self.heads[task_id](x).squeeze(-1)
+
+    def forward_multi(self, z: torch.Tensor, task_ids: torch.Tensor, cov: torch.Tensor) -> torch.Tensor:
+        """Multi-task forward (per-sample task_ids)."""
+        x = torch.cat([z, cov], dim=-1)
+        out = torch.zeros(z.shape[0], device=z.device)
+        for tid in task_ids.unique():
+            mask = task_ids == tid
+            out[mask] = self.heads[tid.item()](x[mask]).squeeze(-1)
+        return out
 
 
 # ── Top-Level Model ────────────────────────────────────────────────────
@@ -272,7 +263,7 @@ class OligoAI(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.encoder = TransformerEncoder(cfg)
-        self.bottleneck = PerceiverBottleneck(cfg)
+        self.pool = AttentionPool(cfg.d_model, cfg.n_heads)
 
         # Covariate encoders
         self.cov_invitro = CovariateEncoder(
@@ -291,25 +282,24 @@ class OligoAI(nn.Module):
             d_out=cfg.d_cov,
         )
 
-        self.head = FiLMHead(cfg)
+        self.heads = TaskHeads(cfg.d_model, cfg.d_cov, cfg.d_head_hidden, N_TASKS)
 
         # Homoscedastic uncertainty weighting: log(sigma^2) per task
         self.log_var = nn.Parameter(torch.zeros(N_TASKS))
 
     def encode(self, batch: dict) -> torch.Tensor:
-        """Encode ASO HELM to latent vector. Returns (batch, d_latent)."""
+        """Encode ASO HELM to pooled vector. Returns (batch, d_model)."""
         h = self.encoder(
             batch["base_idx"], batch["sugar_idx"],
             batch["backbone_idx"], batch["mask"],
         )
-        return self.bottleneck(h, batch["mask"])
+        return self.pool(h, batch["mask"])
 
     def forward_invitro(self, batch: dict) -> torch.Tensor:
         """Forward pass for in vitro data. Returns (batch,) predictions."""
         z = self.encode(batch)
         cov = self.cov_invitro(batch["continuous"], [batch["transfection_idx"]])
-        task_id = torch.zeros(z.shape[0], dtype=torch.long, device=z.device)  # TASK_INHIBITION = 0
-        return self.head(z, task_id, cov)
+        return self.heads.forward(z, 0, cov)  # task 0 = inhibition
 
     def forward_invivo(self, batch: dict) -> torch.Tensor:
         """Forward pass for in vivo data. Routes to appropriate covariate encoder.
@@ -337,7 +327,7 @@ class OligoAI(nn.Module):
                 [batch["admin_idx"][idx]],
             )
 
-        return self.head(z, batch["task_id"], cov)
+        return self.heads.forward_multi(z, batch["task_id"], cov)
 
     def count_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
