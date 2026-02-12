@@ -31,7 +31,8 @@ def get_device() -> torch.device:
 
 # ── Phase 1: Pre-train on In Vitro ─────────────────────────────────────
 
-def train_phase1(model, train_ds, val_ds, device, epochs=30, bs=512, lr=3e-4):
+def train_phase1(model, train_ds, val_ds, device, epochs=30, bs=512, lr=3e-4,
+                 patience=5):
     """Phase 1: Pre-train encoder + bottleneck + in_vitro head on inhibition data."""
     n_train = math.ceil(len(train_ds) / bs)
     n_val = math.ceil(len(val_ds) / bs)
@@ -40,12 +41,11 @@ def train_phase1(model, train_ds, val_ds, device, epochs=30, bs=512, lr=3e-4):
     print(f"{'='*60}")
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-5)
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer, max_lr=lr, epochs=epochs, steps_per_epoch=n_train,
-    )
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     best_val_ccc = -float("inf")
     best_state = None
+    stale = 0
 
     for epoch in range(epochs):
         t0 = time.time()
@@ -60,10 +60,10 @@ def train_phase1(model, train_ds, val_ds, device, epochs=30, bs=512, lr=3e-4):
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-            scheduler.step()
             train_loss_acc += loss.detach()
             n_batches += 1
 
+        scheduler.step()
         t_train = time.time() - t0
 
         # Validation
@@ -92,6 +92,12 @@ def train_phase1(model, train_ds, val_ds, device, epochs=30, bs=512, lr=3e-4):
         if val_ccc > best_val_ccc:
             best_val_ccc = val_ccc
             best_state = {k: v.clone() for k, v in model.state_dict().items()}
+            stale = 0
+        else:
+            stale += 1
+            if stale >= patience:
+                print(f"  Early stopping at epoch {epoch+1} (patience={patience})")
+                break
 
     if best_state is not None:
         model.load_state_dict(best_state)
@@ -200,7 +206,7 @@ def train_phase2(model, train_ds, val_ds, device, epochs=100, bs=128,
 def train_phase3(model, train_iv_ds, train_vivo_ds,
                  val_iv_ds, val_vivo_ds, device,
                  epochs=20, bs_iv=512, bs_vivo=128, lr=1e-5,
-                 max_iv_batches=None, patience=7):
+                 max_iv_batches=100, patience=7):
     """Phase 3: Joint end-to-end fine-tuning with very low LR."""
     print(f"\n{'='*60}")
     print(f"Phase 3: Joint fine-tuning ({epochs} epochs, lr={lr})")
@@ -435,7 +441,7 @@ def main():
     p1_epochs = 2 if args.smoke_test else 30
     p2_epochs = 2 if args.smoke_test else 100
     p3_epochs = 2 if args.smoke_test else 20
-    p3_max_iv = 170 if args.smoke_test else None
+    p3_max_iv = 170 if args.smoke_test else 100
 
     # Load data + pre-move to device (eliminates per-batch transfers)
     data = load_all(seed=args.seed)
