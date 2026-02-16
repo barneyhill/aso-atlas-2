@@ -1,4 +1,4 @@
-p#import "@preview/clean-math-paper:0.2.5": *
+#import "@preview/clean-math-paper:0.2.5": *
 
 #let date = datetime.today().display("[month repr:long] [day], [year]")
 
@@ -32,23 +32,10 @@ abstract: [Your abstract goes here.],
 
 = Introduction
 
-== Background
-
-// Your background content here
-
-== This Work
-
-// Describe the contributions of this paper
-
-= Methods
-
-== Problem Formulation
-
-// Describe your approach
-
-== Model
-
-// Present your model/methods
+- Relative clinical success for 2-MOE's in CNS
+- Despite this vast majority of amenable conditions remain undeveloped bc of cost constraints.
+- ASOs require "thick" preclinical pipelines due to failure rates
+- 
 
 = Results
 
@@ -64,21 +51,15 @@ Construct preclinical benchmark
 
 Introduce joint model
 
-== Main Findings
-
-// Present your results
-
-== Additional Analysis
-
-// Any supplementary results
-
 = Discussion
 
 // Interpret your findings
 
-= Conclusion
+= Methods
 
-// Summarize key takeaways
+== Problem Formulation
+
+// Describe your approach
 
 = Code Availability
 
