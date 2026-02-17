@@ -39,17 +39,43 @@ abstract: [Your abstract goes here.],
 
 = Results
 
-== Fig 1
+== Fig 1: Dataset Overview
 
-Summarise data
+_Message: "We assembled the largest public multi-endpoint ASO preclinical dataset, linking in vitro efficacy to in vivo toxicity for thousands of compounds."_
 
-== Fig 2
+- *Panel A — Sankey diagram.* Data flow from in vitro inhibition (156K measurements, 8.5K ASOs) → dose response (65K, 4.5K) → hepatic tox (4.8K, 2.4K) / neuro tox (1K, 300). Box heights ∝ measurements, flow widths ∝ compound overlap.
+- *Panel B — Summary statistics.* Measurement counts, unique ASOs, species, source (USPTO patents). Small inset table or Typst annotation alongside Panel A.
+- *Status:* Panel A exists. Panel B needs minor addition.
 
-Construct preclinical benchmark
+#figure(
+  image("plots/fig1_flowchart.svg", width: 100%),
+  caption: [Overview of preclinical ASO data extracted from USPTO patents, showing the flow of compounds through in vitro hit screening, dose-response characterisation, and in vivo toxicity assessment. Box heights are proportional to the number of measurements; flow widths are proportional to the fraction of shared compounds.],
+) <fig1>
 
-== Fig 3
+== Fig 2: The Pipeline Problem
 
-Introduce joint model
+_Message: "Sequential screening requires \~2,000 initial candidates at \~\$3.5M to yield 3 development candidates. Most cost is concentrated at expensive in vivo stages where attrition is highest."_
+
+- *Panel A — Pipeline attrition funnel.* 7 stages (inhibition \>80%, IC50 \<500nM, mouse ALT \<100, mouse FOB ≤1, rat ALT \<100, rat FOB ≤1, monkey ALT \<100). Shows ASO counts, pass rates, and per-stage costs.
+- *Panel B — Stage measurement distributions.* 8-panel histograms with pass/fail thresholds (red dashed lines + green pass regions). Gives intuition for how stringent each cutoff is.
+- *Status:* Both panels exist (`pipeline_attrition.svg`, `pipeline_distributions.svg`). Need composition into a single figure.
+
+== Fig 3: Model Overview
+
+_Message: "OligoAI2 jointly predicts ASO potency and tolerability from chemical structure alone, using a shared learned representation across in vitro and in vivo endpoints."_
+
+- *Panel A — High-level architecture schematic.* Input: ASO chemical structure (HELM notation) + experimental covariates (dose, species, transfection). Middle: "Learned ASO representation" (black box). Output: 4 predicted endpoints (% inhibition, ALT, AST, FOB score). Annotate: trained on 249K in vitro + 27K in vivo measurements.
+- *Panel B — Training strategy.* Simple 2-phase diagram: Phase 1 warms up on abundant in vitro data, Phase 2 jointly fine-tunes with scarce in vivo data. Emphasise the data imbalance problem this solves.
+- *Status:* Does not exist. Best created as a clean vector schematic (Figma/draw.io). Keep deliberately simple — detailed architecture goes in Methods text.
+
+== Fig 4: Results and Pipeline Impact
+
+_Message: "OligoAI2 accurately predicts toxicity endpoints and, when used as a pre-screen, enriches the candidate pool 2–3× at toxicity stages — translating to significant cost savings."_
+
+- *Panel A — Predicted vs. actual scatter plots.* One sub-panel per task (inhibition, ALT, AST, FOB). Density-coloured points, Pearson _r_ annotated. Pass/fail thresholds marked as dashed lines (80% inhibition, 100 IU/L ALT, FOB ≤1). Test set, de-normalised to original units.
+- *Panel B — Enrichment bar chart.* Grouped bars: base rate vs. top-10% pass rate for each endpoint, enrichment factor annotated (Inhibition 1.3×, ALT 2.1×, FOB 3.2×). Bridges from "model is accurate" to "model improves screening".
+- *Panel C — Cost comparison.* Stacked bar chart: Baseline vs. OligoAI2-guided pipeline costs, broken down by stage. Shows where savings concentrate (in vivo stages).
+- *Status:* Panel C exists (`pipeline_cost_comparison.svg`). Panels A and B need creation via `analyses/plotting/plot_figure4.py`.
 
 = Discussion
 
