@@ -1,6 +1,17 @@
 #import "@preview/clean-math-paper:0.2.5": *
 
 #let date = datetime.today().display("[month repr:long] [day], [year]")
+#let R = json("data/paper_numbers.json")
+#let comma(n) = {
+  let s = str(n)
+  let out = ""
+  let len = s.len()
+  for (i, c) in s.codepoints().enumerate() {
+    if i > 0 and calc.rem(len - i, 3) == 0 { out += "," }
+    out += c
+  }
+  out
+}
 
 // Modify some arguments, which can be overwritten in the template call
 #page-args.insert("numbering", "1/1")
@@ -43,13 +54,17 @@ abstract: [Your abstract goes here.],
 
 _Message: "We assembled the largest public multi-endpoint ASO preclinical dataset, linking in vitro efficacy to in vivo toxicity for thousands of compounds."_
 
-- *Panel A — Sankey diagram.* Data flow from in vitro inhibition (156K measurements, 8.5K ASOs) → dose response (65K, 4.5K) → hepatic tox (4.8K, 2.4K) / neuro tox (1K, 300). Box heights ∝ measurements, flow widths ∝ compound overlap.
-- *Panel B — Summary statistics.* Measurement counts, unique ASOs, species, source (USPTO patents). Small inset table or Typst annotation alongside Panel A.
-- *Status:* Panel A exists. Panel B needs minor addition.
+- *Panel A — Sankey diagram.* Data flow from in vitro inhibition → dose response → hepatic tox / neuro tox. Box heights ∝ measurements, flow widths ∝ compound overlap.
+- *Panel B — Gene circle.* Donut chart of measurements per target gene aggregated across all four data types. Major genes shown individually; remaining grouped as "Other".
 
 #figure(
-  image("plots/fig1_flowchart.svg", width: 100%),
-  caption: [Overview of preclinical ASO data extracted from USPTO patents, showing the flow of compounds through in vitro hit screening, dose-response characterisation, and in vivo toxicity assessment. Box heights are proportional to the number of measurements; flow widths are proportional to the fraction of shared compounds.],
+  grid(
+    columns: (3fr, 2fr),
+    gutter: 0.5em,
+    image("plots/fig1_flowchart.svg", width: 100%),
+    image("plots/fig1_gene_circle.svg", width: 100%),
+  ),
+  caption: [Overview of preclinical ASO data extracted from USPTO patents. *(A)* Flow of compounds through in vitro hit screening, dose-response characterisation, and in vivo toxicity assessment; box heights are proportional to measurement counts, flow widths to the fraction of shared compounds. *(B)* Distribution of measurements across target genes; each coloured segment represents a major gene, with remaining genes grouped as "Other".],
 ) <fig1>
 
 == Fig 2: The Pipeline Problem
@@ -82,6 +97,29 @@ _Message: "OligoAI2 accurately predicts toxicity endpoints and, when used as a p
 // Interpret your findings
 
 = Methods
+
+== OligoStack Extraction Pipeline
+
+OligoStack is a three-stage language-model-powered pipeline that converts unstructured tables in USPTO patent XML files into flat, structured preclinical ASO datasets annotated with HELM chemical-structure strings.
+
+*Stage 1 — Table extraction.* USPTO patent XML documents filed after 2001 by ISIS Pharmaceuticals (now Ionis Pharmaceuticals) were retrieved via the USPTO bulk-data API and split into individual table files, each paired with the five paragraphs of prose immediately preceding the table. Tables were deduplicated in two phases: exact MD5 hash matching, followed by pairwise sequence similarity (Python `SequenceMatcher`, 90% threshold) with length-based pruning; connected components were resolved by depth-first search to select a single canonical file per group, reducing 35,871 raw tables from 1,125 Ionis Pharmaceuticals patents to 8,435 canonical tables. For each canonical table, GPT-5-mini generated a bespoke Python extraction function tailored to that table's XML layout. Generated scripts were executed in a sandboxed subprocess with a restricted import whitelist (`json`, `re`, `xml.etree.ElementTree`, `math`) and a ten-second timeout. An agentic self-repair loop allowed the model to observe execution output or errors and regenerate corrected code, for up to five attempts per table.
+
+*Stage 2 — HELM annotation.* For each canonical table the model received the surrounding patent prose and a table preview, then generated a function that constructs Hierarchical Editing Language for Macromolecules (HELM) strings nucleotide-by-nucleotide from the chemistry description. To avoid hallucinated annotations, the function was required to return null when explicit modification data could not be found in the patent text. All HELM strings were validated by a rule-based checker that enforces correct sugar tokens (`[moe]`, `d`, `r`, `m`, `[cet]`, `[fR]`, `[lna]`), canonical bases (`A`, `C`, `G`, `T`, `U`, `[5meC]`), backbone tokens (`[sp]`, `[am]`, `.`), balanced bracket syntax, and terminal-nucleotide constraints.
+*Stage 3 — Schema-driven collation.* Each assay category was extracted in a separate pass by supplying a schema dictionary that maps desired column names to natural-language descriptions. GPT-5 generated a mapping function per table that translates table-specific field names to the target schema, performs unit conversions, and unpivots multi-measurement rows into separate records. The same sandboxed execution and self-repair loop as Stage~1 were applied. HELM annotations were merged into each output record by compound identifier, following canonical-link chains across duplicate tables. Four schemas were defined, one per assay category: (i)~in vitro inhibition --- percent inhibition, cell line, dosage in nM, transfection method, treatment period, and target gene; (ii)~dose response --- the same fields with dosage in the original unit (nM or~$mu$M); (iii)~hepatorenal toxicity --- seven serum biomarkers (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio), dosage, species, strain, number of doses, dosing period, measurement source, and administration route; and (iv)~neurotoxicity --- FOB score, dosage, species, strain, latency, administration method, and score type.
+
+== Data Collection and Preprocessing
+
+All preclinical ASO data were extracted from USPTO patent filings using the OligoStack pipeline. Raw tables were parsed into four assay categories: in vitro hit screening (single-concentration percent inhibition), in vitro dose response (multi-dose percent inhibition), in vivo hepatorenal toxicity (serum biomarkers), and in vivo neurological toxicity (functional observational battery scores). Each category underwent a standardised cleaning pipeline described below.
+
+*In vitro inhibition.* Inhibition values outside the range \[--1000%, 100%\] were discarded as extraction artefacts. Cell line names and species labels were standardised to canonical forms (e.g.~"A-431" $arrow$ "A431", "cynomolgus" $arrow$ "monkey"). Duplicate measurements --- defined as identical compound ID and inhibition value --- were collapsed, retaining the most recent patent. This yielded #comma(R.in_vitro.n_measurements) measurements across #comma(R.in_vitro.n_asos) ASOs.
+
+*Dose response.* Dosages reported in $mu$M were converted to nM. The same inhibition range filter and species standardisation were applied. Rows with non-positive dosages were removed. Cell line names were harmonised using a lookup table of 150+ known aliases. Deduplication on compound, dosage, and inhibition yielded #comma(R.dose_response.n_measurements) measurements across #comma(R.dose_response.n_asos) ASOs.
+
+*Hepatorenal toxicity.* Dosage strings were parsed into numeric values and units. Weekly dosing rates (mg/kg/wk) were converted to per-dose equivalents (mg/kg) using the reported number of doses and dosing period. Only subcutaneous and intraperitoneal administration routes with plasma or urine measurement sources were retained. Extreme dosages ($>$ 10,000 mg/kg) were excluded. Biomarker values were range-filtered (ALT and AST: 10--50,000 IU/L; ALB: 1--100 g/dL). Rows sharing the same compound, species, dosing regimen, and administration method were collapsed, aggregating biomarker replicates into lists. Species and strain names were standardised. The final dataset contained #comma(R.hepatic.n_records) collapsed records across #comma(R.hepatic.n_asos) ASOs, with #R.hepatic.n_biomarker_channels biomarker channels (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio).
+
+*Neurological toxicity.* FOB (functional observational battery) score strings were parsed into numeric lists, retaining only values in the valid range \[0, 7\]. Species and strain names were standardised (e.g.~"C57/B16 mice" $arrow$ "C57BL/6 mice"). Since the raw neurotoxicity data lacked target gene annotations, compound-to-gene mappings were inferred in two steps: first by direct lookup against the in vitro and dose response datasets, then by patent-level majority vote for remaining compounds (assigning the most frequent target gene within each USPTO patent). This resolved target gene identity for #R.neuro.gene_coverage_pct% of neurotoxicity records. Deduplication on HELM annotation, species, administration method, score type, and dosage yielded #comma(R.neuro.n_records) records across #comma(R.neuro.n_asos) ASOs.
+
+*Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ _MAPT_, "PKK" $arrow$ _PRKDC_, "K-Ras" $arrow$ _KRAS_). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
 
 == Problem Formulation
 
