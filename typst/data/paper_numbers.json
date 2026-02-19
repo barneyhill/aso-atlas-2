@@ -1,24 +1,24 @@
 {
   "in_vitro": {
-    "n_measurements": 178403,
-    "n_asos": 167510
+    "n_measurements": 174459,
+    "n_asos": 163802
   },
   "dose_response": {
-    "n_measurements": 103551,
-    "n_asos": 17424
+    "n_measurements": 99821,
+    "n_asos": 16834
   },
   "hepatic": {
-    "n_records": 4801,
-    "n_asos": 2350,
+    "n_records": 4341,
+    "n_asos": 2051,
     "n_biomarker_channels": 7
   },
   "neuro": {
-    "n_records": 5485,
-    "n_asos": 3705,
-    "gene_coverage_pct": 90
+    "n_records": 4900,
+    "n_asos": 3316,
+    "gene_coverage_pct": 97
   },
   "genes": {
-    "n_unique": 496,
-    "n_total_measurements": 288049
+    "n_unique": 488,
+    "n_total_measurements": 280027
   }
 }

@@ -58,13 +58,8 @@ _Message: "We assembled the largest public multi-endpoint ASO preclinical datase
 - *Panel B — Gene circle.* Donut chart of measurements per target gene aggregated across all four data types. Major genes shown individually; remaining grouped as "Other".
 
 #figure(
-  grid(
-    columns: (3fr, 2fr),
-    gutter: 0.5em,
-    image("plots/fig1_flowchart.svg", width: 100%),
-    image("plots/fig1_gene_circle.svg", width: 100%),
-  ),
-  caption: [Overview of preclinical ASO data extracted from USPTO patents. *(A)* Flow of compounds through in vitro hit screening, dose-response characterisation, and in vivo toxicity assessment; box heights are proportional to measurement counts, flow widths to the fraction of shared compounds. *(B)* Distribution of measurements across target genes; each coloured segment represents a major gene, with remaining genes grouped as "Other".],
+  image("plots/fig1/fig1.svg", width: 100%),
+  caption: [Overview of the OligoStack extraction pipeline and resulting dataset. *(A)* Three-stage pipeline converting USPTO patent tables into structured preclinical ASO datasets with HELM annotations. *(B)* Flow of compounds through in vitro hit screening, dose-response characterisation, and in vivo toxicity assessment; box heights are proportional to measurement counts, flow widths to the fraction of shared compounds. *(C)* Distribution of measurements across target genes; each coloured segment represents a major gene, with remaining genes grouped as "Other".],
 ) <fig1>
 
 == Fig 2: The Pipeline Problem
@@ -74,6 +69,11 @@ _Message: "Sequential screening requires \~2,000 initial candidates at \~\$3.5M 
 - *Panel A — Pipeline attrition funnel.* 7 stages (inhibition \>80%, IC50 \<500nM, mouse ALT \<100, mouse FOB ≤1, rat ALT \<100, rat FOB ≤1, monkey ALT \<100). Shows ASO counts, pass rates, and per-stage costs.
 - *Panel B — Stage measurement distributions.* 8-panel histograms with pass/fail thresholds (red dashed lines + green pass regions). Gives intuition for how stringent each cutoff is.
 - *Status:* Both panels exist (`pipeline_attrition.svg`, `pipeline_distributions.svg`). Need composition into a single figure.
+
+#figure(
+  image("plots/fig2/fig2.svg", width: 100%),
+  caption: [The ASO preclinical screening pipeline. *(A)* Attrition funnel showing the number of ASO candidates entering each stage, per-stage pass rates, and cumulative costs. Box heights are proportional to log(ASO count). *(B)* Distribution of measurements at each pipeline stage with pass/fail thresholds (red dashed lines) and passing regions (green shading).],
+) <fig2>
 
 == Fig 3: Model Overview
 
@@ -91,6 +91,11 @@ _Message: "OligoAI2 accurately predicts toxicity endpoints and, when used as a p
 - *Panel B — Enrichment bar chart.* Grouped bars: base rate vs. top-10% pass rate for each endpoint, enrichment factor annotated (Inhibition 1.3×, ALT 2.1×, FOB 3.2×). Bridges from "model is accurate" to "model improves screening".
 - *Panel C — Cost comparison.* Stacked bar chart: Baseline vs. OligoAI2-guided pipeline costs, broken down by stage. Shows where savings concentrate (in vivo stages).
 - *Status:* Panel C exists (`pipeline_cost_comparison.svg`). Panels A and B need creation via `analyses/plotting/plot_figure4.py`.
+
+#figure(
+  image("plots/fig4/fig4.svg", width: 100%),
+  caption: [OligoAI2 enrichment and pipeline cost impact. *(B)* Grouped bars comparing the base pass rate (grey) with the top-10% model-selected pass rate (coloured) at each endpoint; enrichment factors annotated above. *(C)* Stacked bar chart of total pipeline costs by stage for the baseline screening pipeline versus the OligoAI2-guided pipeline.],
+) <fig4>
 
 = Discussion
 
@@ -111,6 +116,8 @@ OligoStack is a three-stage language-model-powered pipeline that converts unstru
 
 All preclinical ASO data were extracted from USPTO patent filings using the OligoStack pipeline. Raw tables were parsed into four assay categories: in vitro hit screening (single-concentration percent inhibition), in vitro dose response (multi-dose percent inhibition), in vivo hepatorenal toxicity (serum biomarkers), and in vivo neurological toxicity (functional observational battery scores). Each category underwent a standardised cleaning pipeline described below.
 
+Five HELM-level quality filters were applied uniformly across all four assay categories before any assay-specific cleaning. Compounds whose HELM annotation contained uncertain sugar or backbone tokens (indicated by `?` placeholders in the HELM string) were removed, as were sequences with ten or fewer nucleotides (likely extraction artefacts), uniformly modified compounds with no DNA gap (steric-blocking ASOs outside the scope of gapmer-focused analysis), homopolymer sequences comprising a single repeated nucleotide (extraction artefacts from poly-T or poly-A placeholder annotations), and naked DNA oligonucleotides lacking any sugar modifications (unmodified sequences where the extraction model could not identify the modification pattern).
+
 *In vitro inhibition.* Inhibition values outside the range \[--1000%, 100%\] were discarded as extraction artefacts. Cell line names and species labels were standardised to canonical forms (e.g.~"A-431" $arrow$ "A431", "cynomolgus" $arrow$ "monkey"). Duplicate measurements --- defined as identical compound ID and inhibition value --- were collapsed, retaining the most recent patent. This yielded #comma(R.in_vitro.n_measurements) measurements across #comma(R.in_vitro.n_asos) ASOs.
 
 *Dose response.* Dosages reported in $mu$M were converted to nM. The same inhibition range filter and species standardisation were applied. Rows with non-positive dosages were removed. Cell line names were harmonised using a lookup table of 150+ known aliases. Deduplication on compound, dosage, and inhibition yielded #comma(R.dose_response.n_measurements) measurements across #comma(R.dose_response.n_asos) ASOs.
@@ -120,6 +127,11 @@ All preclinical ASO data were extracted from USPTO patent filings using the Olig
 *Neurological toxicity.* FOB (functional observational battery) score strings were parsed into numeric lists, retaining only values in the valid range \[0, 7\]. Species and strain names were standardised (e.g.~"C57/B16 mice" $arrow$ "C57BL/6 mice"). Since the raw neurotoxicity data lacked target gene annotations, compound-to-gene mappings were inferred in two steps: first by direct lookup against the in vitro and dose response datasets, then by patent-level majority vote for remaining compounds (assigning the most frequent target gene within each USPTO patent). This resolved target gene identity for #R.neuro.gene_coverage_pct% of neurotoxicity records. Deduplication on HELM annotation, species, administration method, score type, and dosage yielded #comma(R.neuro.n_records) records across #comma(R.neuro.n_asos) ASOs.
 
 *Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ _MAPT_, "PKK" $arrow$ _PRKDC_, "K-Ras" $arrow$ _KRAS_). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
+
+#figure(
+  image("plots/fig5/fig5.svg", width: 100%),
+  caption: [UMAP projection of OligoAI2 learned ASO representations, coloured by chemistry type *(left)* and GC content *(right)*. Each point represents a unique HELM-annotated compound. The model's bottleneck layer separates the two dominant gapmer designs --- 5-10-5 MOE with full phosphorothioate backbone (blue) and mixed PS/PO backbone (orange) --- as well as 3-10-3 cEt gapmers (red). Within each chemistry cluster, GC content varies smoothly, indicating that the embedding captures both chemical modification patterns and sequence composition.],
+) <fig5>
 
 == Problem Formulation
 
