@@ -20,5 +20,46 @@
   "genes": {
     "n_unique": 488,
     "n_total_measurements": 280027
+  },
+  "model": {
+    "n_params": 304504,
+    "median_spearman": 0.445,
+    "iv_spearman": 0.443,
+    "alt_spearman": 0.428,
+    "ast_spearman": 0.446,
+    "fob_spearman": 0.708,
+    "top_k_fraction": 0.1,
+    "inhibition_base_rate": 0.0789,
+    "inhibition_top_k_pass_rate": 0.1053,
+    "inhibition_enrichment_factor": 1.3344,
+    "inhibition_n": 18622,
+    "ALT_base_rate": 0.4622,
+    "ALT_top_k_pass_rate": 0.9714,
+    "ALT_enrichment_factor": 2.1018,
+    "ALT_n": 357,
+    "FOB_base_rate": 0.2577,
+    "FOB_top_k_pass_rate": 0.8364,
+    "FOB_enrichment_factor": 3.2453,
+    "FOB_n": 551
+  },
+  "ablation": {
+    "full": {
+      "alt_spearman": 0.352,
+      "ast_spearman": 0.249,
+      "fob_spearman": 0.632,
+      "median_vivo_spearman": 0.352
+    },
+    "no_warmup": {
+      "alt_spearman": 0.465,
+      "ast_spearman": 0.428,
+      "fob_spearman": 0.519,
+      "median_vivo_spearman": 0.465
+    },
+    "vivo_only": {
+      "alt_spearman": 0.417,
+      "ast_spearman": 0.402,
+      "fob_spearman": 0.543,
+      "median_vivo_spearman": 0.417
+    }
   }
 }

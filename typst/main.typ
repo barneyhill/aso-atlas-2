@@ -133,9 +133,49 @@ Five HELM-level quality filters were applied uniformly across all four assay cat
   caption: [UMAP projection of OligoAI2 learned ASO representations, coloured by chemistry type *(left)* and GC content *(right)*. Each point represents a unique HELM-annotated compound. The model's bottleneck layer separates the two dominant gapmer designs --- 5-10-5 MOE with full phosphorothioate backbone (blue) and mixed PS/PO backbone (orange) --- as well as 3-10-3 cEt gapmers (red). Within each chemistry cluster, GC content varies smoothly, indicating that the embedding captures both chemical modification patterns and sequence composition.],
 ) <fig5>
 
-== Problem Formulation
+== Multi-Task Model
 
-// Describe your approach
+=== Problem Formulation
+
+The preclinical ASO pipeline produces four heterogeneous endpoints: single-concentration percent inhibition, serum ALT, serum AST, and functional observational battery (FOB) score. We frame prediction as a four-task regression problem where each task shares a common learned ASO representation but retains independent output heads. The principal data challenge is a $tilde$30:1 imbalance between the in vitro inhibition task (#comma(R.in_vitro.n_measurements) measurements) and the scarcest in vivo endpoint (FOB, #comma(R.neuro.n_records) measurements). The model receives only the HELM chemical-structure string and experimental covariates (dose, species, transfection method) as input --- no target-gene identity is provided, ensuring predictions generalise to novel gene programmes.
+
+=== Model Architecture
+
+The model ($tilde$#comma(R.model.n_params) trainable parameters) consists of four modules:
+
++ *Factored HELM embedding.* Each nucleotide position is represented by the sum of three learned embedding vectors --- one each for the base (A, C, G, T, U, 5-methylcytosine), sugar modification (MOE, DNA, LNA, cEt, fluoro-ribose, O-methyl, RNA), and backbone linkage (phosphorothioate, phosphodiester). This factored design captures the combinatorial chemistry of gapmer ASOs without an exponentially large vocabulary.
+
++ *Transformer encoder with RoPE.* Two pre-norm transformer blocks with four attention heads, GELU-activated feed-forward layers, and rotary position embeddings (RoPE) encode the nucleotide sequence. Attention masks ensure that padding positions do not contribute to the representation.
+
++ *Attention pooling bottleneck.* A single learned query vector attends over the encoder's output to produce a fixed-length ASO representation, replacing the more common masked mean pooling. This allows the model to weight nucleotide positions by their relevance.
+
++ *Task-specific covariate encoders and heads.* Experimental covariates are encoded by separate small MLPs for in vitro (log-dose, treatment hours, transfection method) and in vivo (dose in mg/kg, number of doses, dosing period, administration route) contexts. Each task head is an independent two-layer MLP that receives the concatenation of the ASO representation and the covariate encoding.
+
+=== Training Strategy
+
+Training proceeds in two phases to address the 30:1 data imbalance. In Phase 1 (warmup), only the in vitro inhibition task is trained for 10 epochs, allowing the shared encoder to learn a meaningful ASO representation from the abundant in vitro data. In Phase 2 (joint), all four tasks are trained simultaneously with homoscedastic uncertainty weighting, where each task's contribution to the total loss is scaled by a learned inverse-variance parameter $sigma_t^(-2)$, following Kendall _et al._ (2018). This avoids manual loss-weight tuning and lets the model dynamically balance tasks of differing noise levels.
+
+The per-task loss is the concordance correlation coefficient (CCC) loss, $cal(L)_t = 1 - "CCC"_t$, which jointly penalises errors in correlation, mean bias, and variance mismatch. The total loss is $cal(L) = 1/T sum_(t=1)^T [ 1/(2 sigma_t^2) cal(L)_t + log sigma_t ]$, where $T$ is the number of active tasks.
+
+Data are split by target gene to prevent information leakage: all measurements for a given gene appear exclusively in one of train (80%), validation (10%), or test (10%). This ensures the model is evaluated on its ability to generalise to unseen gene programmes. Optimisation uses AdamW with cosine annealing over 50 epochs and early stopping on validation loss (patience 10). A hyperparameter sweep over 14 configurations (learning rate, weight decay, dropout, encoder depth, warmup duration) selected the best model by median within-gene Spearman $rho$ on the validation set, achieving an overall median Spearman $rho$ of #str(R.model.median_spearman) across all four tasks.
+
+To validate the contribution of in vitro data to in vivo prediction, we conducted an ablation study comparing three training conditions (@tab:ablation): the full pipeline (warmup + joint training with IV data), joint training without warmup, and training on in vivo data only.
+
+#figure(
+  table(columns: 5, align: (left, center, center, center, center),
+    [*Condition*], [*ALT $rho$*], [*AST $rho$*], [*FOB $rho$*], [*Median $rho$*],
+    [Full (warmup + joint)], [#str(R.ablation.full.alt_spearman)], [#str(R.ablation.full.ast_spearman)], [#str(R.ablation.full.fob_spearman)], [#str(R.ablation.full.median_vivo_spearman)],
+    [No warmup (joint only)], [#str(R.ablation.no_warmup.alt_spearman)], [#str(R.ablation.no_warmup.ast_spearman)], [#str(R.ablation.no_warmup.fob_spearman)], [#str(R.ablation.no_warmup.median_vivo_spearman)],
+    [Vivo-only], [#str(R.ablation.vivo_only.alt_spearman)], [#str(R.ablation.vivo_only.ast_spearman)], [#str(R.ablation.vivo_only.fob_spearman)], [#str(R.ablation.vivo_only.median_vivo_spearman)],
+  ),
+  caption: [Ablation study: effect of in vitro inhibition data on in vivo prediction. Median within-gene Spearman $rho$ on held-out test genes.],
+) <tab:ablation>
+
+=== Evaluation
+
+Model performance is assessed by two complementary metrics. *Ranking accuracy* is measured as the median Spearman rank correlation ($rho$) computed within each target-gene group and aggregated across groups, rewarding the model's ability to rank ASOs targeting the same gene by their true endpoint values. Per-task Spearman $rho$: in vitro inhibition #str(R.model.iv_spearman), ALT #str(R.model.alt_spearman), AST #str(R.model.ast_spearman), FOB #str(R.model.fob_spearman).
+
+*Top-K enrichment* quantifies the model's utility as a pipeline pre-screen. For each endpoint, compounds are ranked by model prediction and the top #str(calc.round(R.model.top_k_fraction * 100, digits: 0))% are selected. The enrichment factor is the ratio of the pass rate among model-selected compounds to the base rate in the full test set: $"EF" = P("pass" | "top-K") / P("pass")$. An enrichment factor greater than one indicates the model concentrates passing compounds in its top predictions. We report enrichment at three pipeline stages: in vitro inhibition $>$80% (EF = #str(R.model.inhibition_enrichment_factor)$times$, $n$=#comma(R.model.inhibition_n)), ALT $<$100 IU/L (EF = #str(R.model.ALT_enrichment_factor)$times$, $n$=#comma(R.model.ALT_n)), and FOB $<=$1 (EF = #str(R.model.FOB_enrichment_factor)$times$, $n$=#comma(R.model.FOB_n)).
 
 = Code Availability
 
