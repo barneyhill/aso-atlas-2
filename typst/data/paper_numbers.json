@@ -22,48 +22,53 @@
     "n_total_measurements": 280027
   },
   "hagerdorn_hepatotox": {
-    "accuracy": 0.666,
-    "sensitivity": 0.805,
-    "specificity": 0.63,
-    "auc": 0.78,
+    "oob_accuracy": 0.839,
+    "accuracy": 0.813,
+    "sensitivity": 0.823,
+    "specificity": 0.811,
+    "auc": 0.884,
     "n": 2373,
     "n_high": 497,
     "n_low": 1876,
-    "n_groups": 91,
     "confusion": {
-      "tp": 400,
-      "fp": 695,
-      "tn": 1181,
-      "fn": 97
+      "tp": 409,
+      "fp": 355,
+      "tn": 1521,
+      "fn": 88
+    },
+    "stratum_accuracy": {
+      "1-2 edits": 0.8857142857142857,
+      "3-5 edits": 0.7226720647773279,
+      "6+ edits": 0.7537688442211056
     }
   },
   "hagerdorn_neurotox": {
-    "accuracy": 0.819,
-    "sensitivity": 0.817,
-    "specificity": 0.822,
-    "auc": 0.893,
+    "accuracy": 0.821,
+    "sensitivity": 0.787,
+    "specificity": 0.851,
+    "auc": 0.895,
     "n": 2282,
     "n_high": 1085,
     "n_low": 1197,
     "n_groups": 34,
     "confusion": {
-      "tp": 886,
-      "fp": 213,
-      "tn": 984,
-      "fn": 199
+      "tp": 854,
+      "fp": 178,
+      "tn": 1019,
+      "fn": 231
     }
   },
   "pipeline": {
     "baseline_n_initial": 506,
     "baseline_total_cost": 1303000,
-    "hagerdorn_n_initial": 315,
-    "hagerdorn_total_cost": 998500,
+    "hagerdorn_n_initial": 314,
+    "hagerdorn_total_cost": 998000,
     "hagerdorn_savings_pct": 23.4,
     "oligoai_n_initial": 161,
     "oligoai_total_cost": 1130500,
     "oligoai_savings_pct": 13.2,
-    "combined_n_initial": 101,
-    "combined_total_cost": 891500,
+    "combined_n_initial": 100,
+    "combined_total_cost": 891000,
     "combined_savings_pct": 31.6
   }
 }

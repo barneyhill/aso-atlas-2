@@ -39,7 +39,7 @@ def test_hagerdorn_hepatotox_key_exists(numbers):
 
 def test_hagerdorn_hepatotox_fields(numbers):
     h = numbers["hagerdorn_hepatotox"]
-    for field in ("accuracy", "sensitivity", "specificity", "auc", "n", "n_groups"):
+    for field in ("oob_accuracy", "accuracy", "sensitivity", "specificity", "auc", "n"):
         assert field in h, f"Missing hagerdorn_hepatotox.{field}"
 
 

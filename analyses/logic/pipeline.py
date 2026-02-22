@@ -27,7 +27,6 @@ from scipy.optimize import curve_fit
 _root = Path(__file__).resolve().parents[2]
 DATA_DIR = _root / "data/oligostack/processed"
 RESULTS_DIR = _root / "data/results"
-HAGERDORN_DIR = _root / "analyses/04_hagerdorn"
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -252,7 +251,7 @@ def back_calculate(proportions):
     }
 
 
-def compute_classifier_enrichment(predictions_path: Path) -> dict:
+def compute_classifier_enrichment(preds_data: dict) -> dict:
     """Compute enrichment factors from Hagerdorn classifier predictions.
 
     For each endpoint, compounds predicted as LOW toxicity (P(high) < 0.5)
@@ -261,9 +260,6 @@ def compute_classifier_enrichment(predictions_path: Path) -> dict:
 
     Returns dict mapping task name → {enrichment_factor, base_rate, selected_pass_rate, n}.
     """
-    with open(predictions_path) as f:
-        preds_data = json.load(f)
-
     enrichment = {}
     for task, data in preds_data.items():
         predictions = np.array(data["predictions"])
@@ -376,12 +372,16 @@ def main():
     # Hagerdorn classifier enrichment (hepatotox + neurotox)
     hagerdorn = None
     hagerdorn_enrichment = {}
-    hepatotox_preds = HAGERDORN_DIR / "hepatotox_predictions.json"
-    neurotox_preds = HAGERDORN_DIR / "neurotox_predictions.json"
+    hepatotox_path = RESULTS_DIR / "hepatotox.json"
+    neurotox_path = RESULTS_DIR / "neurotox.json"
 
-    if hepatotox_preds.exists() and neurotox_preds.exists():
-        hagerdorn_enrichment.update(compute_classifier_enrichment(hepatotox_preds))
-        hagerdorn_enrichment.update(compute_classifier_enrichment(neurotox_preds))
+    if hepatotox_path.exists() and neurotox_path.exists():
+        with open(hepatotox_path) as f:
+            hepatotox_data = json.load(f)
+        with open(neurotox_path) as f:
+            neurotox_data = json.load(f)
+        hagerdorn_enrichment.update(compute_classifier_enrichment(hepatotox_data["predictions"]))
+        hagerdorn_enrichment.update(compute_classifier_enrichment(neurotox_data["predictions"]))
 
         if hagerdorn_enrichment:
             hagerdorn = back_calculate_enriched(proportions, hagerdorn_enrichment, STAGE_MAP)
@@ -391,7 +391,7 @@ def main():
                 if task in STAGE_MAP:
                     print(f"  {task}: EF={e['enrichment_factor']:.2f}x (base={e['base_rate']:.2f}, selected={e['selected_pass_rate']:.2f})")
     else:
-        print("Hagerdorn predictions not found — run `just hagerdorn` first")
+        print("Hagerdorn results not found — run `just hagerdorn` first")
 
     # OligoAI enrichment (in vitro efficacy — Gehrmann et al. 2025)
     oligoai = back_calculate_enriched(proportions, OLIGOAI_ENRICHMENT, OLIGOAI_STAGE_MAP)

@@ -4,21 +4,20 @@ default: compile
 clean:
     uv run python -m analyses.logic.clean
 
-pipeline: clean
+hagerdorn:
+    uv run python -m analyses.logic.models.hepatotox
+    uv run python -m analyses.logic.models.neurotox
+
+pipeline: clean hagerdorn
     uv run python -m analyses.logic.pipeline
 
-analysis: clean pipeline
+analysis: clean hagerdorn pipeline
 
-# ── Hagerdorn models ─────────────────────────────────────
-hagerdorn:
-    uv run python -m analyses.04_hagerdorn.01_hepatotox
-    uv run python -m analyses.04_hagerdorn.02_neurotox
-
-# ── Export (reads CSVs/JSONs from analysis + hagerdorn) ──
+# ── Export (reads JSONs from data/results/) ──────────────
 export:
     uv run python -m analyses.export_paper_numbers
 
-# ── Plotting (reads processed data from analysis + hagerdorn) ──
+# ── Plotting (reads processed data from data/results/) ──
 plots:
     uv run python -m analyses.plotting.plot_figure1
     uv run python -m analyses.plotting.plot_figure2
@@ -30,7 +29,7 @@ plots:
 compile:
     typst compile typst/main.typ
 
-build: analysis hagerdorn export plots compile
+build: analysis export plots compile
 
 test:
     uv run pytest tests/ -x -q

@@ -11,12 +11,11 @@ Use `uv` for everything (`uv run`, `uv sync`, `uv pip install`).
 | `analyses/plotting/*.py` | `just plots && just compile` |
 | `analyses/export_paper_numbers.py` | `just export && just compile` |
 | `analyses/logic/*.py` | `just analysis && just test` |
-| `analyses/04_hagerdorn/*.py` | `just hagerdorn && just export && just compile` |
 | `typst/**/*.typ` | `just compile` |
 | Any plotting + export together | `just build` |
 
-- `just build` = `analysis` + `hagerdorn` + `export` + `plots` + `compile` (full rebuild)
-- `just analysis` = `clean` + `pipeline` (~30s)
+- `just build` = `analysis` + `export` + `plots` + `compile` (full rebuild)
+- `just analysis` = `clean` + `hagerdorn` + `pipeline` (~80s)
 - `just hagerdorn` = run Hagerdorn hepatotox + neurotox models (~50s)
 - `just export` = export paper numbers to JSON (assumes data already built)
 - `just plots` = generate all figures (assumes data already built)
@@ -27,8 +26,9 @@ Use `uv` for everything (`uv run`, `uv sync`, `uv pip install`).
 ## Project layout
 
 - `analyses/logic/clean.py` — cleans raw CSVs → processed parquets (run via `just analysis`)
+- `analyses/logic/models/hepatotox.py` — Hagerdorn 2013 hepatotoxicity model replication
+- `analyses/logic/models/neurotox.py` — Hagerdorn 2022 neurotoxicity model replication
 - `analyses/logic/pipeline.py` — pipeline attrition + cost analysis with Hagerdorn enrichment
-- `analyses/04_hagerdorn/` — Hagerdorn model replications (hepatotox 2013, neurotox 2022)
 - `analyses/plotting/` — reads processed data, writes `typst/plots/` and `typst/tables/`
 - `analyses/export_paper_numbers.py` — exports key numbers to `typst/data/paper_numbers.json`
 - `typst/main.typ` — manuscript (reads `paper_numbers.json`, no hardcoded values)

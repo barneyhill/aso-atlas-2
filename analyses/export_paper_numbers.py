@@ -9,8 +9,8 @@ import pandas as pd
 DATA_DIR = Path("data/oligostack/processed")
 OUT_PATH = Path("typst/data/paper_numbers.json")
 
-HAGERDORN_DIR = Path("analyses/04_hagerdorn")
-PIPELINE_RESULTS_PATH = Path("data/results/pipeline_results.json")
+RESULTS_DIR = Path("data/results")
+PIPELINE_RESULTS_PATH = RESULTS_DIR / "pipeline_results.json"
 
 BIOMARKER_COLS = ["ALB", "ALT", "AST", "BUN", "CREA", "TBIL", "PC_ratio"]
 
@@ -55,38 +55,40 @@ def main() -> None:
     }
 
     # ── Hagerdorn hepatotoxicity metrics ──
-    hepatotox_csv = HAGERDORN_DIR / "hepatotox_results.csv"
-    hepatotox_preds = HAGERDORN_DIR / "hepatotox_predictions.json"
-    if hepatotox_csv.exists() and hepatotox_preds.exists():
-        hep_df = pd.read_csv(hepatotox_csv)
-        hep_preds = json.loads(hepatotox_preds.read_text())
-        # Dinucleotide model × ALT
-        dinuc_alt = hep_df[(hep_df["model"] == "Dinucleotide (288)") & (hep_df["biomarker"] == "ALT")]
+    hepatotox_path = RESULTS_DIR / "hepatotox.json"
+    if hepatotox_path.exists():
+        hep_data = json.loads(hepatotox_path.read_text())
+        hep_df = pd.DataFrame(hep_data["models"])
+        hep_preds = hep_data["predictions"]
+        # Dinucleotide model × ALT (Hagedorn 2013-style: OOB + Levenshtein CV)
+        dinuc_alt = hep_df[(hep_df["model"] == "Dinucleotide (128)") & (hep_df["biomarker"] == "ALT")]
         if len(dinuc_alt) > 0:
             row = dinuc_alt.iloc[0]
             numbers["hagerdorn_hepatotox"] = {
-                "accuracy": round(float(row["GK_accuracy"]), 3),
-                "sensitivity": round(float(row["GK_sensitivity"]), 3),
-                "specificity": round(float(row["GK_specificity"]), 3),
-                "auc": round(float(row["GK_AUC"]), 3),
+                "oob_accuracy": round(float(row["OOB_accuracy"]), 3),
+                "accuracy": round(float(row["CV_accuracy"]), 3),
+                "sensitivity": round(float(row["CV_sensitivity"]), 3),
+                "specificity": round(float(row["CV_specificity"]), 3),
+                "auc": round(float(row["CV_AUC"]), 3),
                 "n": int(row["N"]),
                 "n_high": int(row["N_high"]),
                 "n_low": int(row["N_low"]),
-                "n_groups": int(row["N_groups"]),
             }
             if "ALT" in hep_preds:
                 numbers["hagerdorn_hepatotox"]["confusion"] = hep_preds["ALT"]["confusion"]
+                if "stratum_accuracy" in hep_preds["ALT"]:
+                    numbers["hagerdorn_hepatotox"]["stratum_accuracy"] = hep_preds["ALT"]["stratum_accuracy"]
     else:
         warnings.warn(f"Hagerdorn hepatotox results not found — run `just hagerdorn` first")
 
     # ── Hagerdorn neurotoxicity metrics ──
-    neurotox_csv = HAGERDORN_DIR / "neurotox_results.csv"
-    neurotox_preds = HAGERDORN_DIR / "neurotox_predictions.json"
-    if neurotox_csv.exists() and neurotox_preds.exists():
-        neuro_df = pd.read_csv(neurotox_csv)
-        neuro_preds = json.loads(neurotox_preds.read_text())
+    neurotox_path = RESULTS_DIR / "neurotox.json"
+    if neurotox_path.exists():
+        neuro_data = json.loads(neurotox_path.read_text())
+        neuro_df = pd.DataFrame(neuro_data["models"])
+        neuro_preds = neuro_data["predictions"]
         # Dinucleotide model
-        dinuc = neuro_df[neuro_df["model"] == "Dinucleotide (288)"]
+        dinuc = neuro_df[neuro_df["model"] == "Dinucleotide (128)"]
         if len(dinuc) > 0:
             row = dinuc.iloc[0]
             numbers["hagerdorn_neurotox"] = {

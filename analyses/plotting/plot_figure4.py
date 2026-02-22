@@ -11,7 +11,7 @@ Bottom row (D–F): Neurotoxicity (Hagerdorn 2022, FOB prediction)
   E — ROC curves for linear and dinucleotide models.
   F — Confusion matrix for dinucleotide RF model.
 
-Reads: analyses/04_hagerdorn/{hepatotox,neurotox}_{results.csv,predictions.json}
+Reads: data/results/{hepatotox,neurotox}.json
 """
 
 import json
@@ -26,10 +26,8 @@ from sklearn.metrics import roc_curve
 matplotlib.use("Agg")
 
 _root = Path(__file__).resolve().parents[2]
-HEPATOTOX_CSV = _root / "analyses/04_hagerdorn/hepatotox_results.csv"
-HEPATOTOX_JSON = _root / "analyses/04_hagerdorn/hepatotox_predictions.json"
-NEUROTOX_CSV = _root / "analyses/04_hagerdorn/neurotox_results.csv"
-NEUROTOX_JSON = _root / "analyses/04_hagerdorn/neurotox_predictions.json"
+HEPATOTOX_JSON = _root / "data/results/hepatotox.json"
+NEUROTOX_JSON = _root / "data/results/neurotox.json"
 OUT_DIR = _root / "typst/plots/fig4"
 
 
@@ -164,16 +162,19 @@ def _draw_cm(cm_data, tick_labels, accuracy, ax):
 # ── Main ──────────────────────────────────────────────────────────
 
 def main():
-    for p in [HEPATOTOX_CSV, HEPATOTOX_JSON, NEUROTOX_CSV, NEUROTOX_JSON]:
+    for p in [HEPATOTOX_JSON, NEUROTOX_JSON]:
         if not p.exists():
             raise FileNotFoundError(f"{p} not found. Run `just hagerdorn` first.")
 
-    hep_results = pd.read_csv(HEPATOTOX_CSV)
     with open(HEPATOTOX_JSON) as f:
-        hep_preds = json.load(f)
-    neuro_results = pd.read_csv(NEUROTOX_CSV)
+        hep_data = json.load(f)
+    hep_results = pd.DataFrame(hep_data["models"])
+    hep_preds = hep_data["predictions"]
+
     with open(NEUROTOX_JSON) as f:
-        neuro_preds = json.load(f)
+        neuro_data = json.load(f)
+    neuro_results = pd.DataFrame(neuro_data["models"])
+    neuro_preds = neuro_data["predictions"]
 
     fig, axes = plt.subplots(
         2, 3, figsize=(15, 9), dpi=300,

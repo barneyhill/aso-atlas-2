@@ -10,10 +10,10 @@ import re
 import sys
 from pathlib import Path
 
-import importlib.util
-
 import numpy as np
 import pandas as pd
+
+from analyses.utils.helm import Helm
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -21,13 +21,6 @@ import pandas as pd
 _root = Path(__file__).resolve().parents[2]
 DATA_RAW = _root / "data/oligostack/raw"
 DATA_PROCESSED = _root / "data/oligostack/processed"
-
-# Import parse_helm directly to avoid kinetics_model __init__ chain (needs polars)
-_helm_path = _root / "kinetics_model" / "src" / "data" / "helm.py"
-_spec = importlib.util.spec_from_file_location("helm", _helm_path)
-_helm_mod = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_helm_mod)
-_parse_helm = _helm_mod.parse_helm
 
 
 def _filter_helm(df: pd.DataFrame, label: str) -> pd.DataFrame:
@@ -41,7 +34,7 @@ def _filter_helm(df: pd.DataFrame, label: str) -> pd.DataFrame:
     helm_cache: dict = {}
     def _parse(h):
         if h not in helm_cache:
-            helm_cache[h] = _parse_helm(h) if pd.notna(h) else None
+            helm_cache[h] = Helm.parse(h) if pd.notna(h) else None
         return helm_cache[h]
 
     parsed = df["HELM Annotation"].map(_parse)
