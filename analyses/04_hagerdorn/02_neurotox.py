@@ -18,7 +18,7 @@ from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 from sklearn.model_selection import GroupKFold
 from scipy.stats import fisher_exact
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from utils.models import (
     MODELS,
     parse_helm,

@@ -12,16 +12,5 @@ wheels/
 # macOS
 .DS_Store
 
-# AMBER/MD outputs
-modxna/output/
-modxna/leap.log
-modxna/mdinfo
-
-# Binary tools (installed locally)
-modxna/bin/
-
-# Lock file (optional - uncomment to track)
-# uv.lock
-
-# Papers (PDFs)
-papers/
+# Archive (old experiments, legacy code, reference PDFs)
+archive/
