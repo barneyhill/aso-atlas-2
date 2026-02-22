@@ -1,4 +1,4 @@
-"""Smoke tests for paper_numbers.json model metrics."""
+"""Smoke tests for paper_numbers.json."""
 
 import json
 from pathlib import Path
@@ -14,79 +14,102 @@ def numbers():
     return json.loads(NUMBERS_PATH.read_text())
 
 
-def test_model_key_exists(numbers):
-    assert "model" in numbers, "Missing 'model' key — run `just evaluate && just export`"
+# ── Dataset keys ──────────────────────────────────────────────────
+
+def test_dataset_keys_exist(numbers):
+    for key in ("in_vitro", "dose_response", "hepatic", "neuro", "genes"):
+        assert key in numbers, f"Missing '{key}' key"
 
 
-def test_model_required_fields(numbers):
-    model = numbers["model"]
-    required = [
-        "n_params",
-        "median_spearman",
-        "iv_spearman",
-        "alt_spearman",
-        "ast_spearman",
-        "fob_spearman",
-        "top_k_fraction",
-        "inhibition_enrichment_factor",
-        "ALT_enrichment_factor",
-        "FOB_enrichment_factor",
-    ]
-    for field in required:
-        assert field in model, f"Missing model.{field}"
+def test_dataset_counts_positive(numbers):
+    assert numbers["in_vitro"]["n_measurements"] > 0
+    assert numbers["in_vitro"]["n_asos"] > 0
+    assert numbers["dose_response"]["n_measurements"] > 0
+    assert numbers["hepatic"]["n_records"] > 0
+    assert numbers["neuro"]["n_records"] > 0
+    assert numbers["genes"]["n_unique"] > 0
 
 
-def test_spearman_values_in_range(numbers):
-    model = numbers["model"]
-    for key in ("median_spearman", "iv_spearman", "alt_spearman", "ast_spearman", "fob_spearman"):
-        val = model[key]
-        assert -1 <= val <= 1, f"model.{key} = {val} not in [-1, 1]"
+# ── Hagerdorn hepatotoxicity ─────────────────────────────────────
+
+def test_hagerdorn_hepatotox_key_exists(numbers):
+    assert "hagerdorn_hepatotox" in numbers, \
+        "Missing 'hagerdorn_hepatotox' key — run `just hagerdorn && just export`"
 
 
-def test_enrichment_factors_above_one(numbers):
-    model = numbers["model"]
-    for stage in ("inhibition", "ALT", "FOB"):
-        key = f"{stage}_enrichment_factor"
-        val = model[key]
-        assert val > 1.0, f"model.{key} = {val} should be > 1.0"
+def test_hagerdorn_hepatotox_fields(numbers):
+    h = numbers["hagerdorn_hepatotox"]
+    for field in ("accuracy", "sensitivity", "specificity", "auc", "n", "n_groups"):
+        assert field in h, f"Missing hagerdorn_hepatotox.{field}"
 
 
-def test_n_params_positive(numbers):
-    assert numbers["model"]["n_params"] > 0
+def test_hagerdorn_hepatotox_accuracy_in_range(numbers):
+    acc = numbers["hagerdorn_hepatotox"]["accuracy"]
+    assert 0 <= acc <= 1, f"accuracy = {acc} not in [0, 1]"
 
 
-def test_base_rates_are_probabilities(numbers):
-    model = numbers["model"]
-    for stage in ("inhibition", "ALT", "FOB"):
-        for suffix in ("base_rate", "top_k_pass_rate"):
-            key = f"{stage}_{suffix}"
-            val = model[key]
-            assert 0 <= val <= 1, f"model.{key} = {val} not in [0, 1]"
+def test_hagerdorn_hepatotox_auc_in_range(numbers):
+    auc = numbers["hagerdorn_hepatotox"]["auc"]
+    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
 
 
-# ── Ablation tests ──────────────────────────────────────────────────
+# ── Hagerdorn neurotoxicity ──────────────────────────────────────
 
-def test_ablation_key_exists(numbers):
-    assert "ablation" in numbers, "Missing 'ablation' key — run `just ablation && just export`"
-
-
-def test_ablation_has_three_conditions(numbers):
-    ablation = numbers.get("ablation", {})
-    for condition in ("full", "no_warmup", "vivo_only"):
-        assert condition in ablation, f"Missing ablation.{condition}"
+def test_hagerdorn_neurotox_key_exists(numbers):
+    assert "hagerdorn_neurotox" in numbers, \
+        "Missing 'hagerdorn_neurotox' key — run `just hagerdorn && just export`"
 
 
-def test_ablation_spearman_values_in_range(numbers):
-    ablation = numbers.get("ablation", {})
-    for condition, metrics in ablation.items():
-        for key in ("alt_spearman", "ast_spearman", "fob_spearman", "median_vivo_spearman"):
-            val = metrics[key]
-            assert -1 <= val <= 1, f"ablation.{condition}.{key} = {val} not in [-1, 1]"
+def test_hagerdorn_neurotox_fields(numbers):
+    h = numbers["hagerdorn_neurotox"]
+    for field in ("accuracy", "sensitivity", "specificity", "auc", "n", "n_groups"):
+        assert field in h, f"Missing hagerdorn_neurotox.{field}"
 
 
-def test_ablation_median_spearman_positive(numbers):
-    """All ablation conditions should achieve positive median vivo Spearman."""
-    ablation = numbers.get("ablation", {})
-    for condition in ("full", "no_warmup", "vivo_only"):
-        val = ablation.get(condition, {}).get("median_vivo_spearman", -999)
-        assert val > 0, f"ablation.{condition}.median_vivo_spearman = {val} should be > 0"
+def test_hagerdorn_neurotox_accuracy_in_range(numbers):
+    acc = numbers["hagerdorn_neurotox"]["accuracy"]
+    assert 0 <= acc <= 1, f"accuracy = {acc} not in [0, 1]"
+
+
+def test_hagerdorn_neurotox_auc_in_range(numbers):
+    auc = numbers["hagerdorn_neurotox"]["auc"]
+    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
+
+
+# ── Pipeline ─────────────────────────────────────────────────────
+
+def test_pipeline_key_exists(numbers):
+    assert "pipeline" in numbers, \
+        "Missing 'pipeline' key — run `just analysis && just export`"
+
+
+def test_pipeline_baseline_costs(numbers):
+    p = numbers["pipeline"]
+    assert p["baseline_n_initial"] > 0
+    assert p["baseline_total_cost"] > 0
+
+
+def test_pipeline_hagerdorn_savings(numbers):
+    p = numbers["pipeline"]
+    if "hagerdorn_total_cost" in p:
+        assert p["hagerdorn_total_cost"] < p["baseline_total_cost"], \
+            "Hagerdorn pipeline should cost less than baseline"
+        assert 0 < p["hagerdorn_savings_pct"] < 100
+
+
+def test_pipeline_oligoai_savings(numbers):
+    p = numbers["pipeline"]
+    if "oligoai_total_cost" in p:
+        assert p["oligoai_total_cost"] < p["baseline_total_cost"], \
+            "OligoAI pipeline should cost less than baseline"
+        assert 0 < p["oligoai_savings_pct"] < 100
+
+
+def test_pipeline_combined_savings(numbers):
+    p = numbers["pipeline"]
+    if "combined_total_cost" in p:
+        assert p["combined_total_cost"] < p["baseline_total_cost"], \
+            "Combined pipeline should cost less than baseline"
+        assert p["combined_total_cost"] <= p["hagerdorn_total_cost"], \
+            "Combined should be at least as good as Hagerdorn alone"
+        assert 0 < p["combined_savings_pct"] < 100

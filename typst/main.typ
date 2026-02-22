@@ -20,7 +20,7 @@
 #text-args-authors.insert("size", 12pt)
 
 #show: template.with(
-title: "Jointly predicting RNase H-mediated gapmer potency and tolerability to reduce preclinical screening costs",
+title: "OligoStack: a public dataset and cost-based benchmark for antisense oligonucleotide preclinical screening",
 authors: (
 (name: "Barney Hill", affiliation-id: "1,3,5,*"),
 (name: "Nicola Whiffin", affiliation-id: "1,3,4"),
@@ -38,68 +38,91 @@ affiliations: (
 ),
 date: date,
 link-color: rgb("#008002"),
-abstract: [Your abstract goes here.],
+abstract: [
+Antisense oligonucleotides (ASOs) are a maturing therapeutic modality, yet preclinical development remains costly due to sequential in vitro and in vivo screening with high attrition rates. Progress in computational ASO design has been hampered by the absence of a standardised public dataset linking chemical structure to multiple preclinical endpoints, and by the lack of evaluation frameworks that translate predictive accuracy into practical cost savings. Here we introduce *OligoStack*, the largest public multi-endpoint ASO preclinical dataset, comprising #comma(R.in_vitro.n_measurements) in vitro efficacy measurements, #comma(R.dose_response.n_measurements) dose-response curves, #comma(R.hepatic.n_records) hepatotoxicity records, and #comma(R.neuro.n_records) neurotoxicity records across #comma(R.genes.n_unique) target genes --- all extracted from USPTO patent filings using a language-model-powered pipeline. We propose a cost-based benchmarking framework that evaluates classifiers by their ability to enrich the candidate pool at expensive in vivo stages, quantifying savings in terms of the number of animals and dollars required to yield a development candidate. As a baseline benchmark, we replicate the two published Hagedorn sequence-based models (hepatotoxicity, 2013; neurotoxicity, 2022) on OligoStack using GroupKFold cross-validation by target gene. OligoStack, the benchmarking framework, and all baseline code are publicly available to accelerate computational ASO research.
+],
 )
 
 = Introduction
 
-- Relative clinical success for 2-MOE's in CNS
-- Despite this vast majority of amenable conditions remain undeveloped bc of cost constraints.
-- ASOs require "thick" preclinical pipelines due to failure rates
-- 
+Antisense oligonucleotides (ASOs) that recruit RNase H to degrade target mRNA have emerged as a clinically validated therapeutic modality, with several approved drugs targeting conditions from spinal muscular atrophy to hereditary transthyretin amyloidosis. The 2'-MOE gapmer design --- flanking modified nucleotides surrounding a central DNA gap --- has proven particularly successful in the central nervous system, where intrathecal delivery achieves sustained target knockdown.
+
+Despite this clinical success, the vast majority of genetically amenable conditions remain undeveloped. A key barrier is the cost of preclinical screening: identifying a single development candidate typically requires synthesising and testing thousands of ASO sequences through a sequential pipeline of in vitro efficacy assays, dose-response characterisation, and multi-species in vivo toxicity studies. Each successive stage is more expensive and lower-throughput than the last, with in vivo studies in rodents and primates dominating total programme costs.
+
+Several computational approaches have demonstrated that oligonucleotide sequence features carry predictive information about ASO properties. Hagedorn _et al._ (2013) showed that dinucleotide composition predicts hepatotoxicity in locked nucleic acid (LNA) gapmers using random forest classifiers. Hagedorn _et al._ (2022) extended this approach to neurotoxicity prediction using a logistic regression model based on five sequence features. More recently, Gehrmann _et al._ (2025) introduced OligoAI, a deep learning model trained on a proprietary database of 188,521 ASO sequences that achieves 3.14$times$ enrichment for in vitro efficacy prediction. However, these models were developed on proprietary datasets and there is no common benchmark for comparing their contributions across different pipeline stages.
+
+A critical gap remains: there is no standardised public dataset linking ASO chemical structure to multiple preclinical endpoints, and no evaluation framework that translates model accuracy into practical screening cost savings. Without these, it is difficult to compare methods fairly or to quantify the real-world value of computational pre-screening.
+
+In this work, we make three contributions:
+
++ *OligoStack* --- the largest public multi-endpoint ASO preclinical dataset, extracted from USPTO patent filings and annotated with HELM chemical-structure strings. The dataset spans #comma(R.genes.n_unique) target genes across four assay types.
+
++ A *cost-based benchmarking framework* that evaluates classifiers by their enrichment of the candidate pool at expensive pipeline stages, translating accuracy into dollar savings and animal reduction.
+
++ A *baseline benchmark* replicating the Hagedorn hepatotoxicity (2013) and neurotoxicity (2022) models on OligoStack with proper GroupKFold cross-validation by target gene, establishing reference performance for future methods.
 
 = Results
 
-== Fig 1: Dataset Overview
-
-_Message: "We assembled the largest public multi-endpoint ASO preclinical dataset, linking in vitro efficacy to in vivo toxicity for thousands of compounds."_
-
-- *Panel A — Sankey diagram.* Data flow from in vitro inhibition → dose response → hepatic tox / neuro tox. Box heights ∝ measurements, flow widths ∝ compound overlap.
-- *Panel B — Gene circle.* Donut chart of measurements per target gene aggregated across all four data types. Major genes shown individually; remaining grouped as "Other".
+== OligoStack Dataset
 
 #figure(
   image("plots/fig1/fig1.svg", width: 100%),
   caption: [Overview of the OligoStack extraction pipeline and resulting dataset. *(A)* Three-stage pipeline converting USPTO patent tables into structured preclinical ASO datasets with HELM annotations. *(B)* Flow of compounds through in vitro hit screening, dose-response characterisation, and in vivo toxicity assessment; box heights are proportional to measurement counts, flow widths to the fraction of shared compounds. *(C)* Distribution of measurements across target genes; each coloured segment represents a major gene, with remaining genes grouped as "Other".],
 ) <fig1>
 
-== Fig 2: The Pipeline Problem
+OligoStack comprises four linked assay categories extracted from USPTO patent filings: #comma(R.in_vitro.n_measurements) single-concentration in vitro inhibition measurements across #comma(R.in_vitro.n_asos) ASOs, #comma(R.dose_response.n_measurements) multi-dose response measurements across #comma(R.dose_response.n_asos) ASOs, #comma(R.hepatic.n_records) hepatorenal toxicity records across #comma(R.hepatic.n_asos) ASOs with #R.hepatic.n_biomarker_channels biomarker channels, and #comma(R.neuro.n_records) neurotoxicity records across #comma(R.neuro.n_asos) ASOs (@fig1). All compounds are annotated with HELM chemical-structure strings enabling extraction of chemistry-aware features. Target gene identity was resolved for #R.neuro.gene_coverage_pct% of neurotoxicity records through compound-level cross-referencing and patent-level majority voting.
 
-_Message: "Sequential screening requires \~2,000 initial candidates at \~\$3.5M to yield 3 development candidates. Most cost is concentrated at expensive in vivo stages where attrition is highest."_
-
-- *Panel A — Pipeline attrition funnel.* 7 stages (inhibition \>80%, IC50 \<500nM, mouse ALT \<100, mouse FOB ≤1, rat ALT \<100, rat FOB ≤1, monkey ALT \<100). Shows ASO counts, pass rates, and per-stage costs.
-- *Panel B — Stage measurement distributions.* 8-panel histograms with pass/fail thresholds (red dashed lines + green pass regions). Gives intuition for how stringent each cutoff is.
-- *Status:* Both panels exist (`pipeline_attrition.svg`, `pipeline_distributions.svg`). Need composition into a single figure.
+== The Preclinical Screening Pipeline
 
 #figure(
   image("plots/fig2/fig2.svg", width: 100%),
   caption: [The ASO preclinical screening pipeline. *(A)* Attrition funnel showing the number of ASO candidates entering each stage, per-stage pass rates, and cumulative costs. Box heights are proportional to log(ASO count). *(B)* Distribution of measurements at each pipeline stage with pass/fail thresholds (red dashed lines) and passing regions (green shading).],
 ) <fig2>
 
-== Fig 3: Model Overview
+The ASO preclinical pipeline consists of seven sequential stages: in vitro efficacy (inhibition \>80%), in vitro potency (IC50 \<500 nM by electroporation), mouse liver toxicity (ALT \<100 IU/L), mouse neurotoxicity (FOB ≤1), rat liver toxicity, rat neurotoxicity, and monkey liver toxicity (@fig2). Back-calculation from OligoStack pass rates shows that producing a single development candidate requires screening approximately #comma(R.pipeline.baseline_n_initial) initial ASOs at an estimated total cost of \$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 1))M. The majority of this cost is concentrated at the in vivo stages, where per-ASO costs range from \$15,000 (mouse) to \$100,000 (monkey).
 
-_Message: "OligoAI2 jointly predicts ASO potency and tolerability from chemical structure alone, using a shared learned representation across in vitro and in vivo endpoints."_
+== Clinical Benchmark: ION582
 
-- *Panel A — High-level architecture schematic.* Input: ASO chemical structure (HELM notation) + experimental covariates (dose, species, transfection). Middle: "Learned ASO representation" (black box). Output: 4 predicted endpoints (% inhibition, ALT, AST, FOB score). Annotate: trained on 249K in vitro + 27K in vivo measurements.
-- *Panel B — Training strategy.* Simple 2-phase diagram: Phase 1 warms up on abundant in vitro data, Phase 2 jointly fine-tunes with scarce in vivo data. Emphasise the data imbalance problem this solves.
-- *Status:* Does not exist. Best created as a clean vector schematic (Figma/draw.io). Keep deliberately simple — detailed architecture goes in Methods text.
+#figure(
+  image("plots/fig3/fig3.svg", width: 100%),
+  caption: [Benchmarking ION582 (zilganersen) against OligoStack distributions. *(A)* IC50 distribution in iCell GABANeurons under free uptake conditions with ION582 marked. *(B)* Mouse FOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat FOB score distribution (IT, 3000 µg, 3 h post-dose).],
+) <fig3>
 
-== Fig 4: Results and Pipeline Impact
+To contextualise the dataset, we benchmarked ION582 (zilganersen), a clinical-stage ASO targeting _UBE3A-ATS_ for Angelman syndrome, against the OligoStack distributions (@fig3). This demonstrates that the dataset captures the range of preclinical properties relevant to clinical development.
 
-_Message: "OligoAI2 accurately predicts toxicity endpoints and, when used as a pre-screen, enriches the candidate pool 2–3× at toxicity stages — translating to significant cost savings."_
-
-- *Panel A — Predicted vs. actual scatter plots.* One sub-panel per task (inhibition, ALT, AST, FOB). Density-coloured points, Pearson _r_ annotated. Pass/fail thresholds marked as dashed lines (80% inhibition, 100 IU/L ALT, FOB ≤1). Test set, de-normalised to original units.
-- *Panel B — Enrichment bar chart.* Grouped bars: base rate vs. top-10% pass rate for each endpoint, enrichment factor annotated (Inhibition 1.3×, ALT 2.1×, FOB 3.2×). Bridges from "model is accurate" to "model improves screening".
-- *Panel C — Cost comparison.* Stacked bar chart: Baseline vs. OligoAI2-guided pipeline costs, broken down by stage. Shows where savings concentrate (in vivo stages).
-- *Status:* Panel C exists (`pipeline_cost_comparison.svg`). Panels A and B need creation via `analyses/plotting/plot_figure4.py`.
+== Toxicity Prediction
 
 #figure(
   image("plots/fig4/fig4.svg", width: 100%),
-  caption: [OligoAI2 enrichment and pipeline cost impact. *(B)* Grouped bars comparing the base pass rate (grey) with the top-10% model-selected pass rate (coloured) at each endpoint; enrichment factors annotated above. *(C)* Stacked bar chart of total pipeline costs by stage for the baseline screening pipeline versus the OligoAI2-guided pipeline.],
+  caption: [Hagedorn model replication on OligoStack with GroupKFold cross-validation by target gene. *Top row (A--C):* Hepatotoxicity (Hagedorn 2013). *(A)* Classification metrics for four RF model variants on ALT prediction. *(B)* ROC curve for the dinucleotide model. *(C)* Confusion matrix (accuracy = #str(R.hagerdorn_hepatotox.accuracy)). *Bottom row (D--F):* Neurotoxicity (Hagedorn 2022). *(D)* Classification metrics for five models (linear + 4 RF). *(E)* ROC curves for the linear and dinucleotide RF models. *(F)* Confusion matrix for the dinucleotide RF model (accuracy = #str(R.hagerdorn_neurotox.accuracy)).],
 ) <fig4>
+
+We replicated the Hagedorn hepatotoxicity (2013) and neurotoxicity (2022) prediction approaches on OligoStack, adapting them from LNA to DNA/MOE/cET chemistry (@fig4). All models were evaluated with GroupKFold cross-validation (5 folds, grouped by target gene to prevent information leakage).
+
+For hepatotoxicity, four random forest classifiers of increasing feature complexity were evaluated on ALT prediction. The dinucleotide model (288 features) achieved an accuracy of #str(R.hagerdorn_hepatotox.accuracy) with an AUC of #str(R.hagerdorn_hepatotox.auc) on #comma(R.hagerdorn_hepatotox.n) compounds across #comma(R.hagerdorn_hepatotox.n_groups) target gene groups (sensitivity #str(R.hagerdorn_hepatotox.sensitivity), specificity #str(R.hagerdorn_hepatotox.specificity)).
+
+For neurotoxicity, we evaluated the original 5-feature logistic regression and four RF variants on mouse FOB scores (700 µg ICV; neurotoxic FOB ≥3 vs non-toxic FOB ≤1). The dinucleotide RF model achieved an accuracy of #str(R.hagerdorn_neurotox.accuracy) with an AUC of #str(R.hagerdorn_neurotox.auc) on #comma(R.hagerdorn_neurotox.n) compounds across #comma(R.hagerdorn_neurotox.n_groups) target gene groups.
+
+== Cost Savings from Computational Pre-Screening
+
+#figure(
+  image("plots/fig5/fig5.svg", width: 100%),
+  caption: [Cost savings from computational pre-screening. *(A)* Stacked bar chart comparing total pipeline costs by stage across four scenarios: baseline (no screening), Hagerdorn classifiers only (ALT + FOB), OligoAI only (in vitro efficacy), and all models combined. *(B)* Summary table of costs, savings, and enrichment factors.],
+) <fig5>
+
+To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig5). The Hagerdorn classifiers (hepatotoxicity + neurotoxicity) enrich the candidate pool at the mouse ALT and mouse FOB stages, reducing cost by #str(R.pipeline.hagerdorn_savings_pct)% to \$#str(calc.round(R.pipeline.hagerdorn_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction (Gehrmann _et al._, 2025), achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all three enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
 
 = Discussion
 
-// Interpret your findings
+We have introduced OligoStack, a public multi-endpoint ASO preclinical dataset, and a cost-based benchmarking framework for evaluating computational screening methods. Our replication of the Hagedorn hepatotoxicity and neurotoxicity models on OligoStack establishes baseline performance for future methods to improve upon.
+
+The Hagedorn models achieve moderate classification accuracy on OligoStack, consistent with the original publications despite the shift from LNA to MOE/cET chemistry. The use of GroupKFold cross-validation by target gene provides a more realistic estimate of generalisation performance than random splits, since in practice new ASO programmes target novel genes not seen during model development.
+
+Even modest enrichment at the expensive in vivo stages translates into meaningful cost savings, as demonstrated by our cost-based framework. When combined with OligoAI's in vitro enrichment (Gehrmann _et al._, 2025), the total cost reduction reaches #str(R.pipeline.combined_savings_pct)%. This highlights the importance of evaluating models not just by accuracy metrics but by their practical impact on screening economics, and suggests that stacking complementary models across pipeline stages can yield compounding benefits.
+
+Several limitations should be noted. First, the Hagedorn models use only chemistry-derived sequence features and do not incorporate target gene context, target site thermodynamics, or off-target binding potential. Second, OligoStack is derived from Ionis Pharmaceuticals patents and therefore reflects the design space and chemical modifications used by a single organisation. Third, the binary classification approach (high vs low toxicity) discards intermediate cases and may oversimplify the dose-response relationship between sequence features and toxicity.
+
+Future directions include: (i) deep learning models that operate directly on HELM strings rather than hand-crafted features; (ii) multi-task approaches that jointly predict across endpoints; (iii) target-aware models that incorporate gene-level information; and (iv) regression rather than classification to capture the full spectrum of toxicity outcomes.
 
 = Methods
 
@@ -110,6 +133,7 @@ OligoStack is a three-stage language-model-powered pipeline that converts unstru
 *Stage 1 — Table extraction.* USPTO patent XML documents filed after 2001 by ISIS Pharmaceuticals (now Ionis Pharmaceuticals) were retrieved via the USPTO bulk-data API and split into individual table files, each paired with the five paragraphs of prose immediately preceding the table. Tables were deduplicated in two phases: exact MD5 hash matching, followed by pairwise sequence similarity (Python `SequenceMatcher`, 90% threshold) with length-based pruning; connected components were resolved by depth-first search to select a single canonical file per group, reducing 35,871 raw tables from 1,125 Ionis Pharmaceuticals patents to 8,435 canonical tables. For each canonical table, GPT-5-mini generated a bespoke Python extraction function tailored to that table's XML layout. Generated scripts were executed in a sandboxed subprocess with a restricted import whitelist (`json`, `re`, `xml.etree.ElementTree`, `math`) and a ten-second timeout. An agentic self-repair loop allowed the model to observe execution output or errors and regenerate corrected code, for up to five attempts per table.
 
 *Stage 2 — HELM annotation.* For each canonical table the model received the surrounding patent prose and a table preview, then generated a function that constructs Hierarchical Editing Language for Macromolecules (HELM) strings nucleotide-by-nucleotide from the chemistry description. To avoid hallucinated annotations, the function was required to return null when explicit modification data could not be found in the patent text. All HELM strings were validated by a rule-based checker that enforces correct sugar tokens (`[moe]`, `d`, `r`, `m`, `[cet]`, `[fR]`, `[lna]`), canonical bases (`A`, `C`, `G`, `T`, `U`, `[5meC]`), backbone tokens (`[sp]`, `[am]`, `.`), balanced bracket syntax, and terminal-nucleotide constraints.
+
 *Stage 3 — Schema-driven collation.* Each assay category was extracted in a separate pass by supplying a schema dictionary that maps desired column names to natural-language descriptions. GPT-5 generated a mapping function per table that translates table-specific field names to the target schema, performs unit conversions, and unpivots multi-measurement rows into separate records. The same sandboxed execution and self-repair loop as Stage~1 were applied. HELM annotations were merged into each output record by compound identifier, following canonical-link chains across duplicate tables. Four schemas were defined, one per assay category: (i)~in vitro inhibition --- percent inhibition, cell line, dosage in nM, transfection method, treatment period, and target gene; (ii)~dose response --- the same fields with dosage in the original unit (nM or~$mu$M); (iii)~hepatorenal toxicity --- seven serum biomarkers (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio), dosage, species, strain, number of doses, dosing period, measurement source, and administration route; and (iv)~neurotoxicity --- FOB score, dosage, species, strain, latency, administration method, and score type.
 
 == Data Collection and Preprocessing
@@ -126,56 +150,39 @@ Five HELM-level quality filters were applied uniformly across all four assay cat
 
 *Neurological toxicity.* FOB (functional observational battery) score strings were parsed into numeric lists, retaining only values in the valid range \[0, 7\]. Species and strain names were standardised (e.g.~"C57/B16 mice" $arrow$ "C57BL/6 mice"). Since the raw neurotoxicity data lacked target gene annotations, compound-to-gene mappings were inferred in two steps: first by direct lookup against the in vitro and dose response datasets, then by patent-level majority vote for remaining compounds (assigning the most frequent target gene within each USPTO patent). This resolved target gene identity for #R.neuro.gene_coverage_pct% of neurotoxicity records. Deduplication on HELM annotation, species, administration method, score type, and dosage yielded #comma(R.neuro.n_records) records across #comma(R.neuro.n_asos) ASOs.
 
-*Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ _MAPT_, "PKK" $arrow$ _PRKDC_, "K-Ras" $arrow$ _KRAS_). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
+*Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ #emph[MAPT], "PKK" $arrow$ #emph[PRKDC], "K-Ras" $arrow$ #emph[KRAS]). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
 
-#figure(
-  image("plots/fig5/fig5.svg", width: 100%),
-  caption: [UMAP projection of OligoAI2 learned ASO representations, coloured by chemistry type *(left)* and GC content *(right)*. Each point represents a unique HELM-annotated compound. The model's bottleneck layer separates the two dominant gapmer designs --- 5-10-5 MOE with full phosphorothioate backbone (blue) and mixed PS/PO backbone (orange) --- as well as 3-10-3 cEt gapmers (red). Within each chemistry cluster, GC content varies smoothly, indicating that the embedding captures both chemical modification patterns and sequence composition.],
-) <fig5>
+== Hagedorn Hepatotoxicity Model (2013)
 
-== Multi-Task Model
+We replicated the Hagedorn _et al._ (2013) approach for predicting ASO hepatotoxicity from sequence composition. The original method uses random forest classifiers trained on dinucleotide features of LNA gapmers to classify compounds as high or low hepatotoxicity based on serum ALT levels.
 
-=== Problem Formulation
+*Feature extraction.* Four feature sets of increasing complexity were evaluated: (i) a baseline model with 5 features (presence of chemical modification, MOE/cET/DNA nucleotide counts, and sequence length); (ii) a counts model with 15 features (sugar-base combination counts plus phosphorothioate linkage count); (iii) the Hagedorn dinucleotide model with 288 features (all pairwise dinucleotide transitions across 12 nucleotide types and 2 linkage types); and (iv) a position-specific model with 480 features (nucleotide identity at each position from both ends). Dosing covariates (mg/kg, number of doses, dosing period, administration route) were included as additional features.
 
-The preclinical ASO pipeline produces four heterogeneous endpoints: single-concentration percent inhibition, serum ALT, serum AST, and functional observational battery (FOB) score. We frame prediction as a four-task regression problem where each task shares a common learned ASO representation but retains independent output heads. The principal data challenge is a $tilde$30:1 imbalance between the in vitro inhibition task (#comma(R.in_vitro.n_measurements) measurements) and the scarcest in vivo endpoint (FOB, #comma(R.neuro.n_records) measurements). The model receives only the HELM chemical-structure string and experimental covariates (dose, species, transfection method) as input --- no target-gene identity is provided, ensuring predictions generalise to novel gene programmes.
+*Label assignment.* For each biomarker, the upper limit of normal (ULN) was estimated as median + 3 $times$ MAD from the data distribution. Compounds with mean ALT > 3 $times$ ULN were labelled "high" toxicity; those with ALT < 1 $times$ ULN were labelled "low". Intermediate compounds were excluded from classification.
 
-=== Model Architecture
+*Model training.* Random forest classifiers (1000 trees, max 8 features per split, balanced class weights) were trained with GroupKFold cross-validation (5 folds, grouped by target gene). This prevents information leakage from compounds targeting the same gene appearing in both training and test sets.
 
-The model ($tilde$#comma(R.model.n_params) trainable parameters) consists of four modules:
+== Hagedorn Neurotoxicity Model (2022)
 
-+ *Factored HELM embedding.* Each nucleotide position is represented by the sum of three learned embedding vectors --- one each for the base (A, C, G, T, U, 5-methylcytosine), sugar modification (MOE, DNA, LNA, cEt, fluoro-ribose, O-methyl, RNA), and backbone linkage (phosphorothioate, phosphodiester). This factored design captures the combinatorial chemistry of gapmer ASOs without an exponentially large vocabulary.
+We replicated the Hagedorn _et al._ (2022) approach for predicting ASO neurotoxicity from sequence features, evaluated on mouse FOB scores from ICV administration at 700 µg.
 
-+ *Transformer encoder with RoPE.* Two pre-norm transformer blocks with four attention heads, GELU-activated feed-forward layers, and rotary position embeddings (RoPE) encode the nucleotide sequence. Attention masks ensure that padding positions do not contribute to the representation.
+*Linear model.* The original 5-feature logistic regression model uses: G nucleotide count, A nucleotide count, G-free stretch from the 3' end, G-free stretch from the 5' end, and total sequence length. Balanced class weights were applied.
 
-+ *Attention pooling bottleneck.* A single learned query vector attends over the encoder's output to produce a fixed-length ASO representation, replacing the more common masked mean pooling. This allows the model to weight nucleotide positions by their relevance.
+*RF models.* The same four random forest feature sets used for hepatotoxicity were also evaluated for neurotoxicity, without dosing covariates (all neurotoxicity data used the same ICV 700 µg protocol).
 
-+ *Task-specific covariate encoders and heads.* Experimental covariates are encoded by separate small MLPs for in vitro (log-dose, treatment hours, transfection method) and in vivo (dose in mg/kg, number of doses, dosing period, administration route) contexts. Each task head is an independent two-layer MLP that receives the concatenation of the ASO representation and the covariate encoding.
+*Label assignment.* Compounds with mean FOB ≥ 3 were labelled "neurotoxic"; those with mean FOB ≤ 1 were labelled "non-toxic". Intermediate scores were excluded.
 
-=== Training Strategy
+== Cross-Validation Procedure
 
-Training proceeds in two phases to address the 30:1 data imbalance. In Phase 1 (warmup), only the in vitro inhibition task is trained for 10 epochs, allowing the shared encoder to learn a meaningful ASO representation from the abundant in vitro data. In Phase 2 (joint), all four tasks are trained simultaneously with homoscedastic uncertainty weighting, where each task's contribution to the total loss is scaled by a learned inverse-variance parameter $sigma_t^(-2)$, following Kendall _et al._ (2018). This avoids manual loss-weight tuning and lets the model dynamically balance tasks of differing noise levels.
+All models were evaluated using GroupKFold cross-validation with 5 folds, where groups were defined by target gene. This ensures that all compounds targeting the same gene appear exclusively in either the training or test set within each fold, preventing inflated performance estimates from gene-level information leakage. Group assignment prioritised direct target gene annotations, supplemented by compound-level cross-referencing to the in vitro dataset and USPTO patent ID as a fallback proxy.
 
-The per-task loss is the concordance correlation coefficient (CCC) loss, $cal(L)_t = 1 - "CCC"_t$, which jointly penalises errors in correlation, mean bias, and variance mismatch. The total loss is $cal(L) = 1/T sum_(t=1)^T [ 1/(2 sigma_t^2) cal(L)_t + log sigma_t ]$, where $T$ is the number of active tasks.
+== Cost-Based Evaluation Framework
 
-Data are split by target gene to prevent information leakage: all measurements for a given gene appear exclusively in one of train (80%), validation (10%), or test (10%). This ensures the model is evaluated on its ability to generalise to unseen gene programmes. Optimisation uses AdamW with cosine annealing over 50 epochs and early stopping on validation loss (patience 10). A hyperparameter sweep over 14 configurations (learning rate, weight decay, dropout, encoder depth, warmup duration) selected the best model by median within-gene Spearman $rho$ on the validation set, achieving an overall median Spearman $rho$ of #str(R.model.median_spearman) across all four tasks.
+To translate classification accuracy into practical value, we developed a cost-based evaluation framework. For each pipeline stage, per-ASO costs were estimated from industry benchmarks: \$500 (in vitro efficacy), \$2,000 (dose-response), \$15,000 (mouse hepatotoxicity), \$20,000 (mouse neurotoxicity), \$25,000 (rat hepatotoxicity), \$30,000 (rat neurotoxicity), and \$100,000 (monkey hepatotoxicity).
 
-To validate the contribution of in vitro data to in vivo prediction, we conducted an ablation study comparing three training conditions (@tab:ablation): the full pipeline (warmup + joint training with IV data), joint training without warmup, and training on in vivo data only.
+The *enrichment factor* at a given stage is defined as the ratio of the pass rate among classifier-selected compounds to the base pass rate: $"EF" = P("pass" bar.v "selected") / P("pass")$, where "selected" denotes compounds predicted as low-toxicity (P(high) \< 0.5). An enrichment factor greater than one indicates that the classifier concentrates passing compounds among its predictions.
 
-#figure(
-  table(columns: 5, align: (left, center, center, center, center),
-    [*Condition*], [*ALT $rho$*], [*AST $rho$*], [*FOB $rho$*], [*Median $rho$*],
-    [Full (warmup + joint)], [#str(R.ablation.full.alt_spearman)], [#str(R.ablation.full.ast_spearman)], [#str(R.ablation.full.fob_spearman)], [#str(R.ablation.full.median_vivo_spearman)],
-    [No warmup (joint only)], [#str(R.ablation.no_warmup.alt_spearman)], [#str(R.ablation.no_warmup.ast_spearman)], [#str(R.ablation.no_warmup.fob_spearman)], [#str(R.ablation.no_warmup.median_vivo_spearman)],
-    [Vivo-only], [#str(R.ablation.vivo_only.alt_spearman)], [#str(R.ablation.vivo_only.ast_spearman)], [#str(R.ablation.vivo_only.fob_spearman)], [#str(R.ablation.vivo_only.median_vivo_spearman)],
-  ),
-  caption: [Ablation study: effect of in vitro inhibition data on in vivo prediction. Median within-gene Spearman $rho$ on held-out test genes.],
-) <tab:ablation>
-
-=== Evaluation
-
-Model performance is assessed by two complementary metrics. *Ranking accuracy* is measured as the median Spearman rank correlation ($rho$) computed within each target-gene group and aggregated across groups, rewarding the model's ability to rank ASOs targeting the same gene by their true endpoint values. Per-task Spearman $rho$: in vitro inhibition #str(R.model.iv_spearman), ALT #str(R.model.alt_spearman), AST #str(R.model.ast_spearman), FOB #str(R.model.fob_spearman).
-
-*Top-K enrichment* quantifies the model's utility as a pipeline pre-screen. For each endpoint, compounds are ranked by model prediction and the top #str(calc.round(R.model.top_k_fraction * 100, digits: 0))% are selected. The enrichment factor is the ratio of the pass rate among model-selected compounds to the base rate in the full test set: $"EF" = P("pass" | "top-K") / P("pass")$. An enrichment factor greater than one indicates the model concentrates passing compounds in its top predictions. We report enrichment at three pipeline stages: in vitro inhibition $>$80% (EF = #str(R.model.inhibition_enrichment_factor)$times$, $n$=#comma(R.model.inhibition_n)), ALT $<$100 IU/L (EF = #str(R.model.ALT_enrichment_factor)$times$, $n$=#comma(R.model.ALT_n)), and FOB $<=$1 (EF = #str(R.model.FOB_enrichment_factor)$times$, $n$=#comma(R.model.FOB_n)).
+Pipeline costs are back-calculated by determining the number of initial ASOs needed to yield one development candidate, given the pass rates at each stage. With classifier pre-screening, the effective pass rates at enriched stages increase by the enrichment factor, reducing the required number of initial candidates and the associated costs at all downstream stages.
 
 = Code Availability
 

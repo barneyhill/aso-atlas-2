@@ -9,9 +9,8 @@ import pandas as pd
 DATA_DIR = Path("data/oligostack/processed")
 OUT_PATH = Path("typst/data/paper_numbers.json")
 
-ENRICHMENT_PATH = Path("analyses/05_oligoai2/enrichment_metrics.json")
-SWEEP_SUMMARY_PATH = Path("analyses/05_oligoai2/sweep_results/summary.json")
-ABLATION_SUMMARY_PATH = Path("analyses/05_oligoai2/ablation_results/summary.json")
+HAGERDORN_DIR = Path("analyses/04_hagerdorn")
+PIPELINE_RESULTS_PATH = Path("data/results/pipeline_results.json")
 
 BIOMARKER_COLS = ["ALB", "ALT", "AST", "BUN", "CREA", "TBIL", "PC_ratio"]
 
@@ -55,53 +54,90 @@ def main() -> None:
         },
     }
 
-    # ── Model metrics (optional — only present after `just evaluate`) ──
-    model: dict = {}
-    if SWEEP_SUMMARY_PATH.exists():
-        sweep = json.loads(SWEEP_SUMMARY_PATH.read_text())
-        best = sweep[0]  # rank 1
-        model["n_params"] = best["n_params"]
-        model["median_spearman"] = round(best["overall_median_spearman"], 3)
-        model["iv_spearman"] = round(best["iv_spearman"], 3)
-        model["alt_spearman"] = round(best["alt_spearman"], 3)
-        model["ast_spearman"] = round(best["ast_spearman"], 3)
-        model["fob_spearman"] = round(best["fob_spearman"], 3)
+    # ── Hagerdorn hepatotoxicity metrics ──
+    hepatotox_csv = HAGERDORN_DIR / "hepatotox_results.csv"
+    hepatotox_preds = HAGERDORN_DIR / "hepatotox_predictions.json"
+    if hepatotox_csv.exists() and hepatotox_preds.exists():
+        hep_df = pd.read_csv(hepatotox_csv)
+        hep_preds = json.loads(hepatotox_preds.read_text())
+        # Dinucleotide model × ALT
+        dinuc_alt = hep_df[(hep_df["model"] == "Dinucleotide (288)") & (hep_df["biomarker"] == "ALT")]
+        if len(dinuc_alt) > 0:
+            row = dinuc_alt.iloc[0]
+            numbers["hagerdorn_hepatotox"] = {
+                "accuracy": round(float(row["GK_accuracy"]), 3),
+                "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                "specificity": round(float(row["GK_specificity"]), 3),
+                "auc": round(float(row["GK_AUC"]), 3),
+                "n": int(row["N"]),
+                "n_high": int(row["N_high"]),
+                "n_low": int(row["N_low"]),
+                "n_groups": int(row["N_groups"]),
+            }
+            if "ALT" in hep_preds:
+                numbers["hagerdorn_hepatotox"]["confusion"] = hep_preds["ALT"]["confusion"]
     else:
-        warnings.warn(f"{SWEEP_SUMMARY_PATH} not found — run `just evaluate` first")
+        warnings.warn(f"Hagerdorn hepatotox results not found — run `just hagerdorn` first")
 
-    if ENRICHMENT_PATH.exists():
-        enrich = json.loads(ENRICHMENT_PATH.read_text())
-        model["top_k_fraction"] = enrich["top_k_fraction"]
-        for stage in ("inhibition", "ALT", "FOB"):
-            if stage in enrich:
-                e = enrich[stage]
-                model[f"{stage}_base_rate"] = e["base_rate"]
-                model[f"{stage}_top_k_pass_rate"] = e["top_k_pass_rate"]
-                model[f"{stage}_enrichment_factor"] = e["enrichment_factor"]
-                model[f"{stage}_n"] = e["n"]
+    # ── Hagerdorn neurotoxicity metrics ──
+    neurotox_csv = HAGERDORN_DIR / "neurotox_results.csv"
+    neurotox_preds = HAGERDORN_DIR / "neurotox_predictions.json"
+    if neurotox_csv.exists() and neurotox_preds.exists():
+        neuro_df = pd.read_csv(neurotox_csv)
+        neuro_preds = json.loads(neurotox_preds.read_text())
+        # Dinucleotide model
+        dinuc = neuro_df[neuro_df["model"] == "Dinucleotide (288)"]
+        if len(dinuc) > 0:
+            row = dinuc.iloc[0]
+            numbers["hagerdorn_neurotox"] = {
+                "accuracy": round(float(row["GK_accuracy"]), 3),
+                "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                "specificity": round(float(row["GK_specificity"]), 3),
+                "auc": round(float(row["GK_AUC"]), 3),
+                "n": int(row["N"]),
+                "n_high": int(row["N_high"]),
+                "n_low": int(row["N_low"]),
+                "n_groups": int(row["N_groups"]),
+            }
+            if "FOB" in neuro_preds:
+                numbers["hagerdorn_neurotox"]["confusion"] = neuro_preds["FOB"]["confusion"]
     else:
-        warnings.warn(f"{ENRICHMENT_PATH} not found — run `just evaluate` first")
+        warnings.warn(f"Hagerdorn neurotox results not found — run `just hagerdorn` first")
 
-    if model:
-        numbers["model"] = model
+    # ── Pipeline cost analysis ──
+    if PIPELINE_RESULTS_PATH.exists():
+        pipeline_data = json.loads(PIPELINE_RESULTS_PATH.read_text())
+        baseline = pipeline_data["baseline"]
+        hagerdorn = pipeline_data.get("hagerdorn")
+        oligoai = pipeline_data.get("oligoai")
+        combined = pipeline_data.get("combined")
 
-    # ── Ablation metrics (optional — only present after `just ablation`) ──
-    if ABLATION_SUMMARY_PATH.exists():
-        ablation_raw = json.loads(ABLATION_SUMMARY_PATH.read_text())
-        ablation = {}
-        for condition in ("full", "no_warmup", "vivo_only"):
-            if condition in ablation_raw:
-                m = ablation_raw[condition]
-                ablation[condition] = {
-                    "alt_spearman": round(m["alt_spearman"], 3),
-                    "ast_spearman": round(m["ast_spearman"], 3),
-                    "fob_spearman": round(m["fob_spearman"], 3),
-                    "median_vivo_spearman": round(m["median_vivo_spearman"], 3),
-                }
-        if ablation:
-            numbers["ablation"] = ablation
+        pipeline_numbers = {
+            "baseline_n_initial": baseline["n_initial"],
+            "baseline_total_cost": baseline["total_cost"],
+        }
+        if hagerdorn:
+            pipeline_numbers["hagerdorn_n_initial"] = hagerdorn["n_initial"]
+            pipeline_numbers["hagerdorn_total_cost"] = hagerdorn["total_cost"]
+            pipeline_numbers["hagerdorn_savings_pct"] = round(
+                (1 - hagerdorn["total_cost"] / baseline["total_cost"]) * 100, 1
+            )
+        if oligoai:
+            pipeline_numbers["oligoai_n_initial"] = oligoai["n_initial"]
+            pipeline_numbers["oligoai_total_cost"] = oligoai["total_cost"]
+            pipeline_numbers["oligoai_savings_pct"] = round(
+                (1 - oligoai["total_cost"] / baseline["total_cost"]) * 100, 1
+            )
+        if combined:
+            pipeline_numbers["combined_n_initial"] = combined["n_initial"]
+            pipeline_numbers["combined_total_cost"] = combined["total_cost"]
+            pipeline_numbers["combined_savings_pct"] = round(
+                (1 - combined["total_cost"] / baseline["total_cost"]) * 100, 1
+            )
+
+        numbers["pipeline"] = pipeline_numbers
     else:
-        warnings.warn(f"{ABLATION_SUMMARY_PATH} not found — run `just ablation` first")
+        warnings.warn(f"{PIPELINE_RESULTS_PATH} not found — run `just analysis` first")
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(numbers, indent=2) + "\n")

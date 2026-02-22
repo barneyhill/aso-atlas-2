@@ -21,45 +21,49 @@
     "n_unique": 488,
     "n_total_measurements": 280027
   },
-  "model": {
-    "n_params": 304504,
-    "median_spearman": 0.445,
-    "iv_spearman": 0.443,
-    "alt_spearman": 0.428,
-    "ast_spearman": 0.446,
-    "fob_spearman": 0.708,
-    "top_k_fraction": 0.1,
-    "inhibition_base_rate": 0.0789,
-    "inhibition_top_k_pass_rate": 0.1053,
-    "inhibition_enrichment_factor": 1.3344,
-    "inhibition_n": 18622,
-    "ALT_base_rate": 0.4622,
-    "ALT_top_k_pass_rate": 0.9714,
-    "ALT_enrichment_factor": 2.1018,
-    "ALT_n": 357,
-    "FOB_base_rate": 0.2577,
-    "FOB_top_k_pass_rate": 0.8364,
-    "FOB_enrichment_factor": 3.2453,
-    "FOB_n": 551
-  },
-  "ablation": {
-    "full": {
-      "alt_spearman": 0.352,
-      "ast_spearman": 0.249,
-      "fob_spearman": 0.632,
-      "median_vivo_spearman": 0.352
-    },
-    "no_warmup": {
-      "alt_spearman": 0.465,
-      "ast_spearman": 0.428,
-      "fob_spearman": 0.519,
-      "median_vivo_spearman": 0.465
-    },
-    "vivo_only": {
-      "alt_spearman": 0.417,
-      "ast_spearman": 0.402,
-      "fob_spearman": 0.543,
-      "median_vivo_spearman": 0.417
+  "hagerdorn_hepatotox": {
+    "accuracy": 0.666,
+    "sensitivity": 0.805,
+    "specificity": 0.63,
+    "auc": 0.78,
+    "n": 2373,
+    "n_high": 497,
+    "n_low": 1876,
+    "n_groups": 91,
+    "confusion": {
+      "tp": 400,
+      "fp": 695,
+      "tn": 1181,
+      "fn": 97
     }
+  },
+  "hagerdorn_neurotox": {
+    "accuracy": 0.819,
+    "sensitivity": 0.817,
+    "specificity": 0.822,
+    "auc": 0.893,
+    "n": 2282,
+    "n_high": 1085,
+    "n_low": 1197,
+    "n_groups": 34,
+    "confusion": {
+      "tp": 886,
+      "fp": 213,
+      "tn": 984,
+      "fn": 199
+    }
+  },
+  "pipeline": {
+    "baseline_n_initial": 506,
+    "baseline_total_cost": 1303000,
+    "hagerdorn_n_initial": 315,
+    "hagerdorn_total_cost": 998500,
+    "hagerdorn_savings_pct": 23.4,
+    "oligoai_n_initial": 161,
+    "oligoai_total_cost": 1130500,
+    "oligoai_savings_pct": 13.2,
+    "combined_n_initial": 101,
+    "combined_total_cost": 891500,
+    "combined_savings_pct": 31.6
   }
 }
