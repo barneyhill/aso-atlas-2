@@ -6,6 +6,7 @@ hepatotoxicity from data/oligostack/raw/ and writes cleaned, deduplicated
 parquets to data/oligostack/processed/.
 """
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -53,6 +54,121 @@ def _filter_helm(df: pd.DataFrame, label: str) -> pd.DataFrame:
     return result
 
 
+# ---------------------------------------------------------------------------
+# CCLE cell line enrichment helpers
+# ---------------------------------------------------------------------------
+_CCLE_FILE = _root / "data/CCLE_celllines.csv"
+_CELL_LINE_MANUAL_MAPPINGS_FILE = DATA_PROCESSED / "cell_line_manual_mappings.json"
+
+_PRIMARY_CELL_PATTERNS = [
+    r"primary.*hepatocyte", r"hepatocyte.*primary", r"mouse hepatocyte",
+    r"hPHH", r"PHH", r"cryopreserved.*hepatocyte", r"HepatoPac",
+    r"iPSC", r"IPS.*cell", r"IPS.*neuron", r"iCell", r"ReproNeuro",
+    r"HUVEC", r"primary.*cell", r"primary.*neuron", r"primary.*culture",
+    r"human primary", r"mouse primary", r"rat primary",
+    r"transgenic.*hepatocyte", r"^CD4.*T.*cell", r"T-reg", r"^T-cell",
+    r"hSKMC", r"hSKMc", r"HSMM", r"human.*tendon",
+    r"differentiated.*adipocyte", r"^GM\d{4,5}", r"^GMO\d{4,5}",
+    r"^F\d{2}-\d{3}", r"^SCA\d+-\d+", r"DM1 fibroblast", r"Steinert DM1",
+    r"^HBE[s]?$", r"^3T3", r"NIH 3T3", r"^4T1$", r"^AML12$", r"^B16",
+    r"^EMT-6$", r"^HEPA 1-6$", r"^MH-S$", r"^P388D1$", r"^RAW 264",
+    r"^TCMK", r"^b\.END$", r"BACHD", r"^COS-7$", r"^LLC-MK", r"^NRK$",
+    r"^Vero", r"^4MBr", r"^HEK.*\(", r"HEK-SORT1", r"GLP1R HEK",
+    r"^HepAD38$", r"^HepG2\.2\.15$", r"^HepaRG$",
+    r"Angelman.*neuron", r"Ube3a.*neuron", r"Ube3a.*YFP",
+    r"human neuron", r"^ThioMac$",
+]
+
+
+def _normalize_cell_line_name(name: str) -> str:
+    if name is None:
+        return ""
+    result = str(name).upper()
+    for char in ['-', ' ', '.', ':', '/', '(', ')', ',', '_']:
+        result = result.replace(char, '')
+    return result
+
+
+def _classify_cell_line(name: str) -> str | None:
+    if name is None:
+        return None
+    for pattern in _PRIMARY_CELL_PATTERNS:
+        if re.search(pattern, name, re.IGNORECASE):
+            return "primary"
+    return None
+
+
+def _load_ccle_lookup() -> dict[str, dict]:
+    df = pd.read_csv(_CCLE_FILE)
+    lookup = {}
+    for _, row in df.iterrows():
+        stripped = row.get("StrippedCellLineName")
+        if pd.notna(stripped):
+            key = _normalize_cell_line_name(stripped)
+            lookup[key] = {
+                "ccle_cell_line_name": row.get("CellLineName"),
+                "ccle_model_id": row.get("ModelID"),
+                "ccle_oncotree_lineage": row.get("OncotreeLineage"),
+                "ccle_oncotree_disease": row.get("OncotreePrimaryDisease"),
+            }
+    return lookup
+
+
+def _lookup_cell_line(name, ccle_lookup, manual_mappings):
+    if name is None:
+        return None, "unmapped"
+    if name in manual_mappings:
+        mapped = manual_mappings[name]
+        if mapped:
+            norm = _normalize_cell_line_name(mapped)
+            if norm in ccle_lookup:
+                return ccle_lookup[norm], "manual"
+        return None, "manual"
+    norm = _normalize_cell_line_name(name)
+    if norm in ccle_lookup:
+        return ccle_lookup[norm], "ccle_exact"
+    prefix = [(k, v) for k, v in ccle_lookup.items() if k.startswith(norm) and len(norm) >= 3]
+    if len(prefix) == 1:
+        return prefix[0][1], "ccle_prefix"
+    return None, "unmapped"
+
+
+def _enrich_ccle(df: pd.DataFrame, ccle_lookup: dict, manual_mappings: dict) -> pd.DataFrame:
+    """Add CCLE columns to a DataFrame based on its cell_line column."""
+    cell_lines = df["cell_line"].unique()
+    mappings: dict[str, dict] = {}
+    for cl in cell_lines:
+        if cl is None or (isinstance(cl, float) and pd.isna(cl)):
+            mappings[cl] = {
+                "ccle_cell_line_name": None, "ccle_model_id": None,
+                "ccle_oncotree_lineage": None, "ccle_oncotree_disease": None,
+                "cell_line_mapping_source": "unmapped",
+            }
+            continue
+        classification = _classify_cell_line(cl)
+        if classification == "primary":
+            mappings[cl] = {
+                "ccle_cell_line_name": None, "ccle_model_id": None,
+                "ccle_oncotree_lineage": None, "ccle_oncotree_disease": None,
+                "cell_line_mapping_source": "primary",
+            }
+            continue
+        ccle_data, source = _lookup_cell_line(cl, ccle_lookup, manual_mappings)
+        if ccle_data:
+            mappings[cl] = {**ccle_data, "cell_line_mapping_source": source}
+        else:
+            mappings[cl] = {
+                "ccle_cell_line_name": None, "ccle_model_id": None,
+                "ccle_oncotree_lineage": None, "ccle_oncotree_disease": None,
+                "cell_line_mapping_source": source,
+            }
+    df = df.copy()
+    for col in ["ccle_cell_line_name", "ccle_model_id", "ccle_oncotree_lineage",
+                 "ccle_oncotree_disease", "cell_line_mapping_source"]:
+        df[col] = df["cell_line"].map(lambda x, c=col: mappings.get(x, {}).get(c))
+    return df
+
+
 def main():
     # ------------------------------------------------------------------
     # 1. Load raw data
@@ -77,6 +193,25 @@ def main():
     dose_response_df = _filter_helm(dose_response_df, "dose_response")
     neurotoxicity_df = _filter_helm(neurotoxicity_df, "neurotoxicity")
     hepatictoxicity_df = _filter_helm(hepatictoxicity_df, "hepatic")
+
+    # ------------------------------------------------------------------
+    # 1c. Gene standardization (target_RNA)
+    # ------------------------------------------------------------------
+    with open(DATA_PROCESSED / "manual_mappings.json") as f:
+        gene_mappings = json.load(f)
+    for df_label, df_ref in [
+        ("in_vitro", in_vitro_inhibition_df),
+        ("dose_response", dose_response_df),
+    ]:
+        if "target_RNA" not in df_ref.columns:
+            continue
+        before = df_ref["target_RNA"].nunique()
+        df_ref["target_RNA"] = df_ref["target_RNA"].replace(gene_mappings)
+        after = df_ref["target_RNA"].nunique()
+        remapped = before - after
+        if remapped > 0:
+            print(f"  {df_label}: remapped {remapped} target_RNA aliases")
+    print(f"Gene standardization: applied {len(gene_mappings)} mappings")
 
     # ------------------------------------------------------------------
     # 2. Clean in vitro inhibition
@@ -351,6 +486,29 @@ def main():
     )
     dedup_clean_dose_response_df.to_parquet(DATA_PROCESSED / 'dose_response_processed.parquet')
     print(f"Saved dose_response_processed.parquet ({len(dedup_clean_dose_response_df):,} rows)")
+
+    # ------------------------------------------------------------------
+    # 5b. CCLE cell line enrichment
+    # ------------------------------------------------------------------
+    ccle_lookup = _load_ccle_lookup()
+    with open(_CELL_LINE_MANUAL_MAPPINGS_FILE) as f:
+        ccle_manual = json.load(f)
+    print(f"CCLE enrichment: loaded {len(ccle_lookup)} CCLE lines, {len(ccle_manual)} manual mappings")
+
+    dedup_clean_in_vitro_inhibition_df = _enrich_ccle(
+        dedup_clean_in_vitro_inhibition_df, ccle_lookup, ccle_manual
+    )
+    dedup_clean_in_vitro_inhibition_df.to_parquet(DATA_PROCESSED / 'in_vitro_inhibition_processed.parquet')
+
+    dedup_clean_dose_response_df = _enrich_ccle(
+        dedup_clean_dose_response_df, ccle_lookup, ccle_manual
+    )
+    dedup_clean_dose_response_df.to_parquet(DATA_PROCESSED / 'dose_response_processed.parquet')
+
+    sources = dedup_clean_in_vitro_inhibition_df["cell_line_mapping_source"].value_counts()
+    print(f"  in_vitro CCLE sources: {dict(sources)}")
+    sources = dedup_clean_dose_response_df["cell_line_mapping_source"].value_counts()
+    print(f"  dose_response CCLE sources: {dict(sources)}")
 
     # ------------------------------------------------------------------
     # 6. Clean neurotoxicity

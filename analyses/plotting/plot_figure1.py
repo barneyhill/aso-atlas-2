@@ -50,8 +50,8 @@ def draw_sankey_tapered(flows, node_positions, node_heights, node_labels, node_c
         node_flow_positions[source_idx]['out'] += flow_start_h
         node_flow_positions[target_idx]['in'] += flow_end_h
 
-        source_right = source_x + 0.01
-        target_left = target_x - 0.01
+        source_right = source_x + 0.02
+        target_left = target_x - 0.02
         ctrl_x = (source_right + target_left) / 2
 
         verts = [
@@ -85,7 +85,7 @@ def draw_sankey_tapered(flows, node_positions, node_heights, node_labels, node_c
         if node_idx == 5:
             continue
         height = node_heights[node_idx]
-        width = 0.02
+        width = 0.04
         rect = mpatches.Rectangle(
             (x - width/2, y - height/2), width, height,
             facecolor=node_colors[node_idx], edgecolor='black', linewidth=1.5, zorder=10
@@ -93,7 +93,7 @@ def draw_sankey_tapered(flows, node_positions, node_heights, node_labels, node_c
         ax.add_patch(rect)
         label = node_labels[node_idx]
         ax.text(x, y + height/2 + 0.05, label,
-                ha='center', va='bottom', fontsize=10, zorder=11)
+                ha='center', va='bottom', fontsize=12, zorder=11)
 
     return ax
 
@@ -212,7 +212,7 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
             ha='center', va='center', fontsize=12)
 
     ax.set_xlim(-1.45, 1.45)
-    ax.set_ylim(-1.45, 1.45)
+    ax.set_ylim(-1.15, 1.75)
     ax.axis('off')
     return ax
 
@@ -273,8 +273,8 @@ def main():
     }
 
     # Build bottom row: sankey + gene circle
-    fig, (ax_sankey, ax_circle) = plt.subplots(1, 2, figsize=(20, 8), dpi=300,
-                                                gridspec_kw={'width_ratios': [3, 2]})
+    fig, (ax_circle, ax_sankey) = plt.subplots(1, 2, figsize=(16, 8), dpi=300,
+                                                gridspec_kw={'width_ratios': [3, 4], 'wspace': 0.05})
 
     flows = [
         (0, 1, flow_proportions[(0, 1)][0], flow_proportions[(0, 1)][1]),
@@ -286,11 +286,14 @@ def main():
         (5, 3, 0.5, 1 - flow_proportions[(1, 3)][1]),
     ]
 
+    x_start = 0.22
+    x_gap = 0.25
+    y_split = 0.15  # vertical offset for the hepatic/neuro fork
     node_positions = {
-        0: (0.15, 0.5),
-        1: (0.15+(0.8-0.15)/2, 0.5),
-        2: (0.80, 0.35),
-        3: (0.80, 0.65),
+        0: (x_start, 0.5),
+        1: (x_start + x_gap, 0.5),
+        2: (x_start + 2 * x_gap, 0.5 - y_split),
+        3: (x_start + 2 * x_gap, 0.5 + y_split),
         5: (1.5, 0.5),
     }
 
@@ -322,14 +325,18 @@ def main():
 
     draw_sankey_tapered(flows, node_positions, node_heights, node_labels,
                         node_colors, flow_colors, invisible_flows, ax=ax_sankey)
-    ax_sankey.set_title("B", fontsize=16, fontweight='bold', loc='left')
 
     # Panel C: Gene circle donut chart
     draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
                      biomarker_cols, has_measurement, ax=ax_circle)
-    ax_circle.set_title("C", fontsize=16, fontweight='bold', loc='left')
 
-    plt.tight_layout()
+    # Panel labels — use figure coords for vertical alignment
+    bb_b = ax_sankey.get_position()
+    bb_c = ax_circle.get_position()
+    label_y = max(bb_b.y1, bb_c.y1) + 0.01
+    fig.text(bb_c.x0, label_y, "B", fontsize=16, fontweight="bold", va="bottom")
+    fig.text(bb_b.x0, label_y, "C", fontsize=16, fontweight="bold", va="bottom")
+
     sankey_gene_path = _root / "typst/plots/fig1" / "sankey_gene_circle.svg"
     fig.savefig(sankey_gene_path, format="svg", bbox_inches='tight')
     print(f"Saved {sankey_gene_path}")

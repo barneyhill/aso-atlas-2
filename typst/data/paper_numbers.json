@@ -18,57 +18,125 @@
     "gene_coverage_pct": 97
   },
   "genes": {
-    "n_unique": 488,
+    "n_unique": 446,
     "n_total_measurements": 280027
   },
   "hagerdorn_hepatotox": {
-    "oob_accuracy": 0.839,
-    "accuracy": 0.813,
-    "sensitivity": 0.823,
-    "specificity": 0.811,
-    "auc": 0.884,
-    "n": 2373,
-    "n_high": 497,
-    "n_low": 1876,
+    "oob_accuracy": 0.807,
+    "accuracy": 0.793,
+    "sensitivity": 0.802,
+    "specificity": 0.788,
+    "auc": 0.871,
+    "n": 2701,
+    "n_high": 980,
+    "n_low": 1721,
     "confusion": {
-      "tp": 409,
-      "fp": 355,
-      "tn": 1521,
-      "fn": 88
+      "tp": 786,
+      "fp": 364,
+      "tn": 1357,
+      "fn": 194
     },
     "stratum_accuracy": {
-      "1-2 edits": 0.8857142857142857,
-      "3-5 edits": 0.7226720647773279,
-      "6+ edits": 0.7537688442211056
+      "1-2 edits": 0.8357588357588358,
+      "3-5 edits": 0.7125220458553791,
+      "6+ edits": 0.7095238095238096
+    }
+  },
+  "cross_species_hepatotox": {
+    "ALT": {
+      "n_shared": 449,
+      "spearman_rho": 0.299,
+      "spearman_p": 9.40710994737439e-11,
+      "concordance_rate": 0.762,
+      "concordance_n": 449
+    },
+    "AST": {
+      "n_shared": 435,
+      "spearman_rho": 0.272,
+      "spearman_p": 8.140061213033073e-09,
+      "concordance_rate": 0.959,
+      "concordance_n": 341
+    },
+    "TBIL": {
+      "n_shared": 374,
+      "spearman_rho": 0.244,
+      "spearman_p": 1.8211263873085209e-06,
+      "concordance_rate": 0.964,
+      "concordance_n": 363
+    }
+  },
+  "rat_hepatotox": {
+    "accuracy": 0.625,
+    "sensitivity": 0.68,
+    "specificity": 0.589,
+    "auc": 0.67,
+    "n": 714,
+    "n_high": 278,
+    "n_low": 436,
+    "n_groups": 42,
+    "confusion": {
+      "tp": 189,
+      "fp": 179,
+      "tn": 257,
+      "fn": 89
     }
   },
   "hagerdorn_neurotox": {
-    "accuracy": 0.821,
-    "sensitivity": 0.787,
-    "specificity": 0.851,
+    "accuracy": 0.817,
+    "sensitivity": 0.798,
+    "specificity": 0.835,
     "auc": 0.895,
     "n": 2282,
     "n_high": 1085,
     "n_low": 1197,
     "n_groups": 34,
     "confusion": {
-      "tp": 854,
-      "fp": 178,
-      "tn": 1019,
-      "fn": 231
+      "tp": 866,
+      "fp": 198,
+      "tn": 999,
+      "fn": 219
+    }
+  },
+  "cross_species_neurotox": {
+    "FOB": {
+      "n_shared": 1456,
+      "spearman_rho": 0.647,
+      "spearman_p": 1.6556191563419403e-173,
+      "concordance_rate": 0.859,
+      "concordance_n": 788
+    }
+  },
+  "rat_neurotox": {
+    "accuracy": 0.807,
+    "sensitivity": 0.837,
+    "specificity": 0.78,
+    "auc": 0.877,
+    "n": 1193,
+    "n_high": 570,
+    "n_low": 623,
+    "n_groups": 26,
+    "confusion": {
+      "tp": 477,
+      "fp": 137,
+      "tn": 486,
+      "fn": 93
     }
   },
   "pipeline": {
-    "baseline_n_initial": 506,
-    "baseline_total_cost": 1303000,
-    "hagerdorn_n_initial": 314,
-    "hagerdorn_total_cost": 998000,
-    "hagerdorn_savings_pct": 23.4,
-    "oligoai_n_initial": 161,
-    "oligoai_total_cost": 1130500,
-    "oligoai_savings_pct": 13.2,
-    "combined_n_initial": 100,
-    "combined_total_cost": 891000,
-    "combined_savings_pct": 31.6
+    "baseline_n_initial": 568,
+    "baseline_total_cost": 1288000,
+    "hagerdorn_n_initial": 246,
+    "hagerdorn_total_cost": 696000,
+    "hagerdorn_savings_pct": 46.0,
+    "ef_mouse_ALT": 1.292,
+    "ef_mouse_FOB": 1.575,
+    "ef_rat_ALT": 1.077,
+    "ef_rat_FOB": 1.542,
+    "oligoai_n_initial": 181,
+    "oligoai_total_cost": 1094500,
+    "oligoai_savings_pct": 15.0,
+    "combined_n_initial": 79,
+    "combined_total_cost": 612500,
+    "combined_savings_pct": 52.4
   }
 }

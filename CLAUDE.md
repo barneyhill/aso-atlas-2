@@ -16,7 +16,7 @@ Use `uv` for everything (`uv run`, `uv sync`, `uv pip install`).
 
 - `just build` = `analysis` + `export` + `plots` + `compile` (full rebuild)
 - `just analysis` = `clean` + `hagerdorn` + `pipeline` (~80s)
-- `just hagerdorn` = run Hagerdorn hepatotox + neurotox models (~50s)
+- `just hagerdorn` = run Hagedorn hepatotox + neurotox models (~50s)
 - `just export` = export paper numbers to JSON (assumes data already built)
 - `just plots` = generate all figures (assumes data already built)
 - `just test` = `uv run pytest tests/ -x -q`
@@ -26,9 +26,9 @@ Use `uv` for everything (`uv run`, `uv sync`, `uv pip install`).
 ## Project layout
 
 - `analyses/logic/clean.py` — cleans raw CSVs → processed parquets (run via `just analysis`)
-- `analyses/logic/models/hepatotox.py` — Hagerdorn 2013 hepatotoxicity model replication
-- `analyses/logic/models/neurotox.py` — Hagerdorn 2022 neurotoxicity model replication
-- `analyses/logic/pipeline.py` — pipeline attrition + cost analysis with Hagerdorn enrichment
+- `analyses/logic/models/hepatotox.py` — Hagedorn 2013 hepatotoxicity model replication
+- `analyses/logic/models/neurotox.py` — Hagedorn 2022 neurotoxicity model replication
+- `analyses/logic/pipeline.py` — pipeline attrition + cost analysis with Hagedorn enrichment
 - `analyses/plotting/` — reads processed data, writes `typst/plots/` and `typst/tables/`
 - `analyses/export_paper_numbers.py` — exports key numbers to `typst/data/paper_numbers.json`
 - `typst/main.typ` — manuscript (reads `paper_numbers.json`, no hardcoded values)

@@ -47,17 +47,17 @@ class PipelineStage:
 PIPELINE_STAGES = [
     PipelineStage("In vitro efficacy", "In vitro\nefficacy", "Inhibition >80%", 500, "#4878A8"),
     PipelineStage("In vitro potency", "In vitro\npotency", "IC50 <500nM", 2000, "#6A9BC3"),
-    PipelineStage("Mouse liver toxicity", "Mouse liver\ntoxicity", "ALT <100 IU/L", 15000, "#D4A574"),
-    PipelineStage("Mouse neurotoxicity", "Mouse neuro\ntoxicity", "FOB <=1", 20000, "#E8B88A"),
-    PipelineStage("Rat liver toxicity", "Rat liver\ntoxicity", "ALT <100 IU/L", 25000, "#7BAA97"),
-    PipelineStage("Rat neurotoxicity", "Rat neuro\ntoxicity", "FOB <=1", 30000, "#94C4A7"),
-    PipelineStage("Monkey liver toxicity", "Monkey liver\ntoxicity", "ALT <100 IU/L", 100000, "#9B8AA6"),
+    PipelineStage("Mouse liver toxicity", "Mouse liver\ntoxicity", "ALT <2×ULN", 15000, "#D4A574"),
+    PipelineStage("Mouse neurotoxicity", "Mouse neuro\ntoxicity", "bFOB <=1", 20000, "#E8B88A"),
+    PipelineStage("Rat liver toxicity", "Rat liver\ntoxicity", "ALT <2×ULN", 25000, "#7BAA97"),
+    PipelineStage("Rat neurotoxicity", "Rat neuro\ntoxicity", "mFOB <=1", 30000, "#94C4A7"),
+    PipelineStage("Monkey liver toxicity", "Monkey liver\ntoxicity", "ALT <2×ULN", 100000, "#9B8AA6"),
 ]
 
 TARGET_CANDIDATES = 1
 
 # Maps prediction keys → pipeline stage indices
-STAGE_MAP = {"ALT": 2, "FOB": 3}
+STAGE_MAP = {"ALT": 2, "FOB": 3, "rat_ALT": 4, "rat_FOB": 5}
 
 # OligoAI (Gehrmann et al. 2025, bioRxiv 10.1101/2025.10.29.685292)
 # Top-10% enrichment factor for in vitro efficacy across 299 held-out screens
@@ -152,12 +152,15 @@ def calculate_proportions(in_vitro_df, dose_response_df, hepatic_df, neuro_df):
     n2_pass = int((ic50_df["ic50_nm"] < 500).sum()) if len(ic50_df) > 0 else 0
     p2 = n2_pass / n2_total if n2_total > 0 else 0
 
-    # Stage 3: Mouse ALT <100
+    # Stage 3: Mouse ALT < 2×ULN (150 IU/L)
+    # ULN = 75 IU/L: mean of male (94) + female (56) 97.5th percentiles
+    # for C57BL/6J mice (Otto et al. 2016, JAALAS 55(4):375-386)
+    MOUSE_ALT_ULN = 75
     mouse_hep = hepatic_df[hepatic_df["species"] == "mouse"].copy()
     mouse_hep["ALT_mean"] = mouse_hep.apply(_extract_mean, axis=1, col="ALT")
     valid_mouse_alt = mouse_hep.groupby("Compound ID")["ALT_mean"].mean().dropna()
     n3_total = len(valid_mouse_alt)
-    n3_pass = int((valid_mouse_alt < 100).sum())
+    n3_pass = int((valid_mouse_alt < 2 * MOUSE_ALT_ULN).sum())
     p3 = n3_pass / n3_total if n3_total > 0 else 0
 
     # Stage 4: Mouse FOB <=1
@@ -172,12 +175,15 @@ def calculate_proportions(in_vitro_df, dose_response_df, hepatic_df, neuro_df):
     n4_pass = int((valid_mouse_fob <= 1).sum())
     p4 = n4_pass / n4_total if n4_total > 0 else 0
 
-    # Stage 5: Rat ALT <100
+    # Stage 5: Rat ALT < 2×ULN (78 IU/L)
+    # ULN = 39 IU/L: mean of male (47) + female (30) 97.5th percentiles
+    # for Sprague-Dawley rats (He et al. 2017, PLoS ONE 12(12):e0189837)
+    RAT_ALT_ULN = 39
     rat_hep = hepatic_df[hepatic_df["species"] == "rat"].copy()
     rat_hep["ALT_mean"] = rat_hep.apply(_extract_mean, axis=1, col="ALT")
     valid_rat_alt = rat_hep.groupby("Compound ID")["ALT_mean"].mean().dropna()
     n5_total = len(valid_rat_alt)
-    n5_pass = int((valid_rat_alt < 100).sum())
+    n5_pass = int((valid_rat_alt < 2 * RAT_ALT_ULN).sum())
     p5 = n5_pass / n5_total if n5_total > 0 else 0
 
     # Stage 6: Rat FOB <=1
@@ -192,12 +198,15 @@ def calculate_proportions(in_vitro_df, dose_response_df, hepatic_df, neuro_df):
     n6_pass = int((valid_rat_fob <= 1).sum())
     p6 = n6_pass / n6_total if n6_total > 0 else 0
 
-    # Stage 7: Monkey ALT <100
+    # Stage 7: Monkey ALT < 2×ULN (206 IU/L)
+    # ULN = 103 IU/L: mean of male (92) + female (113) 97.5th percentiles
+    # for adult cynomolgus macaques (Bakker et al. 2023, Animals 13(3):445)
+    MONKEY_ALT_ULN = 103
     monkey_hep = hepatic_df[hepatic_df["species"] == "monkey"].copy()
     monkey_hep["ALT_mean"] = monkey_hep.apply(_extract_mean, axis=1, col="ALT")
     valid_monkey_alt = monkey_hep.groupby("Compound ID")["ALT_mean"].mean().dropna()
     n7_total = len(valid_monkey_alt)
-    n7_pass = int((valid_monkey_alt < 100).sum())
+    n7_pass = int((valid_monkey_alt < 2 * MONKEY_ALT_ULN).sum())
     p7 = n7_pass / n7_total if n7_total > 0 else 0
 
     proportions = [p1, p2, p3, p4, p5, p6, p7]
@@ -230,12 +239,12 @@ def back_calculate(proportions):
         running *= proportions[i]
         cumulative_survival.append(running)
 
-    n_initial = math.ceil(TARGET_CANDIDATES / cumulative_survival[-1]) if cumulative_survival[-1] > 0 else float("inf")
-
-    asos_at_stage = [n_initial]
-    for i in range(n_stages):
-        asos_at_stage.append(math.ceil(asos_at_stage[-1] * proportions[i]))
+    # Back-calculate from target: how many ASOs must enter each stage?
+    asos_at_stage = [0] * (n_stages + 1)
     asos_at_stage[-1] = TARGET_CANDIDATES
+    for i in range(n_stages - 1, -1, -1):
+        asos_at_stage[i] = math.ceil(asos_at_stage[i + 1] / proportions[i]) if proportions[i] > 0 else float("inf")
+    n_initial = asos_at_stage[0]
 
     costs_per_stage = [asos_at_stage[i] * PIPELINE_STAGES[i].cost_per_aso for i in range(n_stages)]
     total_cost = sum(costs_per_stage)
@@ -252,7 +261,7 @@ def back_calculate(proportions):
 
 
 def compute_classifier_enrichment(preds_data: dict) -> dict:
-    """Compute enrichment factors from Hagerdorn classifier predictions.
+    """Compute enrichment factors from Hagedorn classifier predictions.
 
     For each endpoint, compounds predicted as LOW toxicity (P(high) < 0.5)
     are the "selected" pool. Among those, the fraction that actually pass
@@ -317,12 +326,12 @@ def back_calculate_enriched(proportions, enrichment, stage_map):
         running *= eff_proportions[i]
         cumulative_survival.append(running)
 
-    n_initial = math.ceil(TARGET_CANDIDATES / cumulative_survival[-1]) if cumulative_survival[-1] > 0 else float("inf")
-
-    asos_at_stage = [n_initial]
-    for i in range(n_stages):
-        asos_at_stage.append(math.ceil(asos_at_stage[-1] * eff_proportions[i]))
+    # Back-calculate from target: how many ASOs must enter each stage?
+    asos_at_stage = [0] * (n_stages + 1)
     asos_at_stage[-1] = TARGET_CANDIDATES
+    for i in range(n_stages - 1, -1, -1):
+        asos_at_stage[i] = math.ceil(asos_at_stage[i + 1] / eff_proportions[i]) if eff_proportions[i] > 0 else float("inf")
+    n_initial = asos_at_stage[0]
 
     costs_per_stage = [asos_at_stage[i] * PIPELINE_STAGES[i].cost_per_aso for i in range(n_stages)]
     total_cost = sum(costs_per_stage)
@@ -369,7 +378,7 @@ def main():
     baseline = back_calculate(proportions)
     print(f"Baseline: {baseline['n_initial']:,} initial ASOs, ${baseline['total_cost']/1e6:.1f}M total")
 
-    # Hagerdorn classifier enrichment (hepatotox + neurotox)
+    # Hagedorn classifier enrichment (hepatotox + neurotox)
     hagerdorn = None
     hagerdorn_enrichment = {}
     hepatotox_path = RESULTS_DIR / "hepatotox.json"
@@ -383,15 +392,21 @@ def main():
         hagerdorn_enrichment.update(compute_classifier_enrichment(hepatotox_data["predictions"]))
         hagerdorn_enrichment.update(compute_classifier_enrichment(neurotox_data["predictions"]))
 
+        # Rat predictions (independent models trained on rat data)
+        if "rat_predictions" in hepatotox_data:
+            hagerdorn_enrichment.update(compute_classifier_enrichment(hepatotox_data["rat_predictions"]))
+        if "rat_predictions" in neurotox_data:
+            hagerdorn_enrichment.update(compute_classifier_enrichment(neurotox_data["rat_predictions"]))
+
         if hagerdorn_enrichment:
             hagerdorn = back_calculate_enriched(proportions, hagerdorn_enrichment, STAGE_MAP)
             savings_pct = (1 - hagerdorn["total_cost"] / baseline["total_cost"]) * 100
-            print(f"Hagerdorn: {hagerdorn['n_initial']:,} initial ASOs, ${hagerdorn['total_cost']/1e6:.1f}M total ({savings_pct:.1f}% reduction)")
+            print(f"Hagedorn: {hagerdorn['n_initial']:,} initial ASOs, ${hagerdorn['total_cost']/1e6:.1f}M total ({savings_pct:.1f}% reduction)")
             for task, e in hagerdorn_enrichment.items():
                 if task in STAGE_MAP:
                     print(f"  {task}: EF={e['enrichment_factor']:.2f}x (base={e['base_rate']:.2f}, selected={e['selected_pass_rate']:.2f})")
     else:
-        print("Hagerdorn results not found — run `just hagerdorn` first")
+        print("Hagedorn results not found — run `just hagerdorn` first")
 
     # OligoAI enrichment (in vitro efficacy — Gehrmann et al. 2025)
     oligoai = back_calculate_enriched(proportions, OLIGOAI_ENRICHMENT, OLIGOAI_STAGE_MAP)
@@ -399,7 +414,7 @@ def main():
     print(f"OligoAI: {oligoai['n_initial']:,} initial ASOs, ${oligoai['total_cost']/1e6:.1f}M total ({oligoai_savings:.1f}% reduction)")
     print(f"  inhibition: EF={OLIGOAI_ENRICHMENT['inhibition']['enrichment_factor']:.2f}x (hardcoded from Gehrmann et al. 2025)")
 
-    # Combined: OligoAI (inhibition) + Hagerdorn (ALT, FOB)
+    # Combined: OligoAI (inhibition) + Hagedorn (ALT, FOB)
     combined = None
     if hagerdorn_enrichment:
         combined_enrichment = dict(OLIGOAI_ENRICHMENT)

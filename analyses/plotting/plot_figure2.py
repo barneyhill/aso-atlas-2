@@ -13,6 +13,7 @@ from pathlib import Path
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path as MPath
 
@@ -31,20 +32,11 @@ def draw_pipeline_attrition(results, stages, ax):
     log_asos = np.array([np.log10(max(a, 1)) for a in asos])
     min_log, max_log = log_asos.min(), log_asos.max()
     rng = max_log - min_log if max_log > min_log else 1
-    box_heights = 0.08 + (log_asos - min_log) / rng * 0.47
+    box_heights = 0.15 + (log_asos - min_log) / rng * 0.40
 
     x_positions = np.linspace(0.07, 0.93, n_stages + 1)
     y_center = 0.45
     box_width = 0.035
-
-    tc = results['target_candidates']
-    cand_word = "candidate" if tc == 1 else "candidates"
-    summary_text = (
-        f"To obtain {tc} expected human development {cand_word} we require "
-        f"{results['n_initial']:,} initial ASO candidates with a ${results['total_cost'] / 1e6:.1f}M "
-        f"estimated total cost."
-    )
-    ax.text(0.5, 0.95, summary_text, ha="center", va="top", fontsize=12, transform=ax.transAxes)
 
     # Tapered flows between stages
     for i in range(n_stages):
@@ -84,8 +76,8 @@ def draw_pipeline_attrition(results, stages, ax):
             color = stages[i]["color"]
             label_name = stages[i]["short_name"]
         else:
-            color = "#6B8E6B"
-            label_name = "Human\ndevelopment\ncandidates"
+            color = "#C44E52"
+            label_name = "Clinical\ncandidate"
 
         rect = mpatches.Rectangle(
             (x - box_width / 2, y_center - h / 2), box_width, h,
@@ -115,8 +107,8 @@ def draw_pipeline_attrition(results, stages, ax):
 
 
 def draw_stage_distributions(distributions, sample_sizes, stages, axes):
-    """Draw 7 histograms + legend panel on an 8-axis grid."""
-    thresholds = [80, 500, 100, 1, 100, 1, 100]
+    """Draw 7 histograms on a single-row grid."""
+    thresholds = [80, 500, 150, 1, 78, 1, 206]
     threshold_ops = [">", "<", "<", "<=", "<", "<=", "<"]
 
     for i in range(7):
@@ -130,54 +122,87 @@ def draw_stage_distributions(distributions, sample_sizes, stages, axes):
             ax.set_title(f"{stage['short_name']}\n(n=0)")
             continue
 
-        if i == 1:
+        if i == 0:
+            # Efficacy: clip to [0, 100]
+            data_plot = np.clip(data[~np.isnan(data)], 0, 100)
+            threshold_plot = thresholds[i]
+            xlabel = "Inhibition (%)"
+        elif i == 1:
+            # Potency: log10
             data_plot = np.log10(data[data > 0])
             threshold_plot = np.log10(thresholds[i])
-            xlabel = "log10(IC50, nM)"
+            xlabel = "log\u2081\u2080(IC\u2085\u2080, nM)"
+        elif i in [2, 4, 6]:
+            # ALT stages: log10
+            data_plot = np.log10(data[(~np.isnan(data)) & (data > 0)])
+            threshold_plot = np.log10(thresholds[i])
+            xlabel = "log\u2081\u2080(ALT, IU/L)"
+        elif i == 3:
+            data_plot = np.round(data[~np.isnan(data)]).astype(int)
+            threshold_plot = 1.5  # <=1 threshold: line between 1 and 2
+            xlabel = "bFOB Score"
         else:
-            data_plot = data[~np.isnan(data)]
-            threshold_plot = thresholds[i]
-            if i == 0:
-                xlabel = "Inhibition (%)"
-            elif i in [2, 4, 6]:
-                xlabel = "ALT (IU/L)"
-            else:
-                xlabel = "FOB Score"
+            data_plot = np.round(data[~np.isnan(data)]).astype(int)
+            threshold_plot = 1.5  # <=1 threshold: line between 1 and 2
+            xlabel = "mFOB Score"
 
-        ax.hist(data_plot, bins=30, color=stage["color"], alpha=0.7, edgecolor="black")
+        if i in [3, 5]:
+            bins = np.arange(-0.5, data_plot.max() + 1.5, 1)
+            ax.hist(data_plot, bins=bins, color=stage["color"], alpha=0.7, edgecolor="black")
+            ax.set_xticks(range(0, int(data_plot.max()) + 1))
+        elif i == 6:
+            ax.hist(data_plot, bins=12, color=stage["color"], alpha=0.7, edgecolor="black")
+        else:
+            ax.hist(data_plot, bins=30, color=stage["color"], alpha=0.7, edgecolor="black")
         ax.axvline(threshold_plot, color="red", linestyle="--", linewidth=2)
 
+        # Set xlim: efficacy [0,100], log panels [1, ...], FOB [-0.5, ...]
         xlim = ax.get_xlim()
-        if threshold_ops[i] == ">":
-            ax.axvspan(threshold_plot, xlim[1], alpha=0.2, color="green")
-        elif threshold_ops[i] == "<":
-            ax.axvspan(xlim[0], threshold_plot, alpha=0.2, color="green")
-        elif threshold_ops[i] == "<=":
-            ax.axvspan(xlim[0], threshold_plot + 0.01, alpha=0.2, color="green")
+        if i == 0:
+            ax.set_xlim(0, 100)
+            xlim = (0, 100)
+        elif i in [1, 2, 4, 6]:
+            ax.set_xlim(1, xlim[1])
+            xlim = (1, xlim[1])
+        elif i in [3, 5]:
+            ax.set_xlim(-0.5, xlim[1])
+            xlim = (-0.5, xlim[1])
+        else:
+            ax.set_xlim(0, xlim[1])
+            xlim = (0, xlim[1])
 
-        ax.set_xlabel(xlabel, fontsize=10)
-        ax.set_ylabel("Count", fontsize=10)
-        prop = n_pass / n_total if n_total > 0 else 0
-        title = stage["short_name"].replace("\n", " ")
-        ax.set_title(f"{title}\n(n={n_total:,}, {prop:.1%} pass)", fontsize=11)
+        # Shade the fail region in grey
+        if threshold_ops[i] == ">":
+            ax.axvspan(xlim[0], threshold_plot, alpha=0.15, color="grey")
+        elif threshold_ops[i] == "<":
+            ax.axvspan(threshold_plot, xlim[1], alpha=0.15, color="grey")
+        elif threshold_ops[i] == "<=":
+            ax.axvspan(threshold_plot, xlim[1], alpha=0.15, color="grey")
+
+        ax.set_xlabel(xlabel, fontsize=9)
+        ax.set_ylabel("Count", fontsize=9)
         ax.grid(True, alpha=0.3)
 
-    # Legend panel
-    axes[7].axis("off")
-    axes[7].text(
-        0.5, 0.5,
-        "Stage Thresholds:\n\n"
-        "1. Inhibition > 80%\n"
-        "2. IC50 < 500 nM\n"
-        "3. Mouse ALT < 100 IU/L\n"
-        "4. Mouse FOB <= 1\n"
-        "5. Rat ALT < 100 IU/L\n"
-        "6. Rat FOB <= 1\n"
-        "7. Monkey ALT < 100 IU/L",
-        ha="center", va="center", fontsize=10,
-        bbox=dict(boxstyle="round", facecolor="lightgray", alpha=0.5),
-        transform=axes[7].transAxes,
-    )
+        # Two-line title: stage name (bold) + "(X% of ASOs have <threshold>)"
+        # with threshold portion in red
+        prop = n_pass / n_total * 100 if n_total > 0 else 0
+        title_name = stage["short_name"].replace("\n", " ")
+        threshold_text = stage["threshold"]
+        ax.set_title("")
+        ax.text(0.5, 1.20, title_name, fontsize=9, fontweight="bold",
+                ha="center", va="bottom", transform=ax.transAxes)
+        prefix = f"({prop:.0f}% of ASOs have "
+        ta_prefix = TextArea(prefix, textprops=dict(fontsize=8, color="black"))
+        ta_thresh = TextArea(threshold_text, textprops=dict(fontsize=8, color="red",
+                                                             fontweight="bold"))
+        ta_close = TextArea(")", textprops=dict(fontsize=8, color="black"))
+        pack = HPacker(children=[ta_prefix, ta_thresh, ta_close],
+                       pad=0, sep=0, align="baseline")
+        ab = AnchoredOffsetbox(loc="lower center", child=pack,
+                               frameon=False,
+                               bbox_to_anchor=(0.5, 1.03),
+                               bbox_transform=ax.transAxes)
+        ax.add_artist(ab)
 
 
 def main():
@@ -194,26 +219,71 @@ def main():
     distributions = data["distributions"]
     sample_sizes = data["sample_sizes"]
 
-    # Two-row figure: Panel A (funnel) on top, Panel B (distributions) below
-    fig = plt.figure(figsize=(16, 17), dpi=300)
-    gs = fig.add_gridspec(2, 1, height_ratios=[1, 1.2], hspace=0.15)
+    # Two-row figure: Panel A (7 histograms) on top, Panel B (funnel) below
+    fig = plt.figure(figsize=(18, 11), dpi=300)
 
-    # Panel A
-    ax_funnel = fig.add_subplot(gs[0])
-    ax_funnel.set_title("A", fontsize=16, fontweight="bold", loc="left")
+    # Panel A — manual equal-spaced square axes
+    n_panels = 7
+    pa_left, pa_right = 0.05, 0.97
+    pa_gap = 0.045
+    pa_total_gap = pa_gap * (n_panels - 1)
+    pa_w = (pa_right - pa_left - pa_total_gap) / n_panels
+    # Make height equal to width in inches, then convert to figure fraction
+    fig_w, fig_h = fig.get_size_inches()
+    pa_h = pa_w * fig_w / fig_h
+    pa_bot = 0.73 - pa_h
+    axes_dist = []
+    for c in range(n_panels):
+        x0 = pa_left + c * (pa_w + pa_gap)
+        axes_dist.append(fig.add_axes([x0, pa_bot, pa_w, pa_h]))
+    draw_stage_distributions(distributions, sample_sizes, stages, axes_dist)
+    for ax in axes_dist:
+        ylo, yhi = ax.get_ylim()
+        ax.set_ylim(ylo, yhi * 1.08)
+
+    # Panel B — funnel below
+    ax_funnel = fig.add_axes([0.05, 0.02, 0.90, 0.50])
     draw_pipeline_attrition(baseline, stages, ax_funnel)
 
-    # Panel B
-    gs_bottom = gs[1].subgridspec(2, 4, hspace=0.4, wspace=0.3)
-    axes_dist = [fig.add_subplot(gs_bottom[r, c]) for r in range(2) for c in range(4)]
-    fig.text(0.01, 0.52, "B", fontsize=16, fontweight="bold")
-    draw_stage_distributions(distributions, sample_sizes, stages, axes_dist)
+    # Panel labels
+    # Place "A" just above the title text (which sits at ~1.20 in axes coords)
+    a_label_y = 0.73 + pa_h * 0.20 + 0.03
+    fig.text(0.02, a_label_y, "A", fontsize=16, fontweight="bold", va="bottom")
+    ax_funnel.text(-0.02, 1.0, "B", fontsize=16, fontweight="bold", va="top",
+                   transform=ax_funnel.transAxes)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig2.svg"
     fig.savefig(out_path, format="svg", bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {out_path}")
+
+    # ── Variant: panel A only ──
+    # Compute square panel size first, then set figure height to fit
+    fig_a_w = 18
+    left, right = 0.05, 0.97
+    gap = 0.045
+    total_gap = gap * (n_panels - 1)
+    ax_w_frac = (right - left - total_gap) / n_panels
+    ax_w_in = ax_w_frac * fig_a_w  # width of one panel in inches
+    bot = 0.15
+    top_margin = 0.30  # space above for titles
+    fig_a_h = ax_w_in / (1 - bot - top_margin)  # figure height so panel is square
+    ax_h_frac = ax_w_in / fig_a_h
+    fig_a = plt.figure(figsize=(fig_a_w, fig_a_h), dpi=300)
+    axes_a = []
+    for c in range(n_panels):
+        x0 = left + c * (ax_w_frac + gap)
+        axes_a.append(fig_a.add_axes([x0, bot, ax_w_frac, ax_h_frac]))
+    draw_stage_distributions(distributions, sample_sizes, stages, axes_a)
+    for ax in axes_a:
+        ylo, yhi = ax.get_ylim()
+        ax.set_ylim(ylo, yhi * 1.08)
+
+    a_path = OUT_DIR / "fig2-just-A.svg"
+    fig_a.savefig(a_path, format="svg", bbox_inches="tight")
+    plt.close(fig_a)
+    print(f"Saved {a_path}")
 
 
 if __name__ == "__main__":

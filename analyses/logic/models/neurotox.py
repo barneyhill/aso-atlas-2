@@ -14,7 +14,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, roc_auc_score
 from sklearn.model_selection import GroupKFold
-from scipy.stats import fisher_exact
+from scipy.stats import fisher_exact, spearmanr
 
 from analyses.utils.helm import Helm
 from analyses.utils.models import (
@@ -280,6 +280,194 @@ def run_all_models(df, groups):
     return pd.DataFrame(results), predictions_dict
 
 
+def load_and_filter_rat():
+    """Load neurotox data, filter to Rat 3000ug valid chemistry."""
+    df = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
+    df = df[
+        (df["species"] == "Rat")
+        & (df["dosage_ug"] == 3000)
+        & (df["latency_time_hours"] == 3)
+        & df["HELM Annotation"].apply(Helm.valid_chemistry)
+    ].copy()
+    print(f"Rat neurotox data: {len(df):,} rows")
+
+    df["mean_FOB"] = df["FOB_score"].apply(_mean_of_array)
+    df = df[df["mean_FOB"].notna()].reset_index(drop=True)
+    print(f"With valid FOB scores: {len(df):,} rows")
+    return df
+
+
+def run_rat_models(df, groups):
+    """Run linear + RF models on rat FOB data with GroupKFold.
+
+    Returns (results_df, predictions_dict) — same structure as mouse.
+    """
+    y_labels = binary_labels(df)
+    results = []
+    predictions_dict = {}
+
+    # ---- Linear model ----
+    print("\n  Linear model (5 features)...", end=" ")
+    linear_feat = hagedorn_linear_features(df)
+    mask = y_labels.isin(["high", "low"]) & linear_feat.notna().all(axis=1) & groups.notna()
+    if mask.sum() >= 50:
+        X = linear_feat.loc[mask]
+        y = (y_labels[mask] == "high")
+        g = groups[mask]
+        lr_result = run_linear_model_grouped(X, y, g)
+        if lr_result:
+            results.append({
+                "model": "Linear (5 features)",
+                "N": lr_result["n"], "N_high": lr_result["n_high"], "N_low": lr_result["n_low"],
+                "GK_accuracy": lr_result["accuracy"],
+                "GK_sensitivity": lr_result["sensitivity"],
+                "GK_specificity": lr_result["specificity"],
+                "GK_AUC": lr_result["auc"],
+                "GK_pvalue": lr_result["p_value"],
+                "N_groups": lr_result["n_groups"],
+            })
+            print(f"GK acc={lr_result['accuracy']:.3f} AUC={lr_result['auc']:.3f}")
+
+            predictions_dict["rat_linear"] = {
+                "predictions": lr_result["predictions"].tolist(),
+                "labels": y.astype(int).tolist(),
+                "n": int(lr_result["n"]),
+                "accuracy": float(lr_result["accuracy"]),
+                "auc": float(lr_result["auc"]),
+                "confusion": {k: int(v) for k, v in lr_result["confusion"].items()},
+            }
+        else:
+            print("skip")
+    else:
+        print(f"skip (n={mask.sum()})")
+
+    # ---- RF models ----
+    for model_key, spec in MODELS.items():
+        print(f"  {spec.name}...", end=" ")
+        feature_df = prepare_data(df, model_key)
+
+        mask = y_labels.isin(["high", "low"]) & feature_df.notna().all(axis=1) & groups.notna()
+        if mask.sum() < 50:
+            print(f"skip (n={mask.sum()})")
+            continue
+
+        X = feature_df.loc[mask]
+        y = (y_labels[mask] == "high")
+        g = groups[mask]
+
+        gk_result = train_and_evaluate_grouped(X, y, g)
+
+        row = {"model": spec.name}
+        if gk_result:
+            row.update({
+                "N": gk_result["n"], "N_high": gk_result["n_high"], "N_low": gk_result["n_low"],
+                "GK_accuracy": gk_result["accuracy"],
+                "GK_sensitivity": gk_result["sensitivity"],
+                "GK_specificity": gk_result["specificity"],
+                "GK_AUC": gk_result["auc"],
+                "GK_pvalue": gk_result["p_value"],
+                "N_groups": gk_result["n_groups"],
+            })
+            print(f"GK acc={gk_result['accuracy']:.3f}")
+
+            if model_key == "dinucleotide":
+                predictions_dict["rat_FOB"] = {
+                    "predictions": gk_result["predictions"].tolist(),
+                    "labels": y.astype(int).tolist(),
+                    "n": int(gk_result["n"]),
+                    "accuracy": float(gk_result["accuracy"]),
+                    "auc": float(gk_result["auc"]),
+                    "sensitivity": float(gk_result["sensitivity"]),
+                    "specificity": float(gk_result["specificity"]),
+                    "confusion": {k: int(v) for k, v in gk_result["confusion"].items()},
+                }
+        else:
+            print("GK=skip")
+
+        results.append(row)
+
+    return pd.DataFrame(results), predictions_dict
+
+
+def cross_species_concordance() -> dict:
+    """Compare mouse vs rat FOB scores for shared compounds.
+
+    Mouse: 700μg ICV; Rat: 3000μg (species-appropriate dose).
+    Binary: FOB ≥ 3 (neurotoxic) vs FOB ≤ 1 (non-toxic).
+    """
+    df_all = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
+    df_all = df_all[df_all["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
+    df_all["mean_FOB"] = df_all["FOB_score"].apply(_mean_of_array)
+    df_all = df_all[df_all["mean_FOB"].notna()]
+
+    mouse = df_all[
+        (df_all["species"] == "Mouse")
+        & (df_all["dosage_ug"] == 700)
+        & (df_all["administration_method"] == "ICV")
+    ]
+    rat = df_all[
+        (df_all["species"] == "Rat")
+        & (df_all["dosage_ug"] == 3000)
+    ]
+
+    shared_cids = set(mouse["Compound ID"].dropna()) & set(rat["Compound ID"].dropna())
+    print(f"\nCross-species concordance: {len(shared_cids)} shared compounds")
+
+    # Per-compound mean FOB
+    mouse_means = mouse.groupby("Compound ID")["mean_FOB"].mean()
+    rat_means = rat.groupby("Compound ID")["mean_FOB"].mean()
+    common = mouse_means.index.intersection(rat_means.index)
+    m_vals = mouse_means.loc[common].dropna()
+    r_vals = rat_means.loc[common].dropna()
+    both_valid = m_vals.index.intersection(r_vals.index)
+    m_vals = m_vals.loc[both_valid]
+    r_vals = r_vals.loc[both_valid]
+
+    rho, pval = spearmanr(m_vals.values, r_vals.values)
+    # Fisher z 95% CI
+    z = np.arctanh(rho)
+    se = 1.0 / np.sqrt(len(m_vals) - 3)
+    ci_lo, ci_hi = np.tanh(z - 1.96 * se), np.tanh(z + 1.96 * se)
+    print(f"  FOB: n={len(m_vals)}, Spearman ρ={rho:.3f} [{ci_lo:.3f}, {ci_hi:.3f}], p={pval:.2e}")
+
+    # Binary labels: FOB ≥ 3 = high, FOB ≤ 1 = low
+    m_label = pd.Series(index=m_vals.index, dtype=str)
+    m_label[m_vals >= 3] = "high"
+    m_label[m_vals <= 1] = "low"
+
+    r_label = pd.Series(index=r_vals.index, dtype=str)
+    r_label[r_vals >= 3] = "high"
+    r_label[r_vals <= 1] = "low"
+
+    labelled = m_label.isin(["high", "low"]) & r_label.isin(["high", "low"])
+    m_lab = m_label[labelled]
+    r_lab = r_label[labelled]
+
+    hh = int(((m_lab == "high") & (r_lab == "high")).sum())
+    hl = int(((m_lab == "high") & (r_lab == "low")).sum())
+    lh = int(((m_lab == "low") & (r_lab == "high")).sum())
+    ll = int(((m_lab == "low") & (r_lab == "low")).sum())
+    n_lab = len(m_lab)
+    concordance = (hh + ll) / n_lab if n_lab > 0 else 0.0
+    print(f"    Binary: concordance={concordance:.1%} (n={n_lab}), "
+          f"hh={hh} hl={hl} lh={lh} ll={ll}")
+
+    return {
+        "FOB": {
+            "n_shared": len(m_vals),
+            "spearman_rho": round(float(rho), 3),
+            "spearman_p": float(pval),
+            "spearman_ci_lo": round(float(ci_lo), 3),
+            "spearman_ci_hi": round(float(ci_hi), 3),
+            "concordance_rate": round(concordance, 3),
+            "concordance_n": n_lab,
+            "crosstab": {"hh": hh, "hl": hl, "lh": lh, "ll": ll},
+            "mouse_values": m_vals.tolist(),
+            "rat_values": r_vals.tolist(),
+        }
+    }
+
+
 def main():
     print("=" * 60)
     print("Hagedorn 2022 — Neurotoxicity Model Replication")
@@ -297,6 +485,24 @@ def main():
     print(f"\nRunning models...")
     results_df, predictions_dict = run_all_models(df, groups)
 
+    cross_species = cross_species_concordance()
+
+    # ── Rat models (independent CV on rat data) ──
+    print("\n" + "=" * 60)
+    print("Rat Neurotoxicity Models (independent)")
+    print("=" * 60)
+    rat_df = load_and_filter_rat()
+    rat_groups = assign_groups(rat_df)
+
+    print(f"\nRat binary labels:")
+    rat_y_labels = binary_labels(rat_df)
+    print(f"  Neurotoxic (FOB >= 3): {(rat_y_labels == 'high').sum():,}")
+    print(f"  Non-toxic (FOB <= 1): {(rat_y_labels == 'low').sum():,}")
+    print(f"  Excluded (intermediate): {(~rat_y_labels.isin(['high', 'low'])).sum():,}")
+
+    print(f"\nRunning rat models...")
+    rat_results_df, rat_predictions = run_rat_models(rat_df, rat_groups)
+
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "neurotox.json"
@@ -304,6 +510,9 @@ def main():
         json.dump({
             "models": results_df.to_dict(orient="records"),
             "predictions": predictions_dict,
+            "cross_species": cross_species,
+            "rat_models": rat_results_df.to_dict(orient="records"),
+            "rat_predictions": rat_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 

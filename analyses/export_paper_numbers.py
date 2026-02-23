@@ -54,7 +54,7 @@ def main() -> None:
         },
     }
 
-    # ── Hagerdorn hepatotoxicity metrics ──
+    # ── Hagedorn hepatotoxicity metrics ──
     hepatotox_path = RESULTS_DIR / "hepatotox.json"
     if hepatotox_path.exists():
         hep_data = json.loads(hepatotox_path.read_text())
@@ -78,10 +78,42 @@ def main() -> None:
                 numbers["hagerdorn_hepatotox"]["confusion"] = hep_preds["ALT"]["confusion"]
                 if "stratum_accuracy" in hep_preds["ALT"]:
                     numbers["hagerdorn_hepatotox"]["stratum_accuracy"] = hep_preds["ALT"]["stratum_accuracy"]
-    else:
-        warnings.warn(f"Hagerdorn hepatotox results not found — run `just hagerdorn` first")
+        # Cross-species concordance
+        if "cross_species" in hep_data:
+            cs = hep_data["cross_species"]
+            numbers["cross_species_hepatotox"] = {
+                bm: {
+                    "n_shared": v["n_shared"],
+                    "spearman_rho": v["spearman_rho"],
+                    "spearman_p": v["spearman_p"],
+                    "concordance_rate": v["concordance_rate"],
+                    "concordance_n": v["concordance_n"],
+                }
+                for bm, v in cs.items()
+            }
 
-    # ── Hagerdorn neurotoxicity metrics ──
+        # Rat hepatotoxicity model (independent CV on rat data)
+        if "rat_models" in hep_data:
+            rat_df = pd.DataFrame(hep_data["rat_models"])
+            rat_dinuc = rat_df[rat_df["model"] == "Dinucleotide (128)"]
+            if len(rat_dinuc) > 0:
+                row = rat_dinuc.iloc[0]
+                numbers["rat_hepatotox"] = {
+                    "accuracy": round(float(row["GK_accuracy"]), 3),
+                    "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                    "specificity": round(float(row["GK_specificity"]), 3),
+                    "auc": round(float(row["GK_AUC"]), 3),
+                    "n": int(row["N"]),
+                    "n_high": int(row["N_high"]),
+                    "n_low": int(row["N_low"]),
+                    "n_groups": int(row["N_groups"]),
+                }
+                if "rat_predictions" in hep_data and "rat_ALT" in hep_data["rat_predictions"]:
+                    numbers["rat_hepatotox"]["confusion"] = hep_data["rat_predictions"]["rat_ALT"]["confusion"]
+    else:
+        warnings.warn(f"Hagedorn hepatotox results not found — run `just hagerdorn` first")
+
+    # ── Hagedorn neurotoxicity metrics ──
     neurotox_path = RESULTS_DIR / "neurotox.json"
     if neurotox_path.exists():
         neuro_data = json.loads(neurotox_path.read_text())
@@ -103,8 +135,41 @@ def main() -> None:
             }
             if "FOB" in neuro_preds:
                 numbers["hagerdorn_neurotox"]["confusion"] = neuro_preds["FOB"]["confusion"]
+
+        # Cross-species concordance
+        if "cross_species" in neuro_data:
+            cs = neuro_data["cross_species"]
+            numbers["cross_species_neurotox"] = {
+                bm: {
+                    "n_shared": v["n_shared"],
+                    "spearman_rho": v["spearman_rho"],
+                    "spearman_p": v["spearman_p"],
+                    "concordance_rate": v["concordance_rate"],
+                    "concordance_n": v["concordance_n"],
+                }
+                for bm, v in cs.items()
+            }
+
+        # Rat neurotoxicity model (independent CV on rat data)
+        if "rat_models" in neuro_data:
+            rat_df = pd.DataFrame(neuro_data["rat_models"])
+            rat_dinuc = rat_df[rat_df["model"] == "Dinucleotide (128)"]
+            if len(rat_dinuc) > 0:
+                row = rat_dinuc.iloc[0]
+                numbers["rat_neurotox"] = {
+                    "accuracy": round(float(row["GK_accuracy"]), 3),
+                    "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                    "specificity": round(float(row["GK_specificity"]), 3),
+                    "auc": round(float(row["GK_AUC"]), 3),
+                    "n": int(row["N"]),
+                    "n_high": int(row["N_high"]),
+                    "n_low": int(row["N_low"]),
+                    "n_groups": int(row["N_groups"]),
+                }
+                if "rat_predictions" in neuro_data and "rat_FOB" in neuro_data["rat_predictions"]:
+                    numbers["rat_neurotox"]["confusion"] = neuro_data["rat_predictions"]["rat_FOB"]["confusion"]
     else:
-        warnings.warn(f"Hagerdorn neurotox results not found — run `just hagerdorn` first")
+        warnings.warn(f"Hagedorn neurotox results not found — run `just hagerdorn` first")
 
     # ── Pipeline cost analysis ──
     if PIPELINE_RESULTS_PATH.exists():
@@ -124,6 +189,12 @@ def main() -> None:
             pipeline_numbers["hagerdorn_savings_pct"] = round(
                 (1 - hagerdorn["total_cost"] / baseline["total_cost"]) * 100, 1
             )
+            # Per-stage enrichment factors
+            if "enriched_stages" in hagerdorn:
+                stage_labels = {"2": "mouse_ALT", "3": "mouse_FOB", "4": "rat_ALT", "5": "rat_FOB"}
+                for stage_idx, info in hagerdorn["enriched_stages"].items():
+                    label = stage_labels.get(stage_idx, f"stage_{stage_idx}")
+                    pipeline_numbers[f"ef_{label}"] = round(info["enrichment_factor"], 3)
         if oligoai:
             pipeline_numbers["oligoai_n_initial"] = oligoai["n_initial"]
             pipeline_numbers["oligoai_total_cost"] = oligoai["total_cost"]

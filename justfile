@@ -24,6 +24,7 @@ plots:
     uv run python -m analyses.plotting.plot_figure3
     uv run python -m analyses.plotting.plot_figure4
     uv run python -m analyses.plotting.plot_figure5
+    uv run python -m analyses.plotting.plot_figure6
 
 # ── Manuscript ───────────────────────────────────────────
 compile:

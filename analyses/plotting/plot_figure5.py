@@ -1,16 +1,11 @@
 """
-Figure 5: Cost savings from computational pre-screening.
+Figure 5: Cross-species concordance and mouse biomarker correlations.
 
-Panel A — Stacked bar chart of pipeline costs: baseline vs screened scenarios.
-Panel B — Summary table (total cost, savings %, enrichment factors).
+(A) Cross-species Spearman ρ with 95% Fisher z CIs for ALT, AST, TBIL, FOB.
+(B) FOB cross-species integer heatmap.
+(C) Mouse inter-biomarker Spearman correlation matrix.
 
-Scenarios:
-  - Baseline: no computational pre-screening
-  - Hagerdorn: hepatotox + neurotox classifiers (ALT 1.03x, FOB 1.57x)
-  - OligoAI: in vitro efficacy model (inhibition 3.14x, Gehrmann et al. 2025)
-  - Combined: all three enrichment stages
-
-Reads: data/results/pipeline_results.json
+Reads: data/results/{hepatotox,neurotox}.json
 """
 
 import json
@@ -18,136 +13,180 @@ from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 
 matplotlib.use("Agg")
 
 _root = Path(__file__).resolve().parents[2]
-RESULTS_PATH = _root / "data/results/pipeline_results.json"
+HEPATOTOX_JSON = _root / "data/results/hepatotox.json"
+NEUROTOX_JSON = _root / "data/results/neurotox.json"
 OUT_DIR = _root / "typst/plots/fig5"
 
 
-def draw_cost_comparison(scenarios, stages, ax):
-    """Panel A: Stacked bar chart — costs by stage for each scenario."""
-    categories = [s["short_name"].replace("\n", " ") for s in reversed(stages)]
-    colors = [s["color"] for s in reversed(stages)]
+def _format_p(p: float) -> str:
+    """Format p-value for display."""
+    if p < 1e-100:
+        return "p < 10\u207b\u00b9\u2070\u2070"
+    if p < 0.001:
+        return f"p = {p:.1e}"
+    return f"p = {p:.3f}"
 
-    n_scenarios = len(scenarios)
-    x_positions = list(range(n_scenarios))
-    bar_width = 0.55
 
-    bottoms = [0.0] * n_scenarios
-    for i, (cat, color) in enumerate(zip(categories, colors)):
-        for j, (label, scenario) in enumerate(scenarios):
-            val = list(reversed(scenario["costs_per_stage"]))[i] / 1e6
-            legend_label = cat if j == 0 else None
-            ax.bar(x_positions[j], val, bar_width, bottom=bottoms[j],
-                   color=color, label=legend_label, edgecolor="white", linewidth=0.5)
-            bottoms[j] += val
+def draw_cross_species_rho(ax, biomarkers):
+    """Draw dot + 95% CI plot of cross-species Spearman ρ.
 
-    ax.set_xticks(x_positions)
-    ax.set_xticklabels([label for label, _ in scenarios], fontsize=10)
+    biomarkers: list of (label, rho, ci_lo, ci_hi, pval, n) tuples.
+    Only significant correlations (Bonferroni-corrected) are shown.
+    """
+    n_tests = len(biomarkers)
+    alpha = 0.05 / n_tests
 
-    totals = [sum(s["costs_per_stage"]) / 1e6 for _, s in scenarios]
-    for j, total in enumerate(totals):
-        ax.text(x_positions[j], total + max(totals) * 0.02, f"${total:.2f}M",
-                ha="center", va="bottom", fontsize=10, fontweight="bold")
+    labels, rhos, ci_los, ci_his, pvals, ns = zip(*biomarkers)
+    y = np.arange(len(labels))
 
-    ax.legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=8,
-              title="Stage", title_fontsize=9)
-    ax.set_ylim(0, max(totals) * 1.18)
-    ax.set_ylabel("Total Cost ($M)", fontsize=12)
+    for i in range(len(labels)):
+        sig = pvals[i] < alpha
+        color = "#4878A8" if sig else "#cccccc"
+        ax.errorbar(rhos[i], y[i],
+                    xerr=[[rhos[i] - ci_los[i]], [ci_his[i] - rhos[i]]],
+                    fmt="o", color=color, ecolor=color, capsize=4,
+                    markersize=6, elinewidth=1.5)
+        # n annotation
+        ax.text(ci_his[i] + 0.02, y[i], f"n={ns[i]}",
+                va="center", fontsize=7, color="#666666")
+        if not sig:
+            ax.text(rhos[i], y[i] + 0.25, "n.s.", ha="center",
+                    fontsize=7, color="#999999")
+
+    ax.axvline(0, color="black", linewidth=0.5, alpha=0.3)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=9)
+    ax.set_xlabel("Spearman \u03c1 (mouse vs rat)", fontsize=9)
+    ax.set_xlim(-0.1, 1.0)
+    ax.invert_yaxis()
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.grid(axis="x", alpha=0.3)
 
 
-def draw_summary_table(baseline, scenarios, ax):
-    """Panel B: Summary table of cost savings."""
-    ax.axis("off")
+def draw_fob_heatmap(ax, mouse_vals, rat_vals, rho, pval, n):
+    """Draw FOB integer-grid heatmap."""
+    import pandas as pd
 
-    # Header
-    y = 0.92
-    ax.text(0.05, y, "Scenario", fontsize=10, fontweight="bold",
-            transform=ax.transAxes, va="top")
-    ax.text(0.45, y, "Cost", fontsize=10, fontweight="bold",
-            transform=ax.transAxes, va="top")
-    ax.text(0.65, y, "Savings", fontsize=10, fontweight="bold",
-            transform=ax.transAxes, va="top")
-    ax.text(0.82, y, "ASOs", fontsize=10, fontweight="bold",
-            transform=ax.transAxes, va="top")
-    y -= 0.04
-    ax.plot([0.03, 0.97], [y, y], color="black", linewidth=0.5,
-            transform=ax.transAxes, clip_on=False)
+    mouse_int = np.round(mouse_vals).astype(int)
+    rat_int = np.round(rat_vals).astype(int)
 
-    for label, scenario in scenarios:
-        y -= 0.1
-        cost = scenario["total_cost"] / 1e6
-        savings = (1 - scenario["total_cost"] / baseline["total_cost"]) * 100
-        n_init = scenario["n_initial"]
+    paired = pd.DataFrame({"Mouse": mouse_int, "Rat": rat_int})
+    count_matrix = paired.groupby(["Mouse", "Rat"]).size().unstack(fill_value=0)
+    full_index = range(8)
+    count_matrix = count_matrix.reindex(index=full_index, columns=full_index, fill_value=0)
 
-        ax.text(0.05, y, label, fontsize=10, transform=ax.transAxes, va="top")
-        ax.text(0.45, y, f"${cost:.2f}M", fontsize=10, transform=ax.transAxes, va="top")
-        if label == "Baseline":
-            ax.text(0.65, y, "---", fontsize=10, color="#999999",
-                    transform=ax.transAxes, va="top")
-        else:
-            ax.text(0.65, y, f"{savings:.0f}%", fontsize=10, fontweight="bold",
-                    color="#2ca02c", transform=ax.transAxes, va="top")
-        ax.text(0.82, y, f"{n_init:,}", fontsize=10, transform=ax.transAxes, va="top")
+    ax.imshow(count_matrix.values, origin="lower", cmap="Blues", aspect="equal")
 
-    # Enrichment factors annotation
-    y -= 0.18
-    ax.text(0.05, y, "Enrichment factors:", fontsize=9, fontweight="bold",
-            transform=ax.transAxes, va="top", color="#555555")
-    y -= 0.09
-    ef_lines = [
-        "OligoAI: Inhibition >80% = 3.14x",
-        "Hagerdorn: Mouse ALT <100 = 1.03x",
-        "Hagerdorn: Mouse FOB <=1 = 1.57x",
-    ]
-    for line in ef_lines:
-        ax.text(0.07, y, line, fontsize=9, transform=ax.transAxes, va="top",
-                color="#666666")
-        y -= 0.08
+    for i in range(8):
+        for j in range(8):
+            val = count_matrix.values[i, j]
+            if val > 0:
+                color = "white" if val > count_matrix.values.max() / 2 else "black"
+                ax.text(j, i, str(val), ha="center", va="center", fontsize=8, color=color)
+
+    for i in range(-1, 8):
+        ax.axhline(i + 0.5, color="black", linewidth=0.5)
+        ax.axvline(i + 0.5, color="black", linewidth=0.5)
+
+    ax.set_xticks(range(8))
+    ax.set_yticks(range(8))
+    ax.set_xlabel("Mouse mean bFOB score", fontsize=9)
+    ax.set_ylabel("Rat mean mFOB score", fontsize=9)
+
+
+def draw_corr_matrix(ax, corr_data):
+    """Draw inter-biomarker Spearman correlation matrix."""
+    biomarkers = corr_data["biomarkers"]
+    rho = np.array(corr_data["rho"])
+    pvals = np.array(corr_data["p_values"])
+    n = len(biomarkers)
+
+    rho_display = np.where(np.isnan(rho), 0, rho)
+    im = ax.imshow(rho_display, cmap="RdBu_r", vmin=-1, vmax=1, aspect="equal")
+
+    n_pairs = n * (n - 1) // 2
+    alpha = 0.05 / n_pairs
+
+    for i in range(n):
+        for j in range(n):
+            if not np.isnan(rho[i, j]):
+                val = rho[i, j]
+                sig = (i == j) or pvals[i, j] < alpha
+                color = "white" if abs(val) > 0.6 else ("black" if sig else "#999999")
+                label = f"{val:.2f}" if sig else f"{val:.2f}\n(n.s.)"
+                ax.text(j, i, label, ha="center", va="center",
+                        fontsize=8, color=color)
+
+    ax.set_xticks(range(n))
+    ax.set_yticks(range(n))
+    ax.set_xticklabels(biomarkers, fontsize=8, rotation=45, ha="right")
+    ax.set_yticklabels(biomarkers, fontsize=8)
+
+    cbar = ax.figure.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Spearman \u03c1", fontsize=8)
+    cbar.ax.tick_params(labelsize=7)
 
 
 def main():
-    if not RESULTS_PATH.exists():
-        raise FileNotFoundError(f"{RESULTS_PATH} not found. Run `just analysis` first.")
+    for p in [HEPATOTOX_JSON, NEUROTOX_JSON]:
+        if not p.exists():
+            raise FileNotFoundError(f"{p} not found. Run `just hagerdorn` first.")
 
-    with open(RESULTS_PATH) as f:
-        data = json.load(f)
+    with open(HEPATOTOX_JSON) as f:
+        hep_data = json.load(f)
+    with open(NEUROTOX_JSON) as f:
+        neuro_data = json.load(f)
 
-    baseline = data["baseline"]
-    hagerdorn = data.get("hagerdorn")
-    oligoai = data.get("oligoai")
-    combined = data.get("combined")
-    stages = data["stages"]
+    hep_cs = hep_data["cross_species"]
+    neuro_cs = neuro_data["cross_species"]
+    corr_data = hep_data["mouse_biomarker_correlations"]
 
-    # Build scenario list
-    scenarios = [("Baseline", baseline)]
-    if hagerdorn:
-        scenarios.append(("Hagerdorn", hagerdorn))
-    if oligoai:
-        scenarios.append(("OligoAI", oligoai))
-    if combined:
-        scenarios.append(("Combined", combined))
+    # Collect cross-species data for panel A
+    biomarkers = []
+    for bm in ["ALT", "AST", "TBIL"]:
+        cs = hep_cs[bm]
+        biomarkers.append((
+            bm, cs["spearman_rho"], cs["spearman_ci_lo"], cs["spearman_ci_hi"],
+            cs["spearman_p"], cs["n_shared"],
+        ))
+    fob_cs = neuro_cs["FOB"]
+    biomarkers.append((
+        "bFOB vs mFOB", fob_cs["spearman_rho"], fob_cs["spearman_ci_lo"], fob_cs["spearman_ci_hi"],
+        fob_cs["spearman_p"], fob_cs["n_shared"],
+    ))
 
-    if len(scenarios) < 2:
-        raise RuntimeError("No enriched pipeline scenarios found.")
+    # 1×3 layout
+    fig = plt.figure(figsize=(14, 4), dpi=300)
+    gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[0.8, 1, 1.1],
+                           wspace=0.4)
 
-    fig, (ax_cost, ax_summary) = plt.subplots(
-        1, 2, figsize=(15, 6), dpi=300,
-        gridspec_kw={"width_ratios": [1.3, 1], "wspace": 0.35},
+    # A: cross-species ρ
+    ax_a = fig.add_subplot(gs[0, 0])
+    draw_cross_species_rho(ax_a, biomarkers)
+    ax_a.text(-0.15, 1.08, "A", transform=ax_a.transAxes,
+              fontsize=14, fontweight="bold")
+
+    # B: FOB heatmap
+    ax_b = fig.add_subplot(gs[0, 1])
+    draw_fob_heatmap(
+        ax_b, np.array(fob_cs["mouse_values"]), np.array(fob_cs["rat_values"]),
+        rho=fob_cs["spearman_rho"], pval=fob_cs["spearman_p"], n=fob_cs["n_shared"],
     )
+    ax_b.text(-0.08, 1.08, "B", transform=ax_b.transAxes,
+              fontsize=14, fontweight="bold")
 
-    ax_cost.text(-0.08, 1.08, "A", transform=ax_cost.transAxes,
-                 fontsize=14, fontweight="bold")
-    ax_summary.text(-0.08, 1.08, "B", transform=ax_summary.transAxes,
-                    fontsize=14, fontweight="bold")
-
-    draw_cost_comparison(scenarios, stages, ax_cost)
-    draw_summary_table(baseline, scenarios, ax_summary)
+    # C: correlation matrix
+    ax_c = fig.add_subplot(gs[0, 2])
+    draw_corr_matrix(ax_c, corr_data)
+    ax_c.text(-0.08, 1.08, "C", transform=ax_c.transAxes,
+              fontsize=14, fontweight="bold")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig5.svg"

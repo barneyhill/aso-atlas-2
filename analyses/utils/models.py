@@ -411,6 +411,7 @@ def run_model_grouped(
     n_splits: int = 5,
     high_mult: float = 5,
     low_mult: float = 2,
+    uln: float | None = None,
 ) -> dict | None:
     """Run a grouped model on a single biomarker."""
     col = f'mean_{biomarker}'
@@ -418,9 +419,10 @@ def run_model_grouped(
     if len(valid) < 100:
         return None
 
-    uln = calc_uln(valid.values)
+    if uln is None:
+        uln = calc_uln(valid.values)
     y_full = pd.Series(index=df.index, dtype=str)
-    y_full[df[col] > high_mult * uln] = 'high'
+    y_full[df[col] >= high_mult * uln] = 'high'
     y_full[df[col] < low_mult * uln] = 'low'
 
     mask = y_full.isin(['high', 'low']) & feature_df.notna().all(axis=1) & groups.notna()
