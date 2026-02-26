@@ -28,14 +28,23 @@ OUT_DIR = _root / "typst/plots/fig4"
 
 # ── ROC panels ───────────────────────────────────────────────────
 
-def draw_hep_roc(predictions, ax, pred_key="ALT", title="Mouse — ALT"):
+def draw_hep_roc(predictions, ax, pred_key="ALT", title="Mouse — ALT",
+                 cnn_predictions=None, cnn_key=None):
     if pred_key in predictions:
         preds = np.array(predictions[pred_key]["predictions"])
         labels = np.array(predictions[pred_key]["labels"])
         fpr, tpr, _ = roc_curve(labels, preds)
         auc_val = predictions[pred_key]["auc"]
-        ax.plot(fpr, tpr, label=f"Dinucleotide (AUC={auc_val:.3f})",
+        ax.plot(fpr, tpr, label=f"Hagedorn RF (AUC={auc_val:.3f})",
                 color="#4878A8", linewidth=2)
+
+    if cnn_predictions and cnn_key and cnn_key in cnn_predictions:
+        preds_cnn = np.array(cnn_predictions[cnn_key]["predictions"])
+        labels_cnn = np.array(cnn_predictions[cnn_key]["labels"])
+        fpr_cnn, tpr_cnn, _ = roc_curve(labels_cnn, preds_cnn)
+        auc_cnn = cnn_predictions[cnn_key]["auc"]
+        ax.plot(fpr_cnn, tpr_cnn, label=f"OligoAI-tox (AUC={auc_cnn:.3f})",
+                color="#C85A3D", linewidth=2)
 
     ax.plot([0, 1], [0, 1], "k--", alpha=0.3)
     ax.set_xlabel("FPR", fontsize=9)
@@ -47,14 +56,23 @@ def draw_hep_roc(predictions, ax, pred_key="ALT", title="Mouse — ALT"):
     ax.set_title(title, fontsize=10, pad=6)
 
 
-def draw_neuro_roc(predictions, ax, fob_key="FOB", title="Mouse — bFOB"):
+def draw_neuro_roc(predictions, ax, fob_key="FOB", title="Mouse — bFOB",
+                   cnn_predictions=None, cnn_key=None):
     if fob_key in predictions:
         preds = np.array(predictions[fob_key]["predictions"])
         labels = np.array(predictions[fob_key]["labels"])
         fpr, tpr, _ = roc_curve(labels, preds)
         auc_val = predictions[fob_key]["auc"]
-        ax.plot(fpr, tpr, label=f"Dinucleotide (AUC={auc_val:.3f})",
+        ax.plot(fpr, tpr, label=f"Hagedorn RF (AUC={auc_val:.3f})",
                 color="#4878A8", linewidth=2)
+
+    if cnn_predictions and cnn_key and cnn_key in cnn_predictions:
+        preds_cnn = np.array(cnn_predictions[cnn_key]["predictions"])
+        labels_cnn = np.array(cnn_predictions[cnn_key]["labels"])
+        fpr_cnn, tpr_cnn, _ = roc_curve(labels_cnn, preds_cnn)
+        auc_cnn = cnn_predictions[cnn_key]["auc"]
+        ax.plot(fpr_cnn, tpr_cnn, label=f"OligoAI-tox (AUC={auc_cnn:.3f})",
+                color="#C85A3D", linewidth=2)
 
     ax.plot([0, 1], [0, 1], "k--", alpha=0.3)
     ax.set_xlabel("FPR", fontsize=9)
@@ -112,14 +130,19 @@ def main():
     with open(HEPATOTOX_JSON) as f:
         hep_data = json.load(f)
     hep_preds = hep_data["predictions"]
+    hep_cnn_preds = hep_data.get("cnn_predictions", {})
 
     with open(NEUROTOX_JSON) as f:
         neuro_data = json.load(f)
     neuro_preds = neuro_data["predictions"]
+    neuro_cnn_preds = neuro_data.get("cnn_predictions", {})
 
     # Rat data
     rat_hep_preds = hep_data.get("rat_predictions", {})
     rat_neuro_preds = neuro_data.get("rat_predictions", {})
+
+    # CNN predictions include both mouse and rat under cnn_predictions
+    all_cnn_preds = {**hep_cnn_preds, **neuro_cnn_preds}
 
     has_rat = bool(rat_hep_preds) or bool(rat_neuro_preds)
 
@@ -154,15 +177,19 @@ def main():
                  fontsize=12, fontweight="bold", rotation=90)
 
         # Top row: hepatotoxicity
-        draw_hep_roc(hep_preds, axes[0, 0], pred_key="ALT", title="Mouse — ALT")
+        draw_hep_roc(hep_preds, axes[0, 0], pred_key="ALT", title="Mouse — ALT",
+                     cnn_predictions=all_cnn_preds, cnn_key="ALT_cnn")
         draw_hep_cm(hep_preds, axes[0, 1], pred_key="ALT")
-        draw_hep_roc(rat_hep_preds, axes[0, 2], pred_key="rat_ALT", title="Rat — ALT")
+        draw_hep_roc(rat_hep_preds, axes[0, 2], pred_key="rat_ALT", title="Rat — ALT",
+                     cnn_predictions=all_cnn_preds, cnn_key="rat_ALT_cnn")
         draw_hep_cm(rat_hep_preds, axes[0, 3], pred_key="rat_ALT")
 
         # Bottom row: neurotoxicity
-        draw_neuro_roc(neuro_preds, axes[1, 0], fob_key="FOB", title="Mouse — bFOB")
+        draw_neuro_roc(neuro_preds, axes[1, 0], fob_key="FOB", title="Mouse — bFOB",
+                       cnn_predictions=all_cnn_preds, cnn_key="FOB_cnn")
         draw_neuro_cm(neuro_preds, axes[1, 1], pred_key="FOB")
-        draw_neuro_roc(rat_neuro_preds, axes[1, 2], fob_key="rat_FOB", title="Rat — mFOB")
+        draw_neuro_roc(rat_neuro_preds, axes[1, 2], fob_key="rat_FOB", title="Rat — mFOB",
+                       cnn_predictions=all_cnn_preds, cnn_key="rat_FOB_cnn")
         draw_neuro_cm(rat_neuro_preds, axes[1, 3], pred_key="rat_FOB")
     else:
         # Fallback: 2×2 mouse only
@@ -176,9 +203,11 @@ def main():
             axes[row, col].text(-0.08, 1.12, letter, transform=axes[row, col].transAxes,
                                 fontsize=14, fontweight="bold")
 
-        draw_hep_roc(hep_preds, axes[0, 0], title="Hepatotoxicity — ALT")
+        draw_hep_roc(hep_preds, axes[0, 0], title="Hepatotoxicity — ALT",
+                     cnn_predictions=all_cnn_preds, cnn_key="ALT_cnn")
         draw_hep_cm(hep_preds, axes[0, 1])
-        draw_neuro_roc(neuro_preds, axes[1, 0], title="Neurotoxicity — bFOB")
+        draw_neuro_roc(neuro_preds, axes[1, 0], title="Neurotoxicity — bFOB",
+                       cnn_predictions=all_cnn_preds, cnn_key="FOB_cnn")
         draw_neuro_cm(neuro_preds, axes[1, 1])
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -23,6 +23,7 @@ from analyses.utils.models import (
     prepare_data,
     train_and_evaluate_grouped,
 )
+from analyses.logic.models.oligoai_tox import train_and_evaluate as cnn_train_and_evaluate
 
 _root = Path(__file__).resolve().parents[3]
 _data_dir = _root / "data/oligostack/processed"
@@ -389,6 +390,48 @@ def run_rat_models(df, groups):
     return pd.DataFrame(results), predictions_dict
 
 
+def run_cnn_models(df, groups, species_prefix=""):
+    """Run OligoAI-tox CNN model on FOB.
+
+    Neurotox data is pre-filtered to fixed dose/route, so no dosing
+    covariates — we use n_cov=0 (empty covariate matrix).
+    """
+    y_labels = binary_labels(df)
+    mask = y_labels.isin(["high", "low"]) & groups.notna()
+    if mask.sum() < 50:
+        print("  CNN: skip (insufficient data)")
+        return {}
+
+    helms = df.loc[mask, "HELM Annotation"].values
+    y = (y_labels[mask] == "high").astype(int).values
+    g = groups[mask].values
+    # No dosing covariates for neurotox (fixed dose/route)
+    cov = np.zeros((mask.sum(), 0), dtype=np.float32)
+
+    key = f"{species_prefix}FOB_cnn"
+    print(f"  OligoAI-tox ({key})...", end=" ")
+    result = cnn_train_and_evaluate(helms, y, g, cov)
+    if result is None:
+        print("skip")
+        return {}
+
+    print(f"acc={result['accuracy']:.3f} AUC={result['auc']:.3f}")
+    return {key: {
+        "predictions": result["predictions"].tolist(),
+        "labels": result["labels"].astype(int).tolist(),
+        "n": result["n"],
+        "accuracy": result["accuracy"],
+        "auc": result["auc"],
+        "sensitivity": result["sensitivity"],
+        "specificity": result["specificity"],
+        "confusion": result["confusion"],
+        "filters_k2": result["filters_k2"].tolist(),
+        "filters_k3": result["filters_k3"].tolist(),
+        "hidden_weights": result["hidden_weights"].tolist(),
+        "output_weights": result["output_weights"].tolist(),
+    }}
+
+
 def cross_species_concordance() -> dict:
     """Compare mouse vs rat FOB scores for shared compounds.
 
@@ -485,6 +528,10 @@ def main():
     print(f"\nRunning models...")
     results_df, predictions_dict = run_all_models(df, groups)
 
+    # ── OligoAI-tox CNN models (mouse) ──
+    print("\n  OligoAI-tox CNN models (mouse)...")
+    cnn_predictions = run_cnn_models(df, groups)
+
     cross_species = cross_species_concordance()
 
     # ── Rat models (independent CV on rat data) ──
@@ -503,6 +550,11 @@ def main():
     print(f"\nRunning rat models...")
     rat_results_df, rat_predictions = run_rat_models(rat_df, rat_groups)
 
+    # ── OligoAI-tox CNN models (rat) ──
+    print("\n  OligoAI-tox CNN models (rat)...")
+    rat_cnn_preds = run_cnn_models(rat_df, rat_groups, species_prefix="rat_")
+    cnn_predictions.update(rat_cnn_preds)
+
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "neurotox.json"
@@ -513,6 +565,7 @@ def main():
             "cross_species": cross_species,
             "rat_models": rat_results_df.to_dict(orient="records"),
             "rat_predictions": rat_predictions,
+            "cnn_predictions": cnn_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 

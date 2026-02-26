@@ -22,24 +22,32 @@
     "n_total_measurements": 280027
   },
   "hagerdorn_hepatotox": {
-    "oob_accuracy": 0.807,
-    "accuracy": 0.793,
-    "sensitivity": 0.802,
-    "specificity": 0.788,
-    "auc": 0.871,
+    "accuracy": 0.707,
+    "sensitivity": 0.715,
+    "specificity": 0.702,
+    "auc": 0.771,
     "n": 2701,
     "n_high": 980,
     "n_low": 1721,
+    "n_groups": 92,
     "confusion": {
-      "tp": 786,
-      "fp": 364,
-      "tn": 1357,
-      "fn": 194
-    },
-    "stratum_accuracy": {
-      "1-2 edits": 0.8357588357588358,
-      "3-5 edits": 0.7125220458553791,
-      "6+ edits": 0.7095238095238096
+      "tp": 701,
+      "fp": 512,
+      "tn": 1209,
+      "fn": 279
+    }
+  },
+  "oligoai_tox_hepatotox": {
+    "accuracy": 0.708,
+    "sensitivity": 0.82,
+    "specificity": 0.644,
+    "auc": 0.803,
+    "n": 2688,
+    "confusion": {
+      "tp": 801,
+      "fp": 609,
+      "tn": 1102,
+      "fn": 176
     }
   },
   "cross_species_hepatotox": {
@@ -97,6 +105,19 @@
       "fn": 219
     }
   },
+  "oligoai_tox_neurotox": {
+    "accuracy": 0.845,
+    "sensitivity": 0.86,
+    "specificity": 0.831,
+    "auc": 0.918,
+    "n": 2282,
+    "confusion": {
+      "tp": 933,
+      "fp": 202,
+      "tn": 995,
+      "fn": 152
+    }
+  },
   "cross_species_neurotox": {
     "FOB": {
       "n_shared": 1456,
@@ -128,7 +149,7 @@
     "hagerdorn_n_initial": 246,
     "hagerdorn_total_cost": 696000,
     "hagerdorn_savings_pct": 46.0,
-    "ef_mouse_ALT": 1.292,
+    "ef_mouse_ALT": 1.177,
     "ef_mouse_FOB": 1.575,
     "ef_rat_ALT": 1.077,
     "ef_rat_FOB": 1.542,
@@ -137,6 +158,12 @@
     "oligoai_savings_pct": 15.0,
     "combined_n_initial": 79,
     "combined_total_cost": 612500,
-    "combined_savings_pct": 52.4
+    "combined_savings_pct": 52.4,
+    "oligoai_tox_n_initial": 195,
+    "oligoai_tox_total_cost": 583500,
+    "oligoai_tox_savings_pct": 54.7,
+    "combined_cnn_n_initial": 63,
+    "combined_cnn_total_cost": 517500,
+    "combined_cnn_savings_pct": 59.8
   }
 }

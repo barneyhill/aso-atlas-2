@@ -20,8 +20,8 @@ from analyses.utils.models import (
     prepare_data,
     run_model_grouped,
     train_and_evaluate_grouped,
-    train_and_evaluate_hepatotox,
 )
+from analyses.logic.models.oligoai_tox import encode_batch, train_and_evaluate as cnn_train_and_evaluate
 
 _root = Path(__file__).resolve().parents[3]
 _data_dir = _root / "data/oligostack/processed"
@@ -123,14 +123,10 @@ def build_covariates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_all_models(df, groups, cov_df):
-    """Run all model x biomarker combinations.
+    """Run all model x biomarker combinations with GroupKFold CV.
 
     Returns (results_df, predictions_dict) where predictions_dict contains
     the dinucleotide model × ALT predictions for pipeline enrichment.
-
-    The dinucleotide × ALT combination uses Hagedorn 2013-style training
-    (OOB + Levenshtein-stratified 10-fold CV). All other combinations use
-    GroupKFold.
     """
     results = []
     predictions_dict = {}
@@ -143,76 +139,6 @@ def run_all_models(df, groups, cov_df):
 
             high_mult, low_mult = THRESHOLDS[bm]
 
-            # Dinucleotide × ALT: Hagedorn 2013-style training
-            if model_key == "dinucleotide" and bm == "ALT":
-                col = f"mean_{bm}"
-                uln = LITERATURE_ULN.get(bm)
-                if uln is None:
-                    valid = df[col].dropna()
-                    uln = calc_uln(valid.values)
-                y_full = pd.Series(index=df.index, dtype=str)
-                y_full[df[col] >= high_mult * uln] = "high"
-                y_full[df[col] < low_mult * uln] = "low"
-
-                mask = (
-                    y_full.isin(["high", "low"])
-                    & feature_df.notna().all(axis=1)
-                    & groups.notna()
-                )
-                if mask.sum() < 50:
-                    print(f"skip (n={mask.sum()})")
-                    results.append({"model": spec.name, "biomarker": bm})
-                    continue
-
-                X = pd.concat([feature_df.loc[mask], cov_df.loc[mask]], axis=1)
-                y = (y_full[mask] == "high")
-                sequences = df.loc[mask, "HELM Annotation"].apply(
-                    lambda h: Helm.parse(h).dna_sequence if Helm.parse(h) else ""
-                )
-
-                hep_result = train_and_evaluate_hepatotox(X, y, sequences)
-
-                row = {"model": spec.name, "biomarker": bm}
-                if hep_result:
-                    row.update({
-                        "N": hep_result["n"],
-                        "N_high": hep_result["n_high"],
-                        "N_low": hep_result["n_low"],
-                        "OOB_accuracy": hep_result["oob_accuracy"],
-                        "CV_accuracy": hep_result["accuracy"],
-                        "CV_sensitivity": hep_result["sensitivity"],
-                        "CV_specificity": hep_result["specificity"],
-                        "CV_AUC": hep_result["auc"],
-                        "CV_pvalue": hep_result["p_value"],
-                        "stratum_accuracy": hep_result["stratum_accuracy"],
-                    })
-                    strata_str = ", ".join(
-                        f"{k}: {v:.0%}" for k, v in hep_result["stratum_accuracy"].items()
-                    )
-                    print(
-                        f"OOB={hep_result['oob_accuracy']:.3f} "
-                        f"CV={hep_result['accuracy']:.3f} "
-                        f"[{strata_str}]"
-                    )
-
-                    predictions_dict["ALT"] = {
-                        "predictions": hep_result["predictions"].tolist(),
-                        "labels": y.astype(int).tolist(),
-                        "n": int(hep_result["n"]),
-                        "oob_accuracy": float(hep_result["oob_accuracy"]),
-                        "accuracy": float(hep_result["accuracy"]),
-                        "auc": float(hep_result["auc"]),
-                        "sensitivity": float(hep_result["sensitivity"]),
-                        "specificity": float(hep_result["specificity"]),
-                        "confusion": hep_result["confusion"],
-                        "stratum_accuracy": hep_result["stratum_accuracy"],
-                    }
-                else:
-                    print("skip")
-                results.append(row)
-                continue
-
-            # All other combinations: GroupKFold
             gk_result = run_model_grouped(
                 df, feature_df, cov_df, groups, bm, spec.name,
                 high_mult=high_mult, low_mult=low_mult,
@@ -233,6 +159,27 @@ def run_all_models(df, groups, cov_df):
                     "N_groups": gk_result["n_groups"],
                 })
                 print(f"GK acc={gk_result['accuracy']:.3f}")
+
+                # Save dinucleotide × ALT predictions for pipeline enrichment
+                if model_key == "dinucleotide" and bm == "ALT":
+                    col = f"mean_{bm}"
+                    uln_val = LITERATURE_ULN.get(bm)
+                    y_full = pd.Series(index=df.index, dtype=str)
+                    y_full[df[col] >= high_mult * uln_val] = "high"
+                    y_full[df[col] < low_mult * uln_val] = "low"
+                    mask = y_full.isin(["high", "low"]) & feature_df.notna().all(axis=1) & groups.notna()
+                    y = (y_full[mask] == "high")
+
+                    predictions_dict["ALT"] = {
+                        "predictions": gk_result["predictions"].tolist(),
+                        "labels": y.astype(int).tolist(),
+                        "n": int(gk_result["n"]),
+                        "accuracy": float(gk_result["accuracy"]),
+                        "auc": float(gk_result["auc"]),
+                        "sensitivity": float(gk_result["sensitivity"]),
+                        "specificity": float(gk_result["specificity"]),
+                        "confusion": {k: int(v) for k, v in gk_result["confusion"].items()},
+                    }
             else:
                 print("GK=skip")
 
@@ -469,6 +416,55 @@ def mouse_biomarker_correlations() -> dict:
     }
 
 
+def run_cnn_models(df, groups, cov_df, species_prefix=""):
+    """Run OligoAI-tox CNN model on ALT.
+
+    Returns predictions_dict with keys like "ALT_cnn"
+    (or "rat_ALT_cnn" if species_prefix is set).
+    """
+    uln_map = LITERATURE_ULN if not species_prefix else RAT_LITERATURE_ULN
+    uln = uln_map.get("ALT")
+    high_mult, low_mult = THRESHOLDS["ALT"]
+
+    col = "mean_ALT"
+    y_full = pd.Series(index=df.index, dtype=str)
+    y_full[df[col] >= high_mult * uln] = "high"
+    y_full[df[col] < low_mult * uln] = "low"
+
+    mask = y_full.isin(["high", "low"]) & groups.notna()
+    if mask.sum() < 50:
+        print("  CNN: skip (insufficient data)")
+        return {}
+
+    helms = df.loc[mask, "HELM Annotation"].values
+    y = (y_full[mask] == "high").astype(int).values
+    g = groups[mask].values
+    cov = cov_df.loc[mask].values
+
+    key = f"{species_prefix}ALT_cnn"
+    print(f"  OligoAI-tox ({key})...", end=" ")
+    result = cnn_train_and_evaluate(helms, y, g, cov)
+    if result is None:
+        print("skip")
+        return {}
+
+    print(f"acc={result['accuracy']:.3f} AUC={result['auc']:.3f}")
+    return {key: {
+        "predictions": result["predictions"].tolist(),
+        "labels": result["labels"].astype(int).tolist(),
+        "n": result["n"],
+        "accuracy": result["accuracy"],
+        "auc": result["auc"],
+        "sensitivity": result["sensitivity"],
+        "specificity": result["specificity"],
+        "confusion": result["confusion"],
+        "filters_k2": result["filters_k2"].tolist(),
+        "filters_k3": result["filters_k3"].tolist(),
+        "hidden_weights": result["hidden_weights"].tolist(),
+        "output_weights": result["output_weights"].tolist(),
+    }}
+
+
 def main():
     print("=" * 60)
     print("Hagedorn 2013 — Hepatotoxicity Model Replication")
@@ -480,6 +476,10 @@ def main():
 
     print(f"\nRunning models...")
     results_df, predictions_dict = run_all_models(df, groups, cov_df)
+
+    # ── OligoAI-tox CNN models (mouse) ──
+    print("\n  OligoAI-tox CNN models (mouse)...")
+    cnn_predictions = run_cnn_models(df, groups, cov_df)
 
     cross_species = cross_species_concordance()
     biomarker_corr = mouse_biomarker_correlations()
@@ -499,6 +499,11 @@ def main():
     if rat_dinuc:
         rat_predictions["rat_ALT"] = rat_dinuc
 
+    # ── OligoAI-tox CNN models (rat) ──
+    print("\n  OligoAI-tox CNN models (rat)...")
+    rat_cnn_preds = run_cnn_models(rat_df, rat_groups, rat_cov, species_prefix="rat_")
+    cnn_predictions.update(rat_cnn_preds)
+
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "hepatotox.json"
@@ -510,6 +515,7 @@ def main():
             "mouse_biomarker_correlations": biomarker_corr,
             "rat_models": rat_results_df.to_dict(orient="records"),
             "rat_predictions": rat_predictions,
+            "cnn_predictions": cnn_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 

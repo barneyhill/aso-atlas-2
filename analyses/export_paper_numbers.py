@@ -60,24 +60,34 @@ def main() -> None:
         hep_data = json.loads(hepatotox_path.read_text())
         hep_df = pd.DataFrame(hep_data["models"])
         hep_preds = hep_data["predictions"]
-        # Dinucleotide model × ALT (Hagedorn 2013-style: OOB + Levenshtein CV)
+        # Dinucleotide model × ALT (GroupKFold CV)
         dinuc_alt = hep_df[(hep_df["model"] == "Dinucleotide (128)") & (hep_df["biomarker"] == "ALT")]
         if len(dinuc_alt) > 0:
             row = dinuc_alt.iloc[0]
             numbers["hagerdorn_hepatotox"] = {
-                "oob_accuracy": round(float(row["OOB_accuracy"]), 3),
-                "accuracy": round(float(row["CV_accuracy"]), 3),
-                "sensitivity": round(float(row["CV_sensitivity"]), 3),
-                "specificity": round(float(row["CV_specificity"]), 3),
-                "auc": round(float(row["CV_AUC"]), 3),
+                "accuracy": round(float(row["GK_accuracy"]), 3),
+                "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                "specificity": round(float(row["GK_specificity"]), 3),
+                "auc": round(float(row["GK_AUC"]), 3),
                 "n": int(row["N"]),
                 "n_high": int(row["N_high"]),
                 "n_low": int(row["N_low"]),
+                "n_groups": int(row["N_groups"]),
             }
             if "ALT" in hep_preds:
                 numbers["hagerdorn_hepatotox"]["confusion"] = hep_preds["ALT"]["confusion"]
-                if "stratum_accuracy" in hep_preds["ALT"]:
-                    numbers["hagerdorn_hepatotox"]["stratum_accuracy"] = hep_preds["ALT"]["stratum_accuracy"]
+        # OligoAI-tox CNN model × ALT
+        if "cnn_predictions" in hep_data and "ALT_cnn" in hep_data["cnn_predictions"]:
+            cnn = hep_data["cnn_predictions"]["ALT_cnn"]
+            numbers["oligoai_tox_hepatotox"] = {
+                "accuracy": round(float(cnn["accuracy"]), 3),
+                "sensitivity": round(float(cnn["sensitivity"]), 3),
+                "specificity": round(float(cnn["specificity"]), 3),
+                "auc": round(float(cnn["auc"]), 3),
+                "n": int(cnn["n"]),
+                "confusion": cnn["confusion"],
+            }
+
         # Cross-species concordance
         if "cross_species" in hep_data:
             cs = hep_data["cross_species"]
@@ -135,6 +145,18 @@ def main() -> None:
             }
             if "FOB" in neuro_preds:
                 numbers["hagerdorn_neurotox"]["confusion"] = neuro_preds["FOB"]["confusion"]
+
+        # OligoAI-tox CNN model × FOB
+        if "cnn_predictions" in neuro_data and "FOB_cnn" in neuro_data["cnn_predictions"]:
+            cnn = neuro_data["cnn_predictions"]["FOB_cnn"]
+            numbers["oligoai_tox_neurotox"] = {
+                "accuracy": round(float(cnn["accuracy"]), 3),
+                "sensitivity": round(float(cnn["sensitivity"]), 3),
+                "specificity": round(float(cnn["specificity"]), 3),
+                "auc": round(float(cnn["auc"]), 3),
+                "n": int(cnn["n"]),
+                "confusion": cnn["confusion"],
+            }
 
         # Cross-species concordance
         if "cross_species" in neuro_data:
@@ -206,6 +228,22 @@ def main() -> None:
             pipeline_numbers["combined_total_cost"] = combined["total_cost"]
             pipeline_numbers["combined_savings_pct"] = round(
                 (1 - combined["total_cost"] / baseline["total_cost"]) * 100, 1
+            )
+
+        oligoai_tox = pipeline_data.get("oligoai_tox")
+        if oligoai_tox:
+            pipeline_numbers["oligoai_tox_n_initial"] = oligoai_tox["n_initial"]
+            pipeline_numbers["oligoai_tox_total_cost"] = oligoai_tox["total_cost"]
+            pipeline_numbers["oligoai_tox_savings_pct"] = round(
+                (1 - oligoai_tox["total_cost"] / baseline["total_cost"]) * 100, 1
+            )
+
+        combined_cnn = pipeline_data.get("combined_cnn")
+        if combined_cnn:
+            pipeline_numbers["combined_cnn_n_initial"] = combined_cnn["n_initial"]
+            pipeline_numbers["combined_cnn_total_cost"] = combined_cnn["total_cost"]
+            pipeline_numbers["combined_cnn_savings_pct"] = round(
+                (1 - combined_cnn["total_cost"] / baseline["total_cost"]) * 100, 1
             )
 
         numbers["pipeline"] = pipeline_numbers

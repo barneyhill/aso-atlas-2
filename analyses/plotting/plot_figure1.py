@@ -99,7 +99,7 @@ def draw_sankey_tapered(flows, node_positions, node_heights, node_labels, node_c
 
 
 def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
-                     biomarker_cols, has_measurement, threshold=2780, ax=None):
+                     biomarker_cols, has_measurement, ax=None):
     """Draw a donut chart of measurements per target gene across all 4 data types."""
     # Load genomic-enriched parquets for gene_symbol mapping
     data_dir = _root / "data/oligostack/processed"
@@ -146,9 +146,20 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
     n_genes = len(gene_meas)
     total_meas = int(gene_meas.sum())
 
-    # Split major vs minor
-    major = gene_meas[gene_meas >= threshold]
-    minor = gene_meas[gene_meas < threshold]
+    # Split major vs minor: keep genes individually labelled until their
+    # label midpoint enters the bottom-right of the circle (past 270°).
+    total_all = gene_meas.sum()
+    cumulative_angle = 0
+    cutoff_idx = len(gene_meas)
+    for i, count in enumerate(gene_meas.values):
+        wedge_angle = 360 * count / total_all
+        mid_angle = cumulative_angle + wedge_angle / 2
+        if (mid_angle % 360) > 270:
+            cutoff_idx = i
+            break
+        cumulative_angle += wedge_angle
+    major = gene_meas.iloc[:cutoff_idx]
+    minor = gene_meas.iloc[cutoff_idx:]
 
     genes = list(major.index)
     counts = list(major.values.astype(int))

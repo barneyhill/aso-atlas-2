@@ -22,7 +22,7 @@ RESULTS_PATH = _root / "data/results/pipeline_results.json"
 OUT_DIR = _root / "typst/plots/fig2"
 
 
-def draw_pipeline_attrition(results, stages, ax):
+def draw_pipeline_attrition(results, stages, ax, x_positions=None):
     """Draw the pipeline attrition funnel on the given axes."""
     n_stages = len(stages)
     asos = results["asos_at_stage"]
@@ -34,7 +34,8 @@ def draw_pipeline_attrition(results, stages, ax):
     rng = max_log - min_log if max_log > min_log else 1
     box_heights = 0.15 + (log_asos - min_log) / rng * 0.40
 
-    x_positions = np.linspace(0.07, 0.93, n_stages + 1)
+    if x_positions is None:
+        x_positions = np.linspace(0.07, 0.93, n_stages + 1)
     y_center = 0.45
     box_width = 0.035
 
@@ -63,9 +64,9 @@ def draw_pipeline_attrition(results, stages, ax):
         ax.add_patch(patch)
 
         filter_text = stages[i]["threshold"]
-        prop_text = f"{props[i] * 100:.0f}% ASOs\ntested have\n{filter_text}"
+        prop_text = f"{props[i] * 100:.0f}% ASOs\nhave\n{filter_text}"
         ax.text((x1 + x2) / 2, y_center, prop_text,
-                ha="center", va="center", fontsize=8, color="#404040")
+                ha="center", va="center", fontsize=9.5, color="#404040")
 
     # Stage boxes
     for i in range(n_stages + 1):
@@ -85,21 +86,27 @@ def draw_pipeline_attrition(results, stages, ax):
         )
         ax.add_patch(rect)
 
+        n_label = f"{asos[i]:,}" if asos[i] != 1 else "1"
+        aso_label = "ASOs" if asos[i] != 1 else "ASO"
+        ax.text(x, y_center + 0.005, n_label, ha="center", va="bottom",
+                fontsize=11, fontweight="bold", color="white", zorder=11)
+        ax.text(x, y_center - 0.005, aso_label, ha="center", va="top",
+                fontsize=7.5, fontweight="bold", color="white", zorder=11)
+
         if i < n_stages:
             ax.text(x, y_center + h / 2 + 0.095, label_name,
                     ha="center", va="center", fontsize=10, fontweight="bold", color="#202020")
-            cost_total = f"${costs[i] / 1e6:.1f}M" if costs[i] >= 1e6 else f"${costs[i] / 1e3:.0f}K"
+            c = costs[i]
+            cost_total = f"{c / 1e6:.1f}M" if c >= 1e6 else f"{c / 1e3:.0f}K"
             cpa = stages[i]["cost_per_aso"]
-            cost_per = f"${cpa / 1e3:.0f}K" if cpa >= 1000 else f"${cpa:.0f}"
-            cost_text = f"{asos[i]:,} ASOs cost {cost_total}\nat {cost_per}/ASO"
+            cost_per = f"{cpa / 1e3:.0f}K" if cpa >= 1000 else f"{cpa:.0f}"
+            cost_text = "\\$" + cost_total + " @ \\$" + cost_per + "/ASO"
             ax.text(x, y_center + h / 2 + 0.035, cost_text,
-                    ha="center", va="center", fontsize=8, color="#303030")
+                    ha="center", va="center", fontsize=9.5, color="#303030")
         else:
             prev_h = box_heights[i - 1]
             ax.text(x, y_center + prev_h / 2 + 0.095, label_name,
                     ha="center", va="center", fontsize=10, fontweight="bold", color="#202020")
-            ax.text(x, y_center + prev_h / 2 + 0.035, f"n={asos[i]:,}",
-                    ha="center", va="center", fontsize=8, color="#303030")
 
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -131,12 +138,12 @@ def draw_stage_distributions(distributions, sample_sizes, stages, axes):
             # Potency: log10
             data_plot = np.log10(data[data > 0])
             threshold_plot = np.log10(thresholds[i])
-            xlabel = "log\u2081\u2080(IC\u2085\u2080, nM)"
+            xlabel = "IC\u2085\u2080 (nM)"
         elif i in [2, 4, 6]:
             # ALT stages: log10
             data_plot = np.log10(data[(~np.isnan(data)) & (data > 0)])
             threshold_plot = np.log10(thresholds[i])
-            xlabel = "log\u2081\u2080(ALT, IU/L)"
+            xlabel = "ALT (IU/L)"
         elif i == 3:
             data_plot = np.round(data[~np.isnan(data)]).astype(int)
             threshold_plot = 1.5  # <=1 threshold: line between 1 and 2
@@ -170,6 +177,16 @@ def draw_stage_distributions(distributions, sample_sizes, stages, axes):
         else:
             ax.set_xlim(0, xlim[1])
             xlim = (0, xlim[1])
+
+        # Log-scale panels: show real values on the axis (10, 100, 1000, …)
+        if i in [1, 2, 4, 6]:
+            lo, hi = ax.get_xlim()
+            ticks = np.arange(np.ceil(lo), np.floor(hi) + 1)
+            ax.set_xticks(ticks)
+            ax.set_xticklabels([
+                f"{10**int(t)/1000:g}K" if 10**int(t) >= 1000 else f"{10**int(t):g}"
+                for t in ticks
+            ])
 
         # Shade the fail region in grey
         if threshold_ops[i] == ">":
@@ -222,34 +239,77 @@ def main():
     # Two-row figure: Panel A (7 histograms) on top, Panel B (funnel) below
     fig = plt.figure(figsize=(18, 11), dpi=300)
 
-    # Panel A — manual equal-spaced square axes
-    n_panels = 7
-    pa_left, pa_right = 0.05, 0.97
-    pa_gap = 0.045
-    pa_total_gap = pa_gap * (n_panels - 1)
-    pa_w = (pa_right - pa_left - pa_total_gap) / n_panels
-    # Make height equal to width in inches, then convert to figure fraction
+    # Funnel x-positions: 8 evenly-spaced stage-box centres
+    n_stages = len(stages)
+    shared_x = np.linspace(0.07, 0.93, n_stages + 1)
+    # Flow midpoints — arrow targets (between consecutive stage boxes)
+    flow_cx = (shared_x[:-1] + shared_x[1:]) / 2
+
+    # Histogram centres — wider spread, symmetric about 0.5 so the
+    # middle histogram (mouse neurotox) sits exactly above its flow.
+    hist_x = np.linspace(0.06, 0.94, n_stages)
+
+    # Panel A — histograms at hist_x positions, sized from funnel spacing
+    spacing = shared_x[1] - shared_x[0]
+    pa_gap = 0.02
+    pa_w = spacing - pa_gap
     fig_w, fig_h = fig.get_size_inches()
     pa_h = pa_w * fig_w / fig_h
     pa_bot = 0.73 - pa_h
     axes_dist = []
-    for c in range(n_panels):
-        x0 = pa_left + c * (pa_w + pa_gap)
+    for i in range(n_stages):
+        x0 = hist_x[i] - pa_w / 2
         axes_dist.append(fig.add_axes([x0, pa_bot, pa_w, pa_h]))
     draw_stage_distributions(distributions, sample_sizes, stages, axes_dist)
     for ax in axes_dist:
         ylo, yhi = ax.get_ylim()
         ax.set_ylim(ylo, yhi * 1.08)
 
-    # Panel B — funnel below
-    ax_funnel = fig.add_axes([0.05, 0.02, 0.90, 0.50])
-    draw_pipeline_attrition(baseline, stages, ax_funnel)
+    # Panel B — funnel below, using shared_x converted to funnel axes coords
+    funnel_left, funnel_width = 0.05, 0.90
+    ax_funnel = fig.add_axes([funnel_left, 0.02, funnel_width, 0.50])
+    funnel_x = (shared_x - funnel_left) / funnel_width
+    draw_pipeline_attrition(baseline, stages, ax_funnel, x_positions=funnel_x)
+
+    # Bézier S-curve arrows from each histogram to its flow centre.
+    # Arrow end sits a fixed distance above each flow's top edge.
+    funnel_bot, funnel_h_size = 0.02, 0.50
+    y_center_funnel = 0.45
+    asos = baseline["asos_at_stage"]
+    log_asos = np.array([np.log10(max(a, 1)) for a in asos])
+    rng = log_asos.max() - log_asos.min() or 1
+    box_h = 0.15 + (log_asos - log_asos.min()) / rng * 0.40
+    arrow_gap = 0.025  # fixed gap above flow top (in funnel axes coords)
+
+    arrow_y0 = pa_bot - 0.05
+    for i in range(n_stages):
+        x0 = hist_x[i]
+        x1 = flow_cx[i]
+        # Flow top at its centre = y_center + (h_left + h_right) / 4
+        flow_top = y_center_funnel + (box_h[i] + box_h[i + 1]) / 4
+        arrow_y1 = funnel_bot + funnel_h_size * (flow_top + arrow_gap)
+        arrow_y_mid = (arrow_y0 + arrow_y1) / 2
+
+        arrow_path = MPath(
+            [(x0, arrow_y0), (x0, arrow_y_mid), (x1, arrow_y_mid), (x1, arrow_y1)],
+            [MPath.MOVETO, MPath.CURVE4, MPath.CURVE4, MPath.CURVE4],
+        )
+        arrow = mpatches.FancyArrowPatch(
+            path=arrow_path,
+            arrowstyle="-|>",
+            mutation_scale=25,
+            color="#bbbbbb",
+            linewidth=3,
+            alpha=1.0,
+            zorder=0,
+        )
+        arrow.set_transform(fig.transFigure)
+        fig.add_artist(arrow)
 
     # Panel labels
-    # Place "A" just above the title text (which sits at ~1.20 in axes coords)
     a_label_y = 0.73 + pa_h * 0.20 + 0.03
-    fig.text(0.02, a_label_y, "A", fontsize=16, fontweight="bold", va="bottom")
-    ax_funnel.text(-0.02, 1.0, "B", fontsize=16, fontweight="bold", va="top",
+    fig.text(0.005, a_label_y, "A", fontsize=16, fontweight="bold", va="bottom")
+    ax_funnel.text(-0.04, 1.0, "B", fontsize=16, fontweight="bold", va="top",
                    transform=ax_funnel.transAxes)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -259,21 +319,17 @@ def main():
     print(f"Saved {out_path}")
 
     # ── Variant: panel A only ──
-    # Compute square panel size first, then set figure height to fit
     fig_a_w = 18
-    left, right = 0.05, 0.97
-    gap = 0.045
-    total_gap = gap * (n_panels - 1)
-    ax_w_frac = (right - left - total_gap) / n_panels
-    ax_w_in = ax_w_frac * fig_a_w  # width of one panel in inches
+    ax_w_frac = pa_w                         # same panel width as full figure
+    ax_w_in = ax_w_frac * fig_a_w
     bot = 0.15
-    top_margin = 0.30  # space above for titles
-    fig_a_h = ax_w_in / (1 - bot - top_margin)  # figure height so panel is square
+    top_margin = 0.30
+    fig_a_h = ax_w_in / (1 - bot - top_margin)
     ax_h_frac = ax_w_in / fig_a_h
     fig_a = plt.figure(figsize=(fig_a_w, fig_a_h), dpi=300)
     axes_a = []
-    for c in range(n_panels):
-        x0 = left + c * (ax_w_frac + gap)
+    for i in range(n_stages):
+        x0 = hist_x[i] - ax_w_frac / 2
         axes_a.append(fig_a.add_axes([x0, bot, ax_w_frac, ax_h_frac]))
     draw_stage_distributions(distributions, sample_sizes, stages, axes_a)
     for ax in axes_a:
