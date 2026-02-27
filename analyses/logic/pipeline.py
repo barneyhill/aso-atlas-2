@@ -59,12 +59,12 @@ TARGET_CANDIDATES = 1
 # Maps prediction keys → pipeline stage indices (OligoAI-tox RF)
 STAGE_MAP = {"ALT": 2, "FOB": 3, "rat_ALT": 4, "rat_FOB": 5}
 
-# OligoAI (Gehrmann et al. 2025, bioRxiv 10.1101/2025.10.29.685292)
+# OligoAI (Hill et al. 2025, bioRxiv 10.1101/2025.10.29.685292)
 # Top-10% enrichment factor for in vitro efficacy across 299 held-out screens
 OLIGOAI_ENRICHMENT = {
     "inhibition": {
         "enrichment_factor": 3.14,
-        "source": "Gehrmann et al. 2025, Table 1",
+        "source": "Hill et al. 2025, Table 1",
     },
 }
 OLIGOAI_STAGE_MAP = {"inhibition": 0}
@@ -408,11 +408,11 @@ def main():
     else:
         print("OligoAI-tox results not found — run `just hagerdorn` first")
 
-    # OligoAI enrichment (in vitro efficacy — Gehrmann et al. 2025)
+    # OligoAI enrichment (in vitro efficacy — Hill et al. 2025)
     oligoai = back_calculate_enriched(proportions, OLIGOAI_ENRICHMENT, OLIGOAI_STAGE_MAP)
     oligoai_savings = (1 - oligoai["total_cost"] / baseline["total_cost"]) * 100
     print(f"OligoAI: {oligoai['n_initial']:,} initial ASOs, ${oligoai['total_cost']/1e6:.1f}M total ({oligoai_savings:.1f}% reduction)")
-    print(f"  inhibition: EF={OLIGOAI_ENRICHMENT['inhibition']['enrichment_factor']:.2f}x (hardcoded from Gehrmann et al. 2025)")
+    print(f"  inhibition: EF={OLIGOAI_ENRICHMENT['inhibition']['enrichment_factor']:.2f}x (hardcoded from Hill et al. 2025)")
 
     # Combined: OligoAI (inhibition) + OligoAI-tox (ALT, FOB)
     combined = None

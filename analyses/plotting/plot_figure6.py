@@ -6,7 +6,7 @@ Panel B — Summary table (total cost, savings %, enrichment factors).
 
 Scenarios:
   - Baseline: no computational pre-screening
-  - OligoAI: in vitro efficacy model (inhibition 3.14x, Gehrmann et al. 2025)
+  - OligoAI: in vitro efficacy model (inhibition 3.14x, Hill et al. 2025)
   - OligoAI-tox: hepatotox + neurotox RF classifiers (ALT + FOB)
   - Combined: all enrichment stages
 
