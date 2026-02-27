@@ -94,14 +94,14 @@ To contextualise the dataset, we benchmarked ION582, a clinical-stage ASO target
 
 #figure(
   image("plots/fig4/fig4.svg", width: 100%),
-  caption: [Hagedorn model replication on OligoStack with GroupKFold cross-validation by target gene. *Top row (A--C):* Hepatotoxicity (Hagedorn 2013). *(A)* Classification metrics for four RF model variants on ALT prediction. *(B)* ROC curve for the dinucleotide model. *(C)* Confusion matrix (accuracy = #str(R.hagerdorn_hepatotox.accuracy)). *Bottom row (D--F):* Neurotoxicity (Hagedorn 2022). *(D)* Classification metrics for five models (linear + 4 RF). *(E)* ROC curves for the linear and dinucleotide RF models. *(F)* Confusion matrix for the dinucleotide RF model (accuracy = #str(R.hagerdorn_neurotox.accuracy)).],
+  caption: [OligoAI-tox: Hagedorn's dinucleotide RF trained on ASO Atlas 2.0 with GroupKFold cross-validation by target gene. *Top row:* Hepatotoxicity (mouse ALT, rat ALT). *Bottom row:* Neurotoxicity (mouse bFOB, rat mFOB). Each panel pair shows ROC curves and confusion matrices. For neurotoxicity, the dashed grey line shows the Hagedorn linear baseline (5 fixed coefficients). Mouse ALT: accuracy = #str(R.oligoai_tox_hepatotox.accuracy), AUC = #str(R.oligoai_tox_hepatotox.auc). Mouse bFOB: accuracy = #str(R.oligoai_tox_neurotox.accuracy), AUC = #str(R.oligoai_tox_neurotox.auc).],
 ) <fig4>
 
-We replicated the Hagedorn hepatotoxicity (2013) and neurotoxicity (2022) prediction approaches on OligoStack, adapting them from LNA to DNA/MOE/cET chemistry (@fig4).
+We trained OligoAI-tox, Hagedorn's dinucleotide random forest architecture applied to ASO Atlas 2.0, adapting it from LNA to DNA/MOE/cET chemistry (@fig4). We trained four explicit models: mouse ALT, mouse bFOB, rat ALT, and rat mFOB, each evaluated with GroupKFold cross-validation (5 folds, grouped by target gene).
 
-For hepatotoxicity, the dinucleotide random forest (128 features, 5,000 trees) was evaluated with GroupKFold cross-validation (5 folds, grouped by target gene) on #comma(R.hagerdorn_hepatotox.n) compounds across #comma(R.hagerdorn_hepatotox.n_groups) target gene groups. The model achieved an accuracy of #str(R.hagerdorn_hepatotox.accuracy) with an AUC of #str(R.hagerdorn_hepatotox.auc) (sensitivity #str(R.hagerdorn_hepatotox.sensitivity), specificity #str(R.hagerdorn_hepatotox.specificity)).
+For hepatotoxicity, the mouse ALT model (128 dinucleotide features, 5,000 trees) achieved an accuracy of #str(R.oligoai_tox_hepatotox.accuracy) with an AUC of #str(R.oligoai_tox_hepatotox.auc) (sensitivity #str(R.oligoai_tox_hepatotox.sensitivity), specificity #str(R.oligoai_tox_hepatotox.specificity)) on #comma(R.oligoai_tox_hepatotox.n) compounds across #comma(R.oligoai_tox_hepatotox.n_groups) target gene groups. The rat ALT model achieved an AUC of #str(R.rat_hepatotox.auc) on #comma(R.rat_hepatotox.n) compounds.
 
-For neurotoxicity, we evaluated the original 5-feature logistic regression and four RF variants on mouse bFOB scores (700 µg ICV; neurotoxic bFOB ≥3 vs non-toxic bFOB ≤1), all with GroupKFold cross-validation (5 folds, grouped by target gene). The dinucleotide RF model achieved an accuracy of #str(R.hagerdorn_neurotox.accuracy) with an AUC of #str(R.hagerdorn_neurotox.auc) on #comma(R.hagerdorn_neurotox.n) compounds across #comma(R.hagerdorn_neurotox.n_groups) target gene groups.
+For neurotoxicity, we compared OligoAI-tox against the Hagedorn linear baseline (5 fixed coefficients from the original publication). On mouse bFOB scores (700 µg ICV; neurotoxic bFOB $>$ 1 vs non-toxic bFOB $<=$ 1), OligoAI-tox achieved an accuracy of #str(R.oligoai_tox_neurotox.accuracy) with an AUC of #str(R.oligoai_tox_neurotox.auc) on #comma(R.oligoai_tox_neurotox.n) compounds across #comma(R.oligoai_tox_neurotox.n_groups) target gene groups, compared to an AUC of #str(R.hagedorn_linear_neurotox.auc) for the Hagedorn linear model. The rat mFOB model achieved an AUC of #str(R.rat_neurotox.auc) on #comma(R.rat_neurotox.n) compounds.
 
 == Cross-Species Concordance
 
@@ -120,22 +120,22 @@ Within mouse, the hepatotoxicity biomarkers show a structured correlation patter
 
 #figure(
   image("plots/fig6/fig6.svg", width: 100%),
-  caption: [Cost savings from computational pre-screening. Stacked bar chart comparing total pipeline costs by stage across four scenarios: baseline (no screening), Hagedorn classifiers only (ALT + bFOB), OligoAI only (in vitro efficacy), and all models combined.],
+  caption: [Cost savings from computational pre-screening. Stacked bar chart comparing total pipeline costs by stage across four scenarios: baseline (no screening), OligoAI only (in vitro efficacy), OligoAI-tox only (ALT + bFOB), and all models combined.],
 ) <fig6>
 
-To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig6). The Hagedorn classifiers (hepatotoxicity + neurotoxicity) enrich the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.hagerdorn_savings_pct)% to \$#str(calc.round(R.pipeline.hagerdorn_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction (Gehrmann _et al._, 2025), achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all three enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
+To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig6). OligoAI-tox (hepatotoxicity + neurotoxicity) enriches the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.oligoai_tox_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction (Gehrmann _et al._, 2025), achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
 
 = Discussion
 
-We have introduced OligoStack, a public multi-endpoint ASO preclinical dataset, and a cost-based benchmarking framework for evaluating computational screening methods. Our replication of the Hagedorn hepatotoxicity and neurotoxicity models on OligoStack establishes baseline performance for future methods to improve upon.
+We have introduced OligoStack, a public multi-endpoint ASO preclinical dataset, and a cost-based benchmarking framework for evaluating computational screening methods. OligoAI-tox --- Hagedorn's dinucleotide random forest trained on ASO Atlas 2.0 --- establishes baseline performance for future methods to improve upon.
 
-The Hagedorn models achieve moderate classification accuracy on OligoStack, consistent with the original publications despite the shift from LNA to MOE/cET chemistry. The use of GroupKFold cross-validation by target gene provides a more realistic estimate of generalisation performance than random splits, since in practice new ASO programmes target novel genes not seen during model development.
+OligoAI-tox achieves moderate classification accuracy on ASO Atlas 2.0, consistent with the original Hagedorn publications despite the shift from LNA to MOE/cET chemistry. The use of GroupKFold cross-validation by target gene provides a more realistic estimate of generalisation performance than random splits, since in practice new ASO programmes target novel genes not seen during model development.
 
 The cross-species concordance analysis provides empirical support for mouse-based screening as a proxy for rat outcomes, particularly for neurotoxicity where bFOB and mFOB scores are strongly correlated between species. This supports the pipeline design assumption that mouse-stage enrichment carries forward to later species.
 
 Even modest enrichment at the expensive in vivo stages translates into meaningful cost savings, as demonstrated by our cost-based framework. When combined with OligoAI's in vitro enrichment (Gehrmann _et al._, 2025), the total cost reduction reaches #str(R.pipeline.combined_savings_pct)%. This highlights the importance of evaluating models not just by accuracy metrics but by their practical impact on screening economics, and suggests that stacking complementary models across pipeline stages can yield compounding benefits.
 
-Several limitations should be noted. First, the Hagedorn models use only chemistry-derived sequence features and do not incorporate target gene context, target site thermodynamics, or off-target binding potential. Second, OligoStack is derived from Ionis Pharmaceuticals patents and therefore reflects the design space and chemical modifications used by a single organisation. Third, the binary classification approach (high vs low toxicity) discards intermediate cases and may oversimplify the dose-response relationship between sequence features and toxicity.
+Several limitations should be noted. First, OligoAI-tox uses only chemistry-derived sequence features and does not incorporate target gene context, target site thermodynamics, or off-target binding potential. Second, OligoStack is derived from Ionis Pharmaceuticals patents and therefore reflects the design space and chemical modifications used by a single organisation. Third, the binary classification approach (high vs low toxicity) discards intermediate cases and may oversimplify the dose-response relationship between sequence features and toxicity.
 
 Future directions include: (i) deep learning models that operate directly on HELM strings rather than hand-crafted features; (ii) multi-task approaches that jointly predict across endpoints; (iii) target-aware models that incorporate gene-level information; and (iv) regression rather than classification to capture the full spectrum of toxicity outcomes.
 
@@ -187,7 +187,7 @@ We replicated the Hagedorn _et al._ (2022) approach for predicting ASO neurotoxi
 
 *RF models.* The same four random forest feature sets used for hepatotoxicity were also evaluated for neurotoxicity, without dosing covariates (all neurotoxicity data used the same ICV 700 µg protocol).
 
-*Label assignment.* Compounds with mean bFOB ≥ 3 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic". Intermediate scores were excluded.
+*Label assignment.* Compounds with mean bFOB > 1 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic".
 
 == Cross-Validation Procedure
 

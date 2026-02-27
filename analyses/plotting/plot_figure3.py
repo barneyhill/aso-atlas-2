@@ -203,6 +203,7 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     svg_path = OUT_DIR / "fig3.svg"
     fig.savefig(svg_path, format="svg", bbox_inches="tight")
+    fig.savefig(svg_path.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {svg_path}")
 
@@ -217,6 +218,7 @@ def main():
     plt.tight_layout()
     p2 = OUT_DIR / "fig3-without-zilg.svg"
     fig2.savefig(p2, format="svg", bbox_inches="tight")
+    fig2.savefig(p2.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig2)
     print(f"Saved {p2}")
 
@@ -231,6 +233,7 @@ def main():
     plt.tight_layout()
     p3 = OUT_DIR / "fig3-without-zilg-without-ube3a-ats.svg"
     fig3.savefig(p3, format="svg", bbox_inches="tight")
+    fig3.savefig(p3.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig3)
     print(f"Saved {p3}")
 

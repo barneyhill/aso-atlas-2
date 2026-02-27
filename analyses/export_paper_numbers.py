@@ -60,11 +60,11 @@ def main() -> None:
         hep_data = json.loads(hepatotox_path.read_text())
         hep_df = pd.DataFrame(hep_data["models"])
         hep_preds = hep_data["predictions"]
-        # Dinucleotide model × ALT (GroupKFold CV)
+        # OligoAI-tox (dinucleotide RF) × ALT (GroupKFold CV)
         dinuc_alt = hep_df[(hep_df["model"] == "Dinucleotide (128)") & (hep_df["biomarker"] == "ALT")]
         if len(dinuc_alt) > 0:
             row = dinuc_alt.iloc[0]
-            numbers["hagerdorn_hepatotox"] = {
+            numbers["oligoai_tox_hepatotox"] = {
                 "accuracy": round(float(row["GK_accuracy"]), 3),
                 "sensitivity": round(float(row["GK_sensitivity"]), 3),
                 "specificity": round(float(row["GK_specificity"]), 3),
@@ -75,18 +75,7 @@ def main() -> None:
                 "n_groups": int(row["N_groups"]),
             }
             if "ALT" in hep_preds:
-                numbers["hagerdorn_hepatotox"]["confusion"] = hep_preds["ALT"]["confusion"]
-        # OligoAI-tox CNN model × ALT
-        if "cnn_predictions" in hep_data and "ALT_cnn" in hep_data["cnn_predictions"]:
-            cnn = hep_data["cnn_predictions"]["ALT_cnn"]
-            numbers["oligoai_tox_hepatotox"] = {
-                "accuracy": round(float(cnn["accuracy"]), 3),
-                "sensitivity": round(float(cnn["sensitivity"]), 3),
-                "specificity": round(float(cnn["specificity"]), 3),
-                "auc": round(float(cnn["auc"]), 3),
-                "n": int(cnn["n"]),
-                "confusion": cnn["confusion"],
-            }
+                numbers["oligoai_tox_hepatotox"]["confusion"] = hep_preds["ALT"]["confusion"]
 
         # Cross-species concordance
         if "cross_species" in hep_data:
@@ -129,11 +118,11 @@ def main() -> None:
         neuro_data = json.loads(neurotox_path.read_text())
         neuro_df = pd.DataFrame(neuro_data["models"])
         neuro_preds = neuro_data["predictions"]
-        # Dinucleotide model
+        # OligoAI-tox (dinucleotide RF) × FOB
         dinuc = neuro_df[neuro_df["model"] == "Dinucleotide (128)"]
         if len(dinuc) > 0:
             row = dinuc.iloc[0]
-            numbers["hagerdorn_neurotox"] = {
+            numbers["oligoai_tox_neurotox"] = {
                 "accuracy": round(float(row["GK_accuracy"]), 3),
                 "sensitivity": round(float(row["GK_sensitivity"]), 3),
                 "specificity": round(float(row["GK_specificity"]), 3),
@@ -144,19 +133,24 @@ def main() -> None:
                 "n_groups": int(row["N_groups"]),
             }
             if "FOB" in neuro_preds:
-                numbers["hagerdorn_neurotox"]["confusion"] = neuro_preds["FOB"]["confusion"]
+                numbers["oligoai_tox_neurotox"]["confusion"] = neuro_preds["FOB"]["confusion"]
 
-        # OligoAI-tox CNN model × FOB
-        if "cnn_predictions" in neuro_data and "FOB_cnn" in neuro_data["cnn_predictions"]:
-            cnn = neuro_data["cnn_predictions"]["FOB_cnn"]
-            numbers["oligoai_tox_neurotox"] = {
-                "accuracy": round(float(cnn["accuracy"]), 3),
-                "sensitivity": round(float(cnn["sensitivity"]), 3),
-                "specificity": round(float(cnn["specificity"]), 3),
-                "auc": round(float(cnn["auc"]), 3),
-                "n": int(cnn["n"]),
-                "confusion": cnn["confusion"],
+        # Hagedorn linear baseline (neurotox only)
+        hagedorn_linear = neuro_df[neuro_df["model"] == "Hagedorn score (5 features)"]
+        if len(hagedorn_linear) > 0:
+            row = hagedorn_linear.iloc[0]
+            numbers["hagedorn_linear_neurotox"] = {
+                "accuracy": round(float(row["GK_accuracy"]), 3),
+                "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                "specificity": round(float(row["GK_specificity"]), 3),
+                "auc": round(float(row["GK_AUC"]), 3),
+                "n": int(row["N"]),
+                "n_high": int(row["N_high"]),
+                "n_low": int(row["N_low"]),
+                "n_groups": int(row["N_groups"]),
             }
+            if "hagedorn_score" in neuro_preds:
+                numbers["hagedorn_linear_neurotox"]["confusion"] = neuro_preds["hagedorn_score"]["confusion"]
 
         # Cross-species concordance
         if "cross_species" in neuro_data:
@@ -190,6 +184,25 @@ def main() -> None:
                 }
                 if "rat_predictions" in neuro_data and "rat_FOB" in neuro_data["rat_predictions"]:
                     numbers["rat_neurotox"]["confusion"] = neuro_data["rat_predictions"]["rat_FOB"]["confusion"]
+
+        # Rat Hagedorn linear baseline (neurotox only)
+        if "rat_models" in neuro_data:
+            rat_df_lin = pd.DataFrame(neuro_data["rat_models"])
+            rat_hagedorn = rat_df_lin[rat_df_lin["model"] == "Hagedorn score (5 features)"]
+            if len(rat_hagedorn) > 0:
+                row = rat_hagedorn.iloc[0]
+                numbers["hagedorn_linear_rat_neurotox"] = {
+                    "accuracy": round(float(row["GK_accuracy"]), 3),
+                    "sensitivity": round(float(row["GK_sensitivity"]), 3),
+                    "specificity": round(float(row["GK_specificity"]), 3),
+                    "auc": round(float(row["GK_AUC"]), 3),
+                    "n": int(row["N"]),
+                    "n_high": int(row["N_high"]),
+                    "n_low": int(row["N_low"]),
+                    "n_groups": int(row["N_groups"]),
+                }
+                if "rat_predictions" in neuro_data and "rat_hagedorn_score" in neuro_data["rat_predictions"]:
+                    numbers["hagedorn_linear_rat_neurotox"]["confusion"] = neuro_data["rat_predictions"]["rat_hagedorn_score"]["confusion"]
     else:
         warnings.warn(f"Hagedorn neurotox results not found — run `just hagerdorn` first")
 
@@ -197,7 +210,7 @@ def main() -> None:
     if PIPELINE_RESULTS_PATH.exists():
         pipeline_data = json.loads(PIPELINE_RESULTS_PATH.read_text())
         baseline = pipeline_data["baseline"]
-        hagerdorn = pipeline_data.get("hagerdorn")
+        oligoai_tox_pipeline = pipeline_data.get("oligoai_tox")
         oligoai = pipeline_data.get("oligoai")
         combined = pipeline_data.get("combined")
 
@@ -205,16 +218,16 @@ def main() -> None:
             "baseline_n_initial": baseline["n_initial"],
             "baseline_total_cost": baseline["total_cost"],
         }
-        if hagerdorn:
-            pipeline_numbers["hagerdorn_n_initial"] = hagerdorn["n_initial"]
-            pipeline_numbers["hagerdorn_total_cost"] = hagerdorn["total_cost"]
-            pipeline_numbers["hagerdorn_savings_pct"] = round(
-                (1 - hagerdorn["total_cost"] / baseline["total_cost"]) * 100, 1
+        if oligoai_tox_pipeline:
+            pipeline_numbers["oligoai_tox_n_initial"] = oligoai_tox_pipeline["n_initial"]
+            pipeline_numbers["oligoai_tox_total_cost"] = oligoai_tox_pipeline["total_cost"]
+            pipeline_numbers["oligoai_tox_savings_pct"] = round(
+                (1 - oligoai_tox_pipeline["total_cost"] / baseline["total_cost"]) * 100, 1
             )
             # Per-stage enrichment factors
-            if "enriched_stages" in hagerdorn:
+            if "enriched_stages" in oligoai_tox_pipeline:
                 stage_labels = {"2": "mouse_ALT", "3": "mouse_FOB", "4": "rat_ALT", "5": "rat_FOB"}
-                for stage_idx, info in hagerdorn["enriched_stages"].items():
+                for stage_idx, info in oligoai_tox_pipeline["enriched_stages"].items():
                     label = stage_labels.get(stage_idx, f"stage_{stage_idx}")
                     pipeline_numbers[f"ef_{label}"] = round(info["enrichment_factor"], 3)
         if oligoai:
@@ -228,22 +241,6 @@ def main() -> None:
             pipeline_numbers["combined_total_cost"] = combined["total_cost"]
             pipeline_numbers["combined_savings_pct"] = round(
                 (1 - combined["total_cost"] / baseline["total_cost"]) * 100, 1
-            )
-
-        oligoai_tox = pipeline_data.get("oligoai_tox")
-        if oligoai_tox:
-            pipeline_numbers["oligoai_tox_n_initial"] = oligoai_tox["n_initial"]
-            pipeline_numbers["oligoai_tox_total_cost"] = oligoai_tox["total_cost"]
-            pipeline_numbers["oligoai_tox_savings_pct"] = round(
-                (1 - oligoai_tox["total_cost"] / baseline["total_cost"]) * 100, 1
-            )
-
-        combined_cnn = pipeline_data.get("combined_cnn")
-        if combined_cnn:
-            pipeline_numbers["combined_cnn_n_initial"] = combined_cnn["n_initial"]
-            pipeline_numbers["combined_cnn_total_cost"] = combined_cnn["total_cost"]
-            pipeline_numbers["combined_cnn_savings_pct"] = round(
-                (1 - combined_cnn["total_cost"] / baseline["total_cost"]) * 100, 1
             )
 
         numbers["pipeline"] = pipeline_numbers

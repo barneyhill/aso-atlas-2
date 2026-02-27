@@ -56,11 +56,8 @@ PIPELINE_STAGES = [
 
 TARGET_CANDIDATES = 1
 
-# Maps prediction keys → pipeline stage indices (Hagedorn RF)
+# Maps prediction keys → pipeline stage indices (OligoAI-tox RF)
 STAGE_MAP = {"ALT": 2, "FOB": 3, "rat_ALT": 4, "rat_FOB": 5}
-
-# Maps CNN prediction keys → pipeline stage indices (OligoAI-tox)
-CNN_STAGE_MAP = {"ALT_cnn": 2, "FOB_cnn": 3, "rat_ALT_cnn": 4, "rat_FOB_cnn": 5}
 
 # OligoAI (Gehrmann et al. 2025, bioRxiv 10.1101/2025.10.29.685292)
 # Top-10% enrichment factor for in vitro efficacy across 299 held-out screens
@@ -381,9 +378,9 @@ def main():
     baseline = back_calculate(proportions)
     print(f"Baseline: {baseline['n_initial']:,} initial ASOs, ${baseline['total_cost']/1e6:.1f}M total")
 
-    # Hagedorn classifier enrichment (hepatotox + neurotox)
-    hagerdorn = None
-    hagerdorn_enrichment = {}
+    # OligoAI-tox RF enrichment (hepatotox + neurotox)
+    oligoai_tox = None
+    oligoai_tox_enrichment = {}
     hepatotox_path = RESULTS_DIR / "hepatotox.json"
     neurotox_path = RESULTS_DIR / "neurotox.json"
 
@@ -392,46 +389,24 @@ def main():
             hepatotox_data = json.load(f)
         with open(neurotox_path) as f:
             neurotox_data = json.load(f)
-        hagerdorn_enrichment.update(compute_classifier_enrichment(hepatotox_data["predictions"]))
-        hagerdorn_enrichment.update(compute_classifier_enrichment(neurotox_data["predictions"]))
+        oligoai_tox_enrichment.update(compute_classifier_enrichment(hepatotox_data["predictions"]))
+        oligoai_tox_enrichment.update(compute_classifier_enrichment(neurotox_data["predictions"]))
 
         # Rat predictions (independent models trained on rat data)
         if "rat_predictions" in hepatotox_data:
-            hagerdorn_enrichment.update(compute_classifier_enrichment(hepatotox_data["rat_predictions"]))
+            oligoai_tox_enrichment.update(compute_classifier_enrichment(hepatotox_data["rat_predictions"]))
         if "rat_predictions" in neurotox_data:
-            hagerdorn_enrichment.update(compute_classifier_enrichment(neurotox_data["rat_predictions"]))
+            oligoai_tox_enrichment.update(compute_classifier_enrichment(neurotox_data["rat_predictions"]))
 
-        if hagerdorn_enrichment:
-            hagerdorn = back_calculate_enriched(proportions, hagerdorn_enrichment, STAGE_MAP)
-            savings_pct = (1 - hagerdorn["total_cost"] / baseline["total_cost"]) * 100
-            print(f"Hagedorn: {hagerdorn['n_initial']:,} initial ASOs, ${hagerdorn['total_cost']/1e6:.1f}M total ({savings_pct:.1f}% reduction)")
-            for task, e in hagerdorn_enrichment.items():
+        if oligoai_tox_enrichment:
+            oligoai_tox = back_calculate_enriched(proportions, oligoai_tox_enrichment, STAGE_MAP)
+            savings_pct = (1 - oligoai_tox["total_cost"] / baseline["total_cost"]) * 100
+            print(f"OligoAI-tox: {oligoai_tox['n_initial']:,} initial ASOs, ${oligoai_tox['total_cost']/1e6:.1f}M total ({savings_pct:.1f}% reduction)")
+            for task, e in oligoai_tox_enrichment.items():
                 if task in STAGE_MAP:
                     print(f"  {task}: EF={e['enrichment_factor']:.2f}x (base={e['base_rate']:.2f}, selected={e['selected_pass_rate']:.2f})")
     else:
-        print("Hagedorn results not found — run `just hagerdorn` first")
-
-    # OligoAI-tox CNN enrichment (hepatotox + neurotox)
-    oligoai_tox = None
-    cnn_enrichment = {}
-    if hepatotox_path.exists() and neurotox_path.exists():
-        with open(hepatotox_path) as f:
-            hepatotox_data_cnn = json.load(f)
-        with open(neurotox_path) as f:
-            neurotox_data_cnn = json.load(f)
-
-        if "cnn_predictions" in hepatotox_data_cnn:
-            cnn_enrichment.update(compute_classifier_enrichment(hepatotox_data_cnn["cnn_predictions"]))
-        if "cnn_predictions" in neurotox_data_cnn:
-            cnn_enrichment.update(compute_classifier_enrichment(neurotox_data_cnn["cnn_predictions"]))
-
-        if cnn_enrichment:
-            oligoai_tox = back_calculate_enriched(proportions, cnn_enrichment, CNN_STAGE_MAP)
-            cnn_savings = (1 - oligoai_tox["total_cost"] / baseline["total_cost"]) * 100
-            print(f"OligoAI-tox: {oligoai_tox['n_initial']:,} initial ASOs, ${oligoai_tox['total_cost']/1e6:.1f}M total ({cnn_savings:.1f}% reduction)")
-            for task, e in cnn_enrichment.items():
-                if task in CNN_STAGE_MAP:
-                    print(f"  {task}: EF={e['enrichment_factor']:.2f}x (base={e['base_rate']:.2f}, selected={e['selected_pass_rate']:.2f})")
+        print("OligoAI-tox results not found — run `just hagerdorn` first")
 
     # OligoAI enrichment (in vitro efficacy — Gehrmann et al. 2025)
     oligoai = back_calculate_enriched(proportions, OLIGOAI_ENRICHMENT, OLIGOAI_STAGE_MAP)
@@ -439,29 +414,17 @@ def main():
     print(f"OligoAI: {oligoai['n_initial']:,} initial ASOs, ${oligoai['total_cost']/1e6:.1f}M total ({oligoai_savings:.1f}% reduction)")
     print(f"  inhibition: EF={OLIGOAI_ENRICHMENT['inhibition']['enrichment_factor']:.2f}x (hardcoded from Gehrmann et al. 2025)")
 
-    # Combined: OligoAI (inhibition) + Hagedorn (ALT, FOB)
+    # Combined: OligoAI (inhibition) + OligoAI-tox (ALT, FOB)
     combined = None
-    if hagerdorn_enrichment:
+    if oligoai_tox_enrichment:
         combined_enrichment = dict(OLIGOAI_ENRICHMENT)
         for task in STAGE_MAP:
-            if task in hagerdorn_enrichment:
-                combined_enrichment[task] = hagerdorn_enrichment[task]
+            if task in oligoai_tox_enrichment:
+                combined_enrichment[task] = oligoai_tox_enrichment[task]
         combined_stage_map = {**OLIGOAI_STAGE_MAP, **STAGE_MAP}
         combined = back_calculate_enriched(proportions, combined_enrichment, combined_stage_map)
         combined_savings = (1 - combined["total_cost"] / baseline["total_cost"]) * 100
         print(f"Combined: {combined['n_initial']:,} initial ASOs, ${combined['total_cost']/1e6:.1f}M total ({combined_savings:.1f}% reduction)")
-
-    # Combined CNN: OligoAI (inhibition) + OligoAI-tox (ALT, FOB)
-    combined_cnn = None
-    if cnn_enrichment:
-        combined_cnn_enrichment = dict(OLIGOAI_ENRICHMENT)
-        for task in CNN_STAGE_MAP:
-            if task in cnn_enrichment:
-                combined_cnn_enrichment[task] = cnn_enrichment[task]
-        combined_cnn_stage_map = {**OLIGOAI_STAGE_MAP, **CNN_STAGE_MAP}
-        combined_cnn = back_calculate_enriched(proportions, combined_cnn_enrichment, combined_cnn_stage_map)
-        combined_cnn_savings = (1 - combined_cnn["total_cost"] / baseline["total_cost"]) * 100
-        print(f"Combined CNN: {combined_cnn['n_initial']:,} initial ASOs, ${combined_cnn['total_cost']/1e6:.1f}M total ({combined_cnn_savings:.1f}% reduction)")
 
     # Save results
     results = {
@@ -469,11 +432,9 @@ def main():
         "sample_sizes": sample_sizes,
         "distributions": distributions,
         "baseline": baseline,
-        "hagerdorn": hagerdorn,
         "oligoai_tox": oligoai_tox,
         "oligoai": oligoai,
         "combined": combined,
-        "combined_cnn": combined_cnn,
         "stages": [
             {"name": s.name, "short_name": s.short_name, "threshold": s.threshold,
              "cost_per_aso": s.cost_per_aso, "color": s.color}

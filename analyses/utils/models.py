@@ -56,6 +56,77 @@ def dinucleotide_features() -> tuple[list[str], Callable]:
     return features, extract
 
 
+def mononucleotide_features() -> tuple[list[str], Callable]:
+    """
+    Mononucleotide features with collapsed sugar types.
+
+    Same sugar collapsing as dinucleotide (DNA vs MOD).
+    2 sugars × 4 bases = 8 features.
+    """
+    _MONO_SUGAR_MAP = {'MOE': 'MOD', 'cEt': 'MOD', 'DNA': 'DNA'}
+    _MONO_SUGARS = ['DNA', 'MOD']
+    features = [f"{s}_{b}" for s in _MONO_SUGARS for b in BASES]
+
+    def extract(helm: str) -> dict:
+        counts = {f: 0 for f in features}
+        parsed = Helm.parse(helm)
+        if parsed is None:
+            return counts
+
+        for sugar, base in zip(parsed.sugars, parsed.bases):
+            s = _MONO_SUGAR_MAP.get(sugar, sugar)
+            feat = f"{s}_{base}"
+            if feat in counts:
+                counts[feat] += 1
+        return counts
+
+    return features, extract
+
+
+def trinucleotide_features() -> tuple[list[str], Callable]:
+    """
+    Trinucleotide features with collapsed sugar types.
+
+    Same sugar collapsing as dinucleotide (DNA vs MOD), but counting
+    overlapping triplets of adjacent nucleotides with two linkage positions.
+    2 sugars × 4 bases = 8 monomer types → 8³ × 2² linkages = 2048 features.
+    """
+    _TRINUC_SUGAR_MAP = {'MOE': 'MOD', 'cEt': 'MOD', 'DNA': 'DNA'}
+    _TRINUC_SUGARS = ['DNA', 'MOD']
+    LINKS = ['PS', 'PO']
+    trinuc_nuc_types = [f"{s}_{b}" for s in _TRINUC_SUGARS for b in BASES]
+    features = [
+        f"{n1}_{l1}_{n2}_{l2}_{n3}"
+        for n1 in trinuc_nuc_types
+        for n2 in trinuc_nuc_types
+        for n3 in trinuc_nuc_types
+        for l1 in LINKS
+        for l2 in LINKS
+    ]
+
+    def extract(helm: str) -> dict:
+        counts = {f: 0 for f in features}
+        parsed = Helm.parse(helm)
+        if parsed is None:
+            return counts
+
+        for i in range(parsed.length - 2):
+            s1 = _TRINUC_SUGAR_MAP.get(parsed.sugars[i], parsed.sugars[i])
+            b1 = parsed.bases[i]
+            l1 = parsed.backbones[i]
+            s2 = _TRINUC_SUGAR_MAP.get(parsed.sugars[i + 1], parsed.sugars[i + 1])
+            b2 = parsed.bases[i + 1]
+            l2 = parsed.backbones[i + 1]
+            s3 = _TRINUC_SUGAR_MAP.get(parsed.sugars[i + 2], parsed.sugars[i + 2])
+            b3 = parsed.bases[i + 2]
+            feat = f"{s1}_{b1}_{l1}_{s2}_{b2}_{l2}_{s3}_{b3}"
+            if feat in counts:
+                counts[feat] += 1
+        return counts
+
+    return features, extract
+
+
 def position_features(max_pos: int = 20) -> tuple[list[str], Callable]:
     """
     Position-specific single nucleotide features.
@@ -151,16 +222,22 @@ def counts_features() -> tuple[list[str], Callable]:
 def _make_models():
     base_feats, base_extract = baseline_features()
     counts_feats, counts_extract = counts_features()
+    mono_feats, mono_extract = mononucleotide_features()
     dinuc_feats, dinuc_extract = dinucleotide_features()
+    trinuc_feats, trinuc_extract = trinucleotide_features()
     pos_feats, pos_extract = position_features(max_pos=20)
     return {
         'baseline': ModelSpec('Baseline (5)', base_feats, base_extract),
         'counts': ModelSpec('Counts (15)', counts_feats, counts_extract),
+        'mononucleotide': ModelSpec('Mononucleotide (8)', mono_feats, mono_extract),
         'dinucleotide': ModelSpec('Dinucleotide (128)', dinuc_feats, dinuc_extract),
+        'trinucleotide': ModelSpec('Trinucleotide (2048)', trinuc_feats, trinuc_extract),
         'position': ModelSpec('Position (480)', pos_feats, pos_extract),
     }
 
 MODELS = _make_models()
+
+ABLATION_MODELS = ['mononucleotide', 'dinucleotide', 'trinucleotide']
 
 
 # =============================================================================

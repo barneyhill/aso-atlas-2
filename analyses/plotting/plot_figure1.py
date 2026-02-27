@@ -350,6 +350,7 @@ def main():
 
     sankey_gene_path = _root / "typst/plots/fig1" / "sankey_gene_circle.svg"
     fig.savefig(sankey_gene_path, format="svg", bbox_inches='tight')
+    fig.savefig(sankey_gene_path.with_suffix(".png"), format="png", dpi=300, bbox_inches='tight')
     print(f"Saved {sankey_gene_path}")
 
     # Compose panel A (external SVG) + panels B+C into single SVG

@@ -11,9 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, roc_auc_score
-from sklearn.model_selection import GroupKFold
 from scipy.stats import fisher_exact, spearmanr
 
 from analyses.utils.helm import Helm
@@ -23,8 +21,6 @@ from analyses.utils.models import (
     prepare_data,
     train_and_evaluate_grouped,
 )
-from analyses.logic.models.oligoai_tox import train_and_evaluate as cnn_train_and_evaluate
-
 _root = Path(__file__).resolve().parents[3]
 _data_dir = _root / "data/oligostack/processed"
 RESULTS_DIR = _root / "data/results"
@@ -104,13 +100,16 @@ def hagedorn_linear_features(df: pd.DataFrame) -> pd.DataFrame:
 
         bases = parsed.bases
 
-        # G-free stretch from 3' end
+        # G-free stretch from 3' end (capped at 20, default 20 if no G)
         g_free_3p = 0
         for b in reversed(bases):
             if b != "G":
                 g_free_3p += 1
             else:
                 break
+        if g_free_3p == len(bases):  # no G in sequence
+            g_free_3p = 20
+        g_free_3p = min(g_free_3p, 20)
 
         rows.append({
             "g_count": bases.count("G"),
@@ -123,68 +122,45 @@ def hagedorn_linear_features(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows, index=df.index)
 
 
+# ── Hagedorn 2022 exact score (fixed coefficients) ─────────────
+
+# Coefficients from the original R code (trained on 1,645 LNA gapmers,
+# calcium oscillation data). Score > 70 = predicted safe (mild neurotox).
+HAGEDORN_INTERCEPT = 136.0430
+HAGEDORN_COEFS = {
+    "a_count": -3.1263,
+    "c_count": -5.1100,
+    "t_count": -4.7217,
+    "g_count": -10.1264,
+    "g_free_3p": 1.3577,
+}
+HAGEDORN_THRESHOLD = 70  # score > 70 → acceptable (low neurotox)
+
+
+def hagedorn_score(df: pd.DataFrame) -> pd.Series:
+    """Compute the exact Hagedorn 2022 neurotoxicity score.
+
+    score = 136.0430 − 3.1263×A − 5.1100×C − 4.7217×T − 10.1264×G + 1.3577×g_free_3p
+
+    Returns a Series of scores (higher = safer). NaN for unparseable HELM.
+    """
+    feat = hagedorn_linear_features(df)
+    scores = pd.Series(HAGEDORN_INTERCEPT, index=df.index, dtype=float)
+    for col, coef in HAGEDORN_COEFS.items():
+        scores += coef * feat[col]
+    # Round to 1 decimal (matching R code)
+    scores = scores.round(1)
+    # NaN where features are NaN
+    scores[feat.isna().any(axis=1)] = np.nan
+    return scores
+
+
 def binary_labels(df: pd.DataFrame) -> pd.Series:
-    """Neurotoxic (FOB >= 3) vs non-toxic (FOB <= 1), exclude intermediate."""
+    """Neurotoxic (FOB > 1) vs non-toxic (FOB <= 1)."""
     y = pd.Series(index=df.index, dtype=str)
-    y[df["mean_FOB"] >= 3] = "high"
+    y[df["mean_FOB"] > 1] = "high"
     y[df["mean_FOB"] <= 1] = "low"
     return y
-
-
-def run_linear_model_grouped(
-    X: pd.DataFrame, y: pd.Series, groups: pd.Series, n_splits: int = 5
-) -> dict | None:
-    """Logistic regression with GroupKFold."""
-    y_binary = y.astype(int)
-    n_high, n_low = y_binary.sum(), len(y_binary) - y_binary.sum()
-    if n_high < 10 or n_low < 10:
-        return None
-
-    n_groups = groups.nunique()
-    actual_splits = min(n_splits, n_groups)
-    if actual_splits < 2:
-        return None
-
-    gkf = GroupKFold(n_splits=actual_splits)
-    all_preds = pd.Series(index=y_binary.index, dtype=float)
-
-    for train_idx, test_idx in gkf.split(X, y_binary, groups):
-        X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
-        y_train = y_binary.iloc[train_idx]
-
-        model = LogisticRegression(
-            class_weight="balanced", max_iter=1000, random_state=42
-        )
-        model.fit(X_train, y_train)
-
-        proba = model.predict_proba(X_test)[:, 1]
-        all_preds.iloc[test_idx] = proba
-
-    # Optimal threshold via Youden's J on pooled OOF predictions
-    try:
-        threshold = _optimal_threshold(y_binary, all_preds)
-    except ValueError:
-        threshold = 0.5
-    all_pred_labels = (all_preds > threshold).astype(int)
-
-    tn, fp, fn, tp = confusion_matrix(y_binary, all_pred_labels).ravel()
-    acc = (tp + tn) / (tp + tn + fp + fn)
-    sens = tp / (tp + fn) if (tp + fn) > 0 else 0
-    spec = tn / (tn + fp) if (tn + fp) > 0 else 0
-    _, pval = fisher_exact([[tp, fn], [fp, tn]])
-
-    try:
-        auc = roc_auc_score(y_binary, all_preds)
-    except ValueError:
-        auc = np.nan
-
-    return {
-        "n": len(y_binary), "n_high": n_high, "n_low": n_low,
-        "accuracy": acc, "sensitivity": sens, "specificity": spec,
-        "threshold": threshold, "p_value": pval, "auc": auc, "n_groups": n_groups,
-        "predictions": all_preds,
-        "confusion": {"tp": tp, "fp": fp, "tn": tn, "fn": fn},
-    }
 
 
 def run_all_models(df, groups):
@@ -197,41 +173,59 @@ def run_all_models(df, groups):
     results = []
     predictions_dict = {}
 
-    # ---- Hagedorn 2022 linear model ----
-    print("\n  Linear model (5 features)...", end=" ")
-    linear_feat = hagedorn_linear_features(df)
-    mask = y_labels.isin(["high", "low"]) & linear_feat.notna().all(axis=1) & groups.notna()
-    if mask.sum() >= 50:
-        X = linear_feat.loc[mask]
-        y = (y_labels[mask] == "high")
-        g = groups[mask]
-        lr_result = run_linear_model_grouped(X, y, g)
-        if lr_result:
-            results.append({
-                "model": "Linear (5 features)",
-                "N": lr_result["n"], "N_high": lr_result["n_high"], "N_low": lr_result["n_low"],
-                "GK_accuracy": lr_result["accuracy"],
-                "GK_sensitivity": lr_result["sensitivity"],
-                "GK_specificity": lr_result["specificity"],
-                "GK_AUC": lr_result["auc"],
-                "GK_pvalue": lr_result["p_value"],
-                "N_groups": lr_result["n_groups"],
-            })
-            print(f"GK acc={lr_result['accuracy']:.3f} AUC={lr_result['auc']:.3f}")
+    # ---- Hagedorn 2022 score (fixed coefficients, optimised threshold) ----
+    print("\n  Hagedorn score (fixed coefficients)...", end=" ")
+    scores = hagedorn_score(df)
+    mask_score = y_labels.isin(["high", "low"]) & scores.notna() & groups.notna()
+    if mask_score.sum() >= 50:
+        y_score = (y_labels[mask_score] == "high").astype(int)
+        s = scores[mask_score]
+        # Higher score = safer, so use -score as risk predictor for AUC/ROC
+        neg_scores = -s
+        try:
+            auc_score = roc_auc_score(y_score, neg_scores)
+        except ValueError:
+            auc_score = np.nan
 
-            # Save linear model predictions
-            predictions_dict["linear"] = {
-                "predictions": lr_result["predictions"].tolist(),
-                "labels": y.astype(int).tolist(),
-                "n": int(lr_result["n"]),
-                "accuracy": float(lr_result["accuracy"]),
-                "auc": float(lr_result["auc"]),
-                "confusion": {k: int(v) for k, v in lr_result["confusion"].items()},
-            }
-        else:
-            print("skip")
+        # Optimise threshold via Youden's J (paper threshold=70 was for 14-mer LNA)
+        threshold = _optimal_threshold(y_score, neg_scores)
+        pred_labels = (neg_scores > threshold).astype(int)
+        tn, fp, fn, tp = confusion_matrix(y_score, pred_labels).ravel()
+        acc = (tp + tn) / (tp + tn + fp + fn)
+        sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+        spec = tn / (tn + fp) if (tn + fp) > 0 else 0
+        _, pval = fisher_exact([[tp, fn], [fp, tn]])
+        # Convert back to score space for interpretability
+        score_threshold = -threshold
+
+        results.append({
+            "model": "Hagedorn score (5 features)",
+            "N": int(mask_score.sum()),
+            "N_high": int(y_score.sum()),
+            "N_low": int(len(y_score) - y_score.sum()),
+            "GK_accuracy": acc,
+            "GK_sensitivity": sens,
+            "GK_specificity": spec,
+            "GK_AUC": auc_score,
+            "GK_pvalue": pval,
+            "N_groups": groups[mask_score].nunique(),
+        })
+        print(f"acc={acc:.3f} AUC={auc_score:.3f} (threshold={score_threshold:.1f})")
+
+        predictions_dict["hagedorn_score"] = {
+            "predictions": neg_scores.tolist(),
+            "labels": y_score.tolist(),
+            "n": int(mask_score.sum()),
+            "accuracy": float(acc),
+            "auc": float(auc_score),
+            "sensitivity": float(sens),
+            "specificity": float(spec),
+            "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
+            "scores": s.tolist(),
+            "threshold": float(score_threshold),
+        }
     else:
-        print(f"skip (n={mask.sum()})")
+        print(f"skip (n={mask_score.sum()})")
 
     # ---- RF models ----
     for model_key, spec in MODELS.items():
@@ -307,40 +301,56 @@ def run_rat_models(df, groups):
     results = []
     predictions_dict = {}
 
-    # ---- Linear model ----
-    print("\n  Linear model (5 features)...", end=" ")
-    linear_feat = hagedorn_linear_features(df)
-    mask = y_labels.isin(["high", "low"]) & linear_feat.notna().all(axis=1) & groups.notna()
-    if mask.sum() >= 50:
-        X = linear_feat.loc[mask]
-        y = (y_labels[mask] == "high")
-        g = groups[mask]
-        lr_result = run_linear_model_grouped(X, y, g)
-        if lr_result:
-            results.append({
-                "model": "Linear (5 features)",
-                "N": lr_result["n"], "N_high": lr_result["n_high"], "N_low": lr_result["n_low"],
-                "GK_accuracy": lr_result["accuracy"],
-                "GK_sensitivity": lr_result["sensitivity"],
-                "GK_specificity": lr_result["specificity"],
-                "GK_AUC": lr_result["auc"],
-                "GK_pvalue": lr_result["p_value"],
-                "N_groups": lr_result["n_groups"],
-            })
-            print(f"GK acc={lr_result['accuracy']:.3f} AUC={lr_result['auc']:.3f}")
+    # ---- Hagedorn 2022 score (fixed coefficients, optimised threshold) ----
+    print("\n  Hagedorn score (fixed coefficients)...", end=" ")
+    scores = hagedorn_score(df)
+    mask_score = y_labels.isin(["high", "low"]) & scores.notna() & groups.notna()
+    if mask_score.sum() >= 50:
+        y_score = (y_labels[mask_score] == "high").astype(int)
+        s = scores[mask_score]
+        neg_scores = -s
+        try:
+            auc_score = roc_auc_score(y_score, neg_scores)
+        except ValueError:
+            auc_score = np.nan
 
-            predictions_dict["rat_linear"] = {
-                "predictions": lr_result["predictions"].tolist(),
-                "labels": y.astype(int).tolist(),
-                "n": int(lr_result["n"]),
-                "accuracy": float(lr_result["accuracy"]),
-                "auc": float(lr_result["auc"]),
-                "confusion": {k: int(v) for k, v in lr_result["confusion"].items()},
-            }
-        else:
-            print("skip")
+        threshold = _optimal_threshold(y_score, neg_scores)
+        pred_labels = (neg_scores > threshold).astype(int)
+        tn, fp, fn, tp = confusion_matrix(y_score, pred_labels).ravel()
+        acc = (tp + tn) / (tp + tn + fp + fn)
+        sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+        spec = tn / (tn + fp) if (tn + fp) > 0 else 0
+        _, pval = fisher_exact([[tp, fn], [fp, tn]])
+        score_threshold = -threshold
+
+        results.append({
+            "model": "Hagedorn score (5 features)",
+            "N": int(mask_score.sum()),
+            "N_high": int(y_score.sum()),
+            "N_low": int(len(y_score) - y_score.sum()),
+            "GK_accuracy": acc,
+            "GK_sensitivity": sens,
+            "GK_specificity": spec,
+            "GK_AUC": auc_score,
+            "GK_pvalue": pval,
+            "N_groups": groups[mask_score].nunique(),
+        })
+        print(f"acc={acc:.3f} AUC={auc_score:.3f} (threshold={score_threshold:.1f})")
+
+        predictions_dict["rat_hagedorn_score"] = {
+            "predictions": neg_scores.tolist(),
+            "labels": y_score.tolist(),
+            "n": int(mask_score.sum()),
+            "accuracy": float(acc),
+            "auc": float(auc_score),
+            "sensitivity": float(sens),
+            "specificity": float(spec),
+            "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
+            "scores": s.tolist(),
+            "threshold": float(score_threshold),
+        }
     else:
-        print(f"skip (n={mask.sum()})")
+        print(f"skip (n={mask_score.sum()})")
 
     # ---- RF models ----
     for model_key, spec in MODELS.items():
@@ -390,48 +400,6 @@ def run_rat_models(df, groups):
     return pd.DataFrame(results), predictions_dict
 
 
-def run_cnn_models(df, groups, species_prefix=""):
-    """Run OligoAI-tox CNN model on FOB.
-
-    Neurotox data is pre-filtered to fixed dose/route, so no dosing
-    covariates — we use n_cov=0 (empty covariate matrix).
-    """
-    y_labels = binary_labels(df)
-    mask = y_labels.isin(["high", "low"]) & groups.notna()
-    if mask.sum() < 50:
-        print("  CNN: skip (insufficient data)")
-        return {}
-
-    helms = df.loc[mask, "HELM Annotation"].values
-    y = (y_labels[mask] == "high").astype(int).values
-    g = groups[mask].values
-    # No dosing covariates for neurotox (fixed dose/route)
-    cov = np.zeros((mask.sum(), 0), dtype=np.float32)
-
-    key = f"{species_prefix}FOB_cnn"
-    print(f"  OligoAI-tox ({key})...", end=" ")
-    result = cnn_train_and_evaluate(helms, y, g, cov)
-    if result is None:
-        print("skip")
-        return {}
-
-    print(f"acc={result['accuracy']:.3f} AUC={result['auc']:.3f}")
-    return {key: {
-        "predictions": result["predictions"].tolist(),
-        "labels": result["labels"].astype(int).tolist(),
-        "n": result["n"],
-        "accuracy": result["accuracy"],
-        "auc": result["auc"],
-        "sensitivity": result["sensitivity"],
-        "specificity": result["specificity"],
-        "confusion": result["confusion"],
-        "filters_k2": result["filters_k2"].tolist(),
-        "filters_k3": result["filters_k3"].tolist(),
-        "hidden_weights": result["hidden_weights"].tolist(),
-        "output_weights": result["output_weights"].tolist(),
-    }}
-
-
 def cross_species_concordance() -> dict:
     """Compare mouse vs rat FOB scores for shared compounds.
 
@@ -473,13 +441,13 @@ def cross_species_concordance() -> dict:
     ci_lo, ci_hi = np.tanh(z - 1.96 * se), np.tanh(z + 1.96 * se)
     print(f"  FOB: n={len(m_vals)}, Spearman ρ={rho:.3f} [{ci_lo:.3f}, {ci_hi:.3f}], p={pval:.2e}")
 
-    # Binary labels: FOB ≥ 3 = high, FOB ≤ 1 = low
+    # Binary labels: FOB > 1 = high, FOB ≤ 1 = low
     m_label = pd.Series(index=m_vals.index, dtype=str)
-    m_label[m_vals >= 3] = "high"
+    m_label[m_vals > 1] = "high"
     m_label[m_vals <= 1] = "low"
 
     r_label = pd.Series(index=r_vals.index, dtype=str)
-    r_label[r_vals >= 3] = "high"
+    r_label[r_vals > 1] = "high"
     r_label[r_vals <= 1] = "low"
 
     labelled = m_label.isin(["high", "low"]) & r_label.isin(["high", "low"])
@@ -521,16 +489,11 @@ def main():
 
     print(f"\nBinary labels:")
     y_labels = binary_labels(df)
-    print(f"  Neurotoxic (FOB >= 3): {(y_labels == 'high').sum():,}")
+    print(f"  Neurotoxic (FOB > 1): {(y_labels == 'high').sum():,}")
     print(f"  Non-toxic (FOB <= 1): {(y_labels == 'low').sum():,}")
-    print(f"  Excluded (intermediate): {(~y_labels.isin(['high', 'low'])).sum():,}")
 
     print(f"\nRunning models...")
     results_df, predictions_dict = run_all_models(df, groups)
-
-    # ── OligoAI-tox CNN models (mouse) ──
-    print("\n  OligoAI-tox CNN models (mouse)...")
-    cnn_predictions = run_cnn_models(df, groups)
 
     cross_species = cross_species_concordance()
 
@@ -543,17 +506,11 @@ def main():
 
     print(f"\nRat binary labels:")
     rat_y_labels = binary_labels(rat_df)
-    print(f"  Neurotoxic (FOB >= 3): {(rat_y_labels == 'high').sum():,}")
+    print(f"  Neurotoxic (FOB > 1): {(rat_y_labels == 'high').sum():,}")
     print(f"  Non-toxic (FOB <= 1): {(rat_y_labels == 'low').sum():,}")
-    print(f"  Excluded (intermediate): {(~rat_y_labels.isin(['high', 'low'])).sum():,}")
 
     print(f"\nRunning rat models...")
     rat_results_df, rat_predictions = run_rat_models(rat_df, rat_groups)
-
-    # ── OligoAI-tox CNN models (rat) ──
-    print("\n  OligoAI-tox CNN models (rat)...")
-    rat_cnn_preds = run_cnn_models(rat_df, rat_groups, species_prefix="rat_")
-    cnn_predictions.update(rat_cnn_preds)
 
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -565,7 +522,6 @@ def main():
             "cross_species": cross_species,
             "rat_models": rat_results_df.to_dict(orient="records"),
             "rat_predictions": rat_predictions,
-            "cnn_predictions": cnn_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 

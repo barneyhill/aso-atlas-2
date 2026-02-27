@@ -315,6 +315,7 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig2.svg"
     fig.savefig(out_path, format="svg", bbox_inches="tight")
+    fig.savefig(out_path.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {out_path}")
 
@@ -338,6 +339,7 @@ def main():
 
     a_path = OUT_DIR / "fig2-just-A.svg"
     fig_a.savefig(a_path, format="svg", bbox_inches="tight")
+    fig_a.savefig(a_path.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig_a)
     print(f"Saved {a_path}")
 

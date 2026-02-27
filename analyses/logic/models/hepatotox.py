@@ -21,8 +21,6 @@ from analyses.utils.models import (
     run_model_grouped,
     train_and_evaluate_grouped,
 )
-from analyses.logic.models.oligoai_tox import encode_batch, train_and_evaluate as cnn_train_and_evaluate
-
 _root = Path(__file__).resolve().parents[3]
 _data_dir = _root / "data/oligostack/processed"
 RESULTS_DIR = _root / "data/results"
@@ -416,55 +414,6 @@ def mouse_biomarker_correlations() -> dict:
     }
 
 
-def run_cnn_models(df, groups, cov_df, species_prefix=""):
-    """Run OligoAI-tox CNN model on ALT.
-
-    Returns predictions_dict with keys like "ALT_cnn"
-    (or "rat_ALT_cnn" if species_prefix is set).
-    """
-    uln_map = LITERATURE_ULN if not species_prefix else RAT_LITERATURE_ULN
-    uln = uln_map.get("ALT")
-    high_mult, low_mult = THRESHOLDS["ALT"]
-
-    col = "mean_ALT"
-    y_full = pd.Series(index=df.index, dtype=str)
-    y_full[df[col] >= high_mult * uln] = "high"
-    y_full[df[col] < low_mult * uln] = "low"
-
-    mask = y_full.isin(["high", "low"]) & groups.notna()
-    if mask.sum() < 50:
-        print("  CNN: skip (insufficient data)")
-        return {}
-
-    helms = df.loc[mask, "HELM Annotation"].values
-    y = (y_full[mask] == "high").astype(int).values
-    g = groups[mask].values
-    cov = cov_df.loc[mask].values
-
-    key = f"{species_prefix}ALT_cnn"
-    print(f"  OligoAI-tox ({key})...", end=" ")
-    result = cnn_train_and_evaluate(helms, y, g, cov)
-    if result is None:
-        print("skip")
-        return {}
-
-    print(f"acc={result['accuracy']:.3f} AUC={result['auc']:.3f}")
-    return {key: {
-        "predictions": result["predictions"].tolist(),
-        "labels": result["labels"].astype(int).tolist(),
-        "n": result["n"],
-        "accuracy": result["accuracy"],
-        "auc": result["auc"],
-        "sensitivity": result["sensitivity"],
-        "specificity": result["specificity"],
-        "confusion": result["confusion"],
-        "filters_k2": result["filters_k2"].tolist(),
-        "filters_k3": result["filters_k3"].tolist(),
-        "hidden_weights": result["hidden_weights"].tolist(),
-        "output_weights": result["output_weights"].tolist(),
-    }}
-
-
 def main():
     print("=" * 60)
     print("Hagedorn 2013 — Hepatotoxicity Model Replication")
@@ -476,10 +425,6 @@ def main():
 
     print(f"\nRunning models...")
     results_df, predictions_dict = run_all_models(df, groups, cov_df)
-
-    # ── OligoAI-tox CNN models (mouse) ──
-    print("\n  OligoAI-tox CNN models (mouse)...")
-    cnn_predictions = run_cnn_models(df, groups, cov_df)
 
     cross_species = cross_species_concordance()
     biomarker_corr = mouse_biomarker_correlations()
@@ -499,11 +444,6 @@ def main():
     if rat_dinuc:
         rat_predictions["rat_ALT"] = rat_dinuc
 
-    # ── OligoAI-tox CNN models (rat) ──
-    print("\n  OligoAI-tox CNN models (rat)...")
-    rat_cnn_preds = run_cnn_models(rat_df, rat_groups, rat_cov, species_prefix="rat_")
-    cnn_predictions.update(rat_cnn_preds)
-
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "hepatotox.json"
@@ -515,7 +455,6 @@ def main():
             "mouse_biomarker_correlations": biomarker_corr,
             "rat_models": rat_results_df.to_dict(orient="records"),
             "rat_predictions": rat_predictions,
-            "cnn_predictions": cnn_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 

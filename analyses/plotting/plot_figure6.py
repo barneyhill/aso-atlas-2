@@ -6,9 +6,9 @@ Panel B — Summary table (total cost, savings %, enrichment factors).
 
 Scenarios:
   - Baseline: no computational pre-screening
-  - Hagedorn: hepatotox + neurotox classifiers (ALT 1.03x, FOB 1.57x)
   - OligoAI: in vitro efficacy model (inhibition 3.14x, Gehrmann et al. 2025)
-  - Combined: all three enrichment stages
+  - OligoAI-tox: hepatotox + neurotox RF classifiers (ALT + FOB)
+  - Combined: all enrichment stages
 
 Reads: data/results/pipeline_results.json
 """
@@ -244,7 +244,7 @@ def draw_summary_table(baseline, scenarios, ax, enriched_stages=None):
         for stage_idx, info in sorted(enriched_stages.items()):
             label = stage_labels.get(stage_idx, f"Stage {stage_idx}")
             ef = info["enrichment_factor"]
-            ef_lines.append(f"Hagedorn: {label} = {ef:.2f}x")
+            ef_lines.append(f"OligoAI-tox: {label} = {ef:.2f}x")
     for line in ef_lines:
         ax.text(0.07, y, line, fontsize=9, transform=ax.transAxes, va="top",
                 color="#666666")
@@ -259,7 +259,7 @@ def main():
         data = json.load(f)
 
     baseline = data["baseline"]
-    hagerdorn = data.get("hagerdorn")
+    oligoai_tox = data.get("oligoai_tox")
     oligoai = data.get("oligoai")
     combined = data.get("combined")
     stages = data["stages"]
@@ -268,10 +268,10 @@ def main():
     scenarios = [("Baseline", baseline)]
     if oligoai:
         scenarios.append(("OligoAI", oligoai))
-    if hagerdorn:
-        scenarios.append(("Hagedorn", hagerdorn))
+    if oligoai_tox:
+        scenarios.append(("OligoAI-tox", oligoai_tox))
     if combined:
-        scenarios.append(("OligoAI+Hagedorn", combined))
+        scenarios.append(("Combined", combined))
 
     if len(scenarios) < 2:
         raise RuntimeError("No enriched pipeline scenarios found.")
@@ -283,6 +283,7 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig6.svg"
     fig.savefig(out_path, format="svg", bbox_inches="tight")
+    fig.savefig(out_path.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {out_path}")
 
@@ -293,18 +294,20 @@ def main():
         draw_cost_comparison(scenarios_oa, stages, ax_oa)
         oa_path = OUT_DIR / "fig6-just-oligoAI.svg"
         fig_oa.savefig(oa_path, format="svg", bbox_inches="tight")
+        fig_oa.savefig(oa_path.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
         plt.close(fig_oa)
         print(f"Saved {oa_path}")
 
 
-    # ── Variant: Animals (Baseline vs Hagedorn only) ──
+    # ── Variant: Animals (Baseline vs OligoAI-tox only) ──
     scenarios_an = [("Baseline", baseline)]
-    if hagerdorn:
-        scenarios_an.append(("Hagedorn", hagerdorn))
+    if oligoai_tox:
+        scenarios_an.append(("OligoAI-tox", oligoai_tox))
     fig_an, ax_an = plt.subplots(1, 1, figsize=(8, 6), dpi=300)
     draw_animal_comparison(scenarios_an, stages, ax_an)
     an_path = OUT_DIR / "fig6-animals.svg"
     fig_an.savefig(an_path, format="svg", bbox_inches="tight")
+    fig_an.savefig(an_path.with_suffix(".png"), format="png", dpi=300, bbox_inches="tight")
     plt.close(fig_an)
     print(f"Saved {an_path}")
 
