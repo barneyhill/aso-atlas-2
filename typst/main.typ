@@ -20,7 +20,7 @@
 #text-args-authors.insert("size", 12pt)
 
 #show: template.with(
-title: "OligoStack: a public dataset and cost-based benchmark for antisense oligonucleotide preclinical screening",
+title: "OligoStack: a public dataset and cost-based benchmark for antisense oligonuclotioptimise preclinical screening",
 authors: (
 (name: "Barney Hill", affiliation-id: "1,3,5,*"),
 (name: "Nicola Whiffin", affiliation-id: "1,3,4"),
