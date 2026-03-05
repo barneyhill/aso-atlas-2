@@ -323,10 +323,10 @@ def main():
     n_neurotox_asos = neurotox_df["Compound ID"].nunique()
 
     node_labels = {
-        0: f"$\\bf{{In\\ vitro}}$\n$\\bf{{hit\\ screening}}$\n{in_vitro_total_meas:,} measurements\nacross {n_in_vitro_asos:,} ASOs",
-        1: f"$\\bf{{In\\ vitro}}$\n$\\bf{{dose\\ response}}$\n{dose_total_meas:,} measurements\nacross {n_dose_asos:,} ASOs",
-        2: f"$\\bf{{In \\ vivo}}$\n$\\bf{{hepatorenal\\ toxicity}}$\n{hepatic_total_meas:,} measurements\nacross {n_hepatic_asos:,} ASOs",
-        3: f"$\\bf{{In \\ vivo}}$\n$\\bf{{neurological\\ toxicity}}$\n{neurotox_total_meas:,} measurements\nacross {n_neurotox_asos:,} ASOs",
+        0: f"$\\bf{{\\it{{In\\ vitro}}}}$\n$\\bf{{hit\\ screening}}$\n{in_vitro_total_meas:,} measurements\nacross {n_in_vitro_asos:,} ASOs",
+        1: f"$\\bf{{\\it{{In\\ vitro}}}}$\n$\\bf{{dose\\ response}}$\n{dose_total_meas:,} measurements\nacross {n_dose_asos:,} ASOs",
+        2: f"$\\bf{{\\it{{In\\ vivo}}}}$\n$\\bf{{liver\\ toxicity}}$\n{hepatic_total_meas:,} measurements\nacross {n_hepatic_asos:,} ASOs",
+        3: f"$\\bf{{\\it{{In\\ vivo}}}}$\n$\\bf{{neuro\\ tolerability}}$\n{neurotox_total_meas:,} measurements\nacross {n_neurotox_asos:,} ASOs",
         5: "",
     }
 

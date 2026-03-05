@@ -5,8 +5,9 @@ clean:
     uv run python -m analyses.logic.clean
 
 hagerdorn:
-    uv run python -m analyses.logic.models.hepatotox
-    uv run python -m analyses.logic.models.neurotox
+    uv run python -m analyses.logic.models.hepatotox &
+    uv run python -m analyses.logic.models.neurotox &
+    wait
 
 pipeline: clean hagerdorn
     uv run python -m analyses.logic.pipeline
@@ -25,10 +26,18 @@ plots:
     uv run python -m analyses.plotting.plot_figure4
     uv run python -m analyses.plotting.plot_figure5
     uv run python -m analyses.plotting.plot_figure6
+    uv run python -m analyses.plotting.plot_figure7
+    uv run python -m analyses.plotting.plot_supp_enrichment_sweep
+    uv run python -m analyses.plotting.plot_supp_dinucleotide
+    uv run python -m analyses.plotting.plot_supp_alt_ast
+    uv run python -m analyses.plotting.plot_supp_biomarker_dist
 
 # ── Manuscript ───────────────────────────────────────────
 compile:
     typst compile typst/main.typ
+
+export-models:
+    uv run python -m analyses.export_models
 
 build: analysis export plots compile
 

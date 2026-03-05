@@ -91,6 +91,20 @@ def main() -> None:
                 for bm, v in cs.items()
             }
 
+        # Combined (mouse+rat) hepatotoxicity model
+        if "combined_predictions" in hep_data:
+            cp = hep_data["combined_predictions"]
+            if "combined_ALT" in cp:
+                p = cp["combined_ALT"]
+                numbers["combined_hepatotox"] = {
+                    "accuracy": round(float(p["accuracy"]), 3),
+                    "sensitivity": round(float(p["sensitivity"]), 3),
+                    "specificity": round(float(p["specificity"]), 3),
+                    "auc": round(float(p["auc"]), 3),
+                    "n": int(p["n"]),
+                    "confusion": p["confusion"],
+                }
+
         # Rat hepatotoxicity model (independent CV on rat data)
         if "rat_models" in hep_data:
             rat_df = pd.DataFrame(hep_data["rat_models"])
@@ -135,7 +149,7 @@ def main() -> None:
             if "FOB" in neuro_preds:
                 numbers["oligoai_tox_neurotox"]["confusion"] = neuro_preds["FOB"]["confusion"]
 
-        # Hagedorn linear baseline (neurotox only)
+        # Hagedorn et al. 2022 baseline (neurotox only)
         hagedorn_linear = neuro_df[neuro_df["model"] == "Hagedorn score (5 features)"]
         if len(hagedorn_linear) > 0:
             row = hagedorn_linear.iloc[0]
@@ -185,7 +199,21 @@ def main() -> None:
                 if "rat_predictions" in neuro_data and "rat_FOB" in neuro_data["rat_predictions"]:
                     numbers["rat_neurotox"]["confusion"] = neuro_data["rat_predictions"]["rat_FOB"]["confusion"]
 
-        # Rat Hagedorn linear baseline (neurotox only)
+        # Combined (mouse+rat) neurotoxicity model
+        if "combined_predictions" in neuro_data:
+            cp = neuro_data["combined_predictions"]
+            if "combined_FOB" in cp:
+                p = cp["combined_FOB"]
+                numbers["combined_neurotox"] = {
+                    "accuracy": round(float(p["accuracy"]), 3),
+                    "sensitivity": round(float(p["sensitivity"]), 3),
+                    "specificity": round(float(p["specificity"]), 3),
+                    "auc": round(float(p["auc"]), 3),
+                    "n": int(p["n"]),
+                    "confusion": p["confusion"],
+                }
+
+        # Rat Hagedorn et al. 2022 baseline (neurotox only)
         if "rat_models" in neuro_data:
             rat_df_lin = pd.DataFrame(neuro_data["rat_models"])
             rat_hagedorn = rat_df_lin[rat_df_lin["model"] == "Hagedorn score (5 features)"]

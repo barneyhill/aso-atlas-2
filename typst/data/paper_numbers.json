@@ -22,19 +22,19 @@
     "n_total_measurements": 280027
   },
   "oligoai_tox_hepatotox": {
-    "accuracy": 0.707,
-    "sensitivity": 0.715,
-    "specificity": 0.702,
-    "auc": 0.771,
+    "accuracy": 0.702,
+    "sensitivity": 0.803,
+    "specificity": 0.644,
+    "auc": 0.786,
     "n": 2701,
     "n_high": 980,
     "n_low": 1721,
-    "n_groups": 92,
+    "n_groups": 80,
     "confusion": {
-      "tp": 701,
-      "fp": 512,
-      "tn": 1209,
-      "fn": 279
+      "tp": 482,
+      "fp": 259,
+      "tn": 450,
+      "fn": 193
     }
   },
   "cross_species_hepatotox": {
@@ -60,36 +60,49 @@
       "concordance_n": 363
     }
   },
+  "combined_hepatotox": {
+    "accuracy": 0.679,
+    "sensitivity": 0.62,
+    "specificity": 0.731,
+    "auc": 0.723,
+    "n": 1822,
+    "confusion": {
+      "tp": 522,
+      "fp": 264,
+      "tn": 716,
+      "fn": 320
+    }
+  },
   "rat_hepatotox": {
-    "accuracy": 0.625,
-    "sensitivity": 0.68,
-    "specificity": 0.589,
-    "auc": 0.67,
+    "accuracy": 0.697,
+    "sensitivity": 0.626,
+    "specificity": 0.743,
+    "auc": 0.739,
     "n": 714,
     "n_high": 278,
     "n_low": 436,
-    "n_groups": 42,
+    "n_groups": 38,
     "confusion": {
-      "tp": 189,
-      "fp": 179,
-      "tn": 257,
-      "fn": 89
+      "tp": 91,
+      "fp": 78,
+      "tn": 193,
+      "fn": 76
     }
   },
   "oligoai_tox_neurotox": {
-    "accuracy": 0.769,
-    "sensitivity": 0.781,
-    "specificity": 0.754,
-    "auc": 0.844,
+    "accuracy": 0.777,
+    "sensitivity": 0.838,
+    "specificity": 0.7,
+    "auc": 0.842,
     "n": 2696,
     "n_high": 1499,
     "n_low": 1197,
-    "n_groups": 35,
+    "n_groups": 23,
     "confusion": {
-      "tp": 1170,
-      "fp": 295,
-      "tn": 902,
-      "fn": 329
+      "tp": 1256,
+      "fp": 359,
+      "tn": 838,
+      "fn": 243
     }
   },
   "hagedorn_linear_neurotox": {
@@ -100,7 +113,7 @@
     "n": 2696,
     "n_high": 1499,
     "n_low": 1197,
-    "n_groups": 35,
+    "n_groups": 23,
     "confusion": {
       "tp": 1101,
       "fp": 396,
@@ -118,19 +131,32 @@
     }
   },
   "rat_neurotox": {
-    "accuracy": 0.762,
-    "sensitivity": 0.81,
-    "specificity": 0.674,
-    "auc": 0.796,
+    "accuracy": 0.734,
+    "sensitivity": 0.739,
+    "specificity": 0.724,
+    "auc": 0.787,
     "n": 1779,
     "n_high": 1156,
     "n_low": 623,
-    "n_groups": 27,
+    "n_groups": 17,
     "confusion": {
-      "tp": 936,
-      "fp": 203,
-      "tn": 420,
-      "fn": 220
+      "tp": 854,
+      "fp": 172,
+      "tn": 451,
+      "fn": 302
+    }
+  },
+  "combined_neurotox": {
+    "accuracy": 0.757,
+    "sensitivity": 0.763,
+    "specificity": 0.747,
+    "auc": 0.831,
+    "n": 4475,
+    "confusion": {
+      "tp": 2026,
+      "fp": 460,
+      "tn": 1360,
+      "fn": 629
     }
   },
   "hagedorn_linear_rat_neurotox": {
@@ -141,7 +167,7 @@
     "n": 1779,
     "n_high": 1156,
     "n_low": 623,
-    "n_groups": 27,
+    "n_groups": 17,
     "confusion": {
       "tp": 947,
       "fp": 253,
@@ -152,18 +178,18 @@
   "pipeline": {
     "baseline_n_initial": 568,
     "baseline_total_cost": 1288000,
-    "oligoai_tox_n_initial": 246,
-    "oligoai_tox_total_cost": 696000,
-    "oligoai_tox_savings_pct": 46.0,
-    "ef_mouse_ALT": 1.177,
-    "ef_mouse_FOB": 1.732,
-    "ef_rat_ALT": 1.077,
-    "ef_rat_FOB": 2.095,
+    "oligoai_tox_n_initial": 136,
+    "oligoai_tox_total_cost": 490000,
+    "oligoai_tox_savings_pct": 62.0,
+    "ef_mouse_ALT": 1.489,
+    "ef_mouse_FOB": 1.918,
+    "ef_rat_ALT": 1.305,
+    "ef_rat_FOB": 2.026,
     "oligoai_n_initial": 181,
     "oligoai_total_cost": 1094500,
     "oligoai_savings_pct": 15.0,
-    "combined_n_initial": 79,
-    "combined_total_cost": 612500,
-    "combined_savings_pct": 52.4
+    "combined_n_initial": 44,
+    "combined_total_cost": 444000,
+    "combined_savings_pct": 65.5
   }
 }

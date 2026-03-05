@@ -48,13 +48,14 @@ PIPELINE_STAGES = [
     PipelineStage("In vitro efficacy", "In vitro\nefficacy", "Inhibition >80%", 500, "#4878A8"),
     PipelineStage("In vitro potency", "In vitro\npotency", "IC50 <500nM", 2000, "#6A9BC3"),
     PipelineStage("Mouse liver toxicity", "Mouse liver\ntoxicity", "ALT <2×ULN", 15000, "#D4A574"),
-    PipelineStage("Mouse neurotoxicity", "Mouse neuro\ntoxicity", "bFOB <=1", 20000, "#E8B88A"),
+    PipelineStage("Mouse neuro tolerability", "Mouse neuro\ntolerability", "bFOB <=1", 20000, "#E8B88A"),
     PipelineStage("Rat liver toxicity", "Rat liver\ntoxicity", "ALT <2×ULN", 25000, "#7BAA97"),
-    PipelineStage("Rat neurotoxicity", "Rat neuro\ntoxicity", "mFOB <=1", 30000, "#94C4A7"),
+    PipelineStage("Rat neuro tolerability", "Rat neuro\ntolerability", "mFOB <=1", 30000, "#94C4A7"),
     PipelineStage("Monkey liver toxicity", "Monkey liver\ntoxicity", "ALT <2×ULN", 100000, "#9B8AA6"),
 ]
 
 TARGET_CANDIDATES = 1
+TOP_K_SELECTION_FRACTION = 0.25
 
 # Maps prediction keys → pipeline stage indices (OligoAI-tox RF)
 STAGE_MAP = {"ALT": 2, "FOB": 3, "rat_ALT": 4, "rat_FOB": 5}
@@ -263,9 +264,10 @@ def back_calculate(proportions):
 def compute_classifier_enrichment(preds_data: dict) -> dict:
     """Compute enrichment factors from Hagedorn classifier predictions.
 
-    For each endpoint, compounds predicted as LOW toxicity (P(high) < 0.5)
-    are the "selected" pool. Among those, the fraction that actually pass
-    the pipeline threshold gives the enrichment factor.
+    For each endpoint, the selected pool is the top-K safest compounds
+    (lowest predicted P(high)), where K = floor(25% of available compounds).
+    Among those, the fraction that actually pass the pipeline threshold gives
+    the enrichment factor.
 
     Returns dict mapping task name → {enrichment_factor, base_rate, selected_pass_rate, n}.
     """
@@ -277,8 +279,12 @@ def compute_classifier_enrichment(preds_data: dict) -> dict:
         # Base rate: fraction that are actually low toxicity (pass)
         base_pass_rate = float((labels == 0).mean())
 
-        # Selected: compounds predicted as low toxicity (P(high) < 0.5)
-        selected_mask = predictions < 0.5
+        # Selected: top-K safest compounds by predicted P(high).
+        n = len(labels)
+        k = max(1, int(np.floor(TOP_K_SELECTION_FRACTION * n)))
+        selected_idx = np.argsort(predictions, kind="mergesort")[:k]
+        selected_mask = np.zeros(n, dtype=bool)
+        selected_mask[selected_idx] = True
         if selected_mask.sum() == 0:
             continue
 
@@ -293,6 +299,8 @@ def compute_classifier_enrichment(preds_data: dict) -> dict:
             "selected_pass_rate": round(selected_pass_rate, 3),
             "n": int(len(labels)),
             "n_selected": int(selected_mask.sum()),
+            "selection_policy": "top_k_safest",
+            "selection_fraction": TOP_K_SELECTION_FRACTION,
         }
 
     return enrichment

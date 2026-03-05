@@ -18,22 +18,13 @@ from analyses.utils.helm import Helm
 from analyses.utils.models import (
     MODELS,
     _optimal_threshold,
+    mean_of_array,
     prepare_data,
     train_and_evaluate_grouped,
 )
 _root = Path(__file__).resolve().parents[3]
 _data_dir = _root / "data/oligostack/processed"
 RESULTS_DIR = _root / "data/results"
-
-
-def _mean_of_array(val):
-    """Compute mean from array/scalar FOB column."""
-    if isinstance(val, (np.ndarray, list)):
-        valid = [v for v in val if v is not None and not np.isnan(v)]
-        return np.mean(valid) if valid else np.nan
-    if val is not None and not np.isnan(val):
-        return float(val)
-    return np.nan
 
 
 def load_and_filter():
@@ -49,37 +40,16 @@ def load_and_filter():
     ].copy()
     print(f"After filter (Mouse, 700ug ICV, valid chemistry): {len(df):,} rows")
 
-    df["mean_FOB"] = df["FOB_score"].apply(_mean_of_array)
+    df["mean_FOB"] = df["FOB_score"].apply(mean_of_array)
     df = df[df["mean_FOB"].notna()].reset_index(drop=True)
     print(f"With valid FOB scores: {len(df):,} rows")
     return df
 
 
 def assign_groups(df: pd.DataFrame) -> pd.Series:
-    """Assign target-level groups via in_vitro join + USPTO fallback."""
-    groups = pd.Series(index=df.index, dtype=object)
-
-    # Join via Compound ID to in_vitro target_RNA
-    invitro = pd.read_parquet(_data_dir / "in_vitro_inhibition_processed.parquet")
-    cid_to_target = (
-        invitro.dropna(subset=["target_RNA"])
-        .groupby("Compound ID")["target_RNA"]
-        .first()
-    )
-    groups = df["Compound ID"].map(cid_to_target)
-    n_invitro = groups.notna().sum()
-    print(f"  Filled {n_invitro} groups via in_vitro Compound ID join")
-
-    # Remaining: use USPTO ID as proxy
-    still_missing = groups.isna()
-    if still_missing.any():
-        groups.loc[still_missing] = df.loc[still_missing, "USPTO ID"].apply(
-            lambda x: f"patent_{x}" if pd.notna(x) else None
-        )
-        n_patent = still_missing.sum() - groups.isna().sum()
-        print(f"  Filled {n_patent} groups via USPTO ID proxy")
-
-    print(f"  Total grouped: {groups.notna().sum()}/{len(df)}, {groups.nunique()} unique groups")
+    """Assign patent-level groups for GroupKFold (patent_<USPTO ID>)."""
+    groups = df["USPTO ID"].apply(lambda x: f"patent_{x}" if pd.notna(x) else None)
+    print(f"  Total grouped: {groups.notna().sum()}/{len(df)}, {groups.nunique()} unique patents")
     return groups
 
 
@@ -163,69 +133,68 @@ def binary_labels(df: pd.DataFrame) -> pd.Series:
     return y
 
 
-def run_all_models(df, groups):
-    """Run linear model + RF models.
+def run_species_models(df, groups, pred_key_prefix="", include_hagedorn=False):
+    """Run all model variants on FOB, sequence-only.
 
-    Returns (results_df, predictions_dict) where predictions_dict contains
-    the dinucleotide model predictions for pipeline enrichment.
+    Returns (results_df, predictions_dict).
     """
     y_labels = binary_labels(df)
     results = []
     predictions_dict = {}
 
     # ---- Hagedorn 2022 score (fixed coefficients, optimised threshold) ----
-    print("\n  Hagedorn score (fixed coefficients)...", end=" ")
-    scores = hagedorn_score(df)
-    mask_score = y_labels.isin(["high", "low"]) & scores.notna() & groups.notna()
-    if mask_score.sum() >= 50:
-        y_score = (y_labels[mask_score] == "high").astype(int)
-        s = scores[mask_score]
-        # Higher score = safer, so use -score as risk predictor for AUC/ROC
-        neg_scores = -s
-        try:
-            auc_score = roc_auc_score(y_score, neg_scores)
-        except ValueError:
-            auc_score = np.nan
+    if include_hagedorn:
+        print("\n  Hagedorn score (fixed coefficients)...", end=" ")
+        scores = hagedorn_score(df)
+        mask_score = y_labels.isin(["high", "low"]) & scores.notna() & groups.notna()
+        if mask_score.sum() >= 50:
+            y_score = (y_labels[mask_score] == "high").astype(int)
+            s = scores[mask_score]
+            # Higher score = safer, so use -score as risk predictor for AUC/ROC
+            neg_scores = -s
+            try:
+                auc_score = roc_auc_score(y_score, neg_scores)
+            except ValueError:
+                auc_score = np.nan
 
-        # Optimise threshold via Youden's J (paper threshold=70 was for 14-mer LNA)
-        threshold = _optimal_threshold(y_score, neg_scores)
-        pred_labels = (neg_scores > threshold).astype(int)
-        tn, fp, fn, tp = confusion_matrix(y_score, pred_labels).ravel()
-        acc = (tp + tn) / (tp + tn + fp + fn)
-        sens = tp / (tp + fn) if (tp + fn) > 0 else 0
-        spec = tn / (tn + fp) if (tn + fp) > 0 else 0
-        _, pval = fisher_exact([[tp, fn], [fp, tn]])
-        # Convert back to score space for interpretability
-        score_threshold = -threshold
+            # Optimise threshold via Youden's J (paper threshold=70 was for 14-mer LNA)
+            threshold = _optimal_threshold(y_score, neg_scores)
+            pred_labels = (neg_scores > threshold).astype(int)
+            tn, fp, fn, tp = confusion_matrix(y_score, pred_labels).ravel()
+            acc = (tp + tn) / (tp + tn + fp + fn)
+            sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+            spec = tn / (tn + fp) if (tn + fp) > 0 else 0
+            _, pval = fisher_exact([[tp, fn], [fp, tn]])
+            score_threshold = -threshold
 
-        results.append({
-            "model": "Hagedorn score (5 features)",
-            "N": int(mask_score.sum()),
-            "N_high": int(y_score.sum()),
-            "N_low": int(len(y_score) - y_score.sum()),
-            "GK_accuracy": acc,
-            "GK_sensitivity": sens,
-            "GK_specificity": spec,
-            "GK_AUC": auc_score,
-            "GK_pvalue": pval,
-            "N_groups": groups[mask_score].nunique(),
-        })
-        print(f"acc={acc:.3f} AUC={auc_score:.3f} (threshold={score_threshold:.1f})")
+            results.append({
+                "model": "Hagedorn score (5 features)",
+                "N": int(mask_score.sum()),
+                "N_high": int(y_score.sum()),
+                "N_low": int(len(y_score) - y_score.sum()),
+                "GK_accuracy": acc,
+                "GK_sensitivity": sens,
+                "GK_specificity": spec,
+                "GK_AUC": auc_score,
+                "GK_pvalue": pval,
+                "N_groups": groups[mask_score].nunique(),
+            })
+            print(f"acc={acc:.3f} AUC={auc_score:.3f} (threshold={score_threshold:.1f})")
 
-        predictions_dict["hagedorn_score"] = {
-            "predictions": neg_scores.tolist(),
-            "labels": y_score.tolist(),
-            "n": int(mask_score.sum()),
-            "accuracy": float(acc),
-            "auc": float(auc_score),
-            "sensitivity": float(sens),
-            "specificity": float(spec),
-            "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
-            "scores": s.tolist(),
-            "threshold": float(score_threshold),
-        }
-    else:
-        print(f"skip (n={mask_score.sum()})")
+            predictions_dict[f"{pred_key_prefix}hagedorn_score"] = {
+                "predictions": neg_scores.tolist(),
+                "labels": y_score.tolist(),
+                "n": int(mask_score.sum()),
+                "accuracy": float(acc),
+                "auc": float(auc_score),
+                "sensitivity": float(sens),
+                "specificity": float(spec),
+                "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
+                "scores": s.tolist(),
+                "threshold": float(score_threshold),
+            }
+        else:
+            print(f"skip (n={mask_score.sum()})")
 
     # ---- RF models ----
     for model_key, spec in MODELS.items():
@@ -241,7 +210,10 @@ def run_all_models(df, groups):
         y = (y_labels[mask] == "high")
         g = groups[mask]
 
-        gk_result = train_and_evaluate_grouped(X, y, g)
+        gk_result = train_and_evaluate_grouped(
+            X, y, g,
+            make_classifier=spec.make_classifier,
+        )
 
         row = {"model": spec.name}
         if gk_result:
@@ -256,8 +228,10 @@ def run_all_models(df, groups):
             })
             print(f"GK acc={gk_result['accuracy']:.3f}")
 
-            if model_key == "dinucleotide":
-                predictions_dict["FOB"] = {
+            if model_key in ("dinucleotide", "dinucleotide_decomposed"):
+                suffix = "" if model_key == "dinucleotide" else "_decomposed"
+                pred_key = f"{pred_key_prefix}FOB{suffix}"
+                predictions_dict[pred_key] = {
                     "predictions": gk_result["predictions"].tolist(),
                     "labels": y.astype(int).tolist(),
                     "n": int(gk_result["n"]),
@@ -266,6 +240,8 @@ def run_all_models(df, groups):
                     "sensitivity": float(gk_result["sensitivity"]),
                     "specificity": float(gk_result["specificity"]),
                     "confusion": {k: int(v) for k, v in gk_result["confusion"].items()},
+                    "feature_names": gk_result["feature_names"],
+                    "fold_importances": gk_result["fold_importances"],
                 }
         else:
             print("GK=skip")
@@ -286,24 +262,54 @@ def load_and_filter_rat():
     ].copy()
     print(f"Rat neurotox data: {len(df):,} rows")
 
-    df["mean_FOB"] = df["FOB_score"].apply(_mean_of_array)
+    df["mean_FOB"] = df["FOB_score"].apply(mean_of_array)
     df = df[df["mean_FOB"].notna()].reset_index(drop=True)
     print(f"With valid FOB scores: {len(df):,} rows")
     return df
 
 
-def run_rat_models(df, groups):
-    """Run linear + RF models on rat FOB data with GroupKFold.
+def run_combined_models():
+    """Run combined mouse+rat neurotox model with species as a binary covariate.
 
-    Returns (results_df, predictions_dict) — same structure as mouse.
+    Applies species-specific dosing filters:
+      - Mouse: 700μg ICV
+      - Rat: 3000μg, latency 3h
+    Same binary label threshold for both: FOB > 1 = toxic.
     """
-    y_labels = binary_labels(df)
-    results = []
-    predictions_dict = {}
+    print("\n" + "=" * 60)
+    print("Combined (Mouse+Rat) Neurotoxicity Model")
+    print("=" * 60)
 
-    # ---- Hagedorn 2022 score (fixed coefficients, optimised threshold) ----
-    print("\n  Hagedorn score (fixed coefficients)...", end=" ")
-    scores = hagedorn_score(df)
+    df_all = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
+    df_all = df_all[df_all["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
+    df_all["mean_FOB"] = df_all["FOB_score"].apply(mean_of_array)
+    df_all = df_all[df_all["mean_FOB"].notna()]
+
+    mouse = df_all[
+        (df_all["species"] == "Mouse")
+        & (df_all["dosage_ug"] == 700)
+        & (df_all["administration_method"] == "ICV")
+    ].copy()
+    rat = df_all[
+        (df_all["species"] == "Rat")
+        & (df_all["dosage_ug"] == 3000)
+        & (df_all["latency_time_hours"] == 3)
+    ].copy()
+
+    df_combined = pd.concat([mouse, rat], ignore_index=True)
+    print(f"Combined neurotox data: {len(df_combined):,} rows (Mouse: {len(mouse)}, Rat: {len(rat)})")
+
+    is_rat = (df_combined["species"] == "Rat").astype(int)
+
+    y_labels = binary_labels(df_combined)
+    print(f"  Labels: {(y_labels == 'high').sum()} high, {(y_labels == 'low').sum()} low")
+
+    groups = assign_groups(df_combined)
+    predictions = {}
+
+    # ---- Hagedorn score (fixed coefficients) on combined data ----
+    print("\n  Hagedorn score (combined)...", end=" ")
+    scores = hagedorn_score(df_combined)
     mask_score = y_labels.isin(["high", "low"]) & scores.notna() & groups.notna()
     if mask_score.sum() >= 50:
         y_score = (y_labels[mask_score] == "high").astype(int)
@@ -320,24 +326,9 @@ def run_rat_models(df, groups):
         acc = (tp + tn) / (tp + tn + fp + fn)
         sens = tp / (tp + fn) if (tp + fn) > 0 else 0
         spec = tn / (tn + fp) if (tn + fp) > 0 else 0
-        _, pval = fisher_exact([[tp, fn], [fp, tn]])
-        score_threshold = -threshold
+        print(f"AUC={auc_score:.3f}")
 
-        results.append({
-            "model": "Hagedorn score (5 features)",
-            "N": int(mask_score.sum()),
-            "N_high": int(y_score.sum()),
-            "N_low": int(len(y_score) - y_score.sum()),
-            "GK_accuracy": acc,
-            "GK_sensitivity": sens,
-            "GK_specificity": spec,
-            "GK_AUC": auc_score,
-            "GK_pvalue": pval,
-            "N_groups": groups[mask_score].nunique(),
-        })
-        print(f"acc={acc:.3f} AUC={auc_score:.3f} (threshold={score_threshold:.1f})")
-
-        predictions_dict["rat_hagedorn_score"] = {
+        predictions["combined_hagedorn_score"] = {
             "predictions": neg_scores.tolist(),
             "labels": y_score.tolist(),
             "n": int(mask_score.sum()),
@@ -346,58 +337,47 @@ def run_rat_models(df, groups):
             "sensitivity": float(sens),
             "specificity": float(spec),
             "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
-            "scores": s.tolist(),
-            "threshold": float(score_threshold),
         }
     else:
         print(f"skip (n={mask_score.sum()})")
 
-    # ---- RF models ----
-    for model_key, spec in MODELS.items():
-        print(f"  {spec.name}...", end=" ")
-        feature_df = prepare_data(df, model_key)
+    # ---- Dinucleotide RF model ----
+    model_key = "dinucleotide"
+    model_spec = MODELS[model_key]
+    feature_df = prepare_data(df_combined, model_key)
 
-        mask = y_labels.isin(["high", "low"]) & feature_df.notna().all(axis=1) & groups.notna()
-        if mask.sum() < 50:
-            print(f"skip (n={mask.sum()})")
-            continue
+    mask = y_labels.isin(["high", "low"]) & feature_df.notna().all(axis=1) & groups.notna()
+    if mask.sum() < 50:
+        print("  Combined FOB: skip (insufficient data)")
+        return predictions
 
-        X = feature_df.loc[mask]
-        y = (y_labels[mask] == "high")
-        g = groups[mask]
+    # Add species covariate
+    X = feature_df.loc[mask].copy()
+    X["species_rat"] = is_rat[mask].values
+    y = (y_labels[mask] == "high")
+    g = groups[mask]
 
-        gk_result = train_and_evaluate_grouped(X, y, g)
+    print(f"  Dinucleotide + species (n={mask.sum()})...", end=" ")
+    result = train_and_evaluate_grouped(X, y, g, make_classifier=model_spec.make_classifier)
 
-        row = {"model": spec.name}
-        if gk_result:
-            row.update({
-                "N": gk_result["n"], "N_high": gk_result["n_high"], "N_low": gk_result["n_low"],
-                "GK_accuracy": gk_result["accuracy"],
-                "GK_sensitivity": gk_result["sensitivity"],
-                "GK_specificity": gk_result["specificity"],
-                "GK_AUC": gk_result["auc"],
-                "GK_pvalue": gk_result["p_value"],
-                "N_groups": gk_result["n_groups"],
-            })
-            print(f"GK acc={gk_result['accuracy']:.3f}")
+    if result:
+        print(f"AUC={result['auc']:.3f}")
+        predictions["combined_FOB"] = {
+            "predictions": result["predictions"].tolist(),
+            "labels": y.astype(int).tolist(),
+            "n": int(result["n"]),
+            "accuracy": float(result["accuracy"]),
+            "auc": float(result["auc"]),
+            "sensitivity": float(result["sensitivity"]),
+            "specificity": float(result["specificity"]),
+            "confusion": {k: int(v) for k, v in result["confusion"].items()},
+            "feature_names": result["feature_names"],
+            "fold_importances": result["fold_importances"],
+        }
+    else:
+        print("skip")
 
-            if model_key == "dinucleotide":
-                predictions_dict["rat_FOB"] = {
-                    "predictions": gk_result["predictions"].tolist(),
-                    "labels": y.astype(int).tolist(),
-                    "n": int(gk_result["n"]),
-                    "accuracy": float(gk_result["accuracy"]),
-                    "auc": float(gk_result["auc"]),
-                    "sensitivity": float(gk_result["sensitivity"]),
-                    "specificity": float(gk_result["specificity"]),
-                    "confusion": {k: int(v) for k, v in gk_result["confusion"].items()},
-                }
-        else:
-            print("GK=skip")
-
-        results.append(row)
-
-    return pd.DataFrame(results), predictions_dict
+    return predictions
 
 
 def cross_species_concordance() -> dict:
@@ -408,7 +388,7 @@ def cross_species_concordance() -> dict:
     """
     df_all = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
     df_all = df_all[df_all["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
-    df_all["mean_FOB"] = df_all["FOB_score"].apply(_mean_of_array)
+    df_all["mean_FOB"] = df_all["FOB_score"].apply(mean_of_array)
     df_all = df_all[df_all["mean_FOB"].notna()]
 
     mouse = df_all[
@@ -493,7 +473,9 @@ def main():
     print(f"  Non-toxic (FOB <= 1): {(y_labels == 'low').sum():,}")
 
     print(f"\nRunning models...")
-    results_df, predictions_dict = run_all_models(df, groups)
+    results_df, predictions_dict = run_species_models(
+        df, groups, include_hagedorn=True,
+    )
 
     cross_species = cross_species_concordance()
 
@@ -510,7 +492,12 @@ def main():
     print(f"  Non-toxic (FOB <= 1): {(rat_y_labels == 'low').sum():,}")
 
     print(f"\nRunning rat models...")
-    rat_results_df, rat_predictions = run_rat_models(rat_df, rat_groups)
+    rat_results_df, rat_predictions = run_species_models(
+        rat_df, rat_groups, "rat_", include_hagedorn=True,
+    )
+
+    # ── Combined (mouse + rat) model ──
+    combined_predictions = run_combined_models()
 
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -522,6 +509,7 @@ def main():
             "cross_species": cross_species,
             "rat_models": rat_results_df.to_dict(orient="records"),
             "rat_predictions": rat_predictions,
+            "combined_predictions": combined_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 

@@ -64,10 +64,11 @@ def draw_cost_comparison(scenarios, stages, ax):
         ax.text(x_positions[j], total + max(totals) * 0.02, f"${total:.2f}M",
                 ha="center", va="bottom", fontsize=10, fontweight="bold")
 
-    ax.set_ylim(0, max(totals) * 1.28)
+    ax.set_ylim(0, 1.5)
     ax.set_ylabel("Total Cost ($M)", fontsize=12)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.xaxis.grid(False)
 
     # ── Bracket between first and last bar showing cost decrease ──
     if n_scenarios >= 2:
@@ -88,16 +89,25 @@ def draw_cost_comparison(scenarios, stages, ax):
     bar_right = x_positions[last_idx] + bar_width / 2
     elbow_x = bar_right + 0.15   # horizontal kink point
     label_x = bar_right + 0.30   # where text starts
+    # Keep full room for right-hand labels while truncating grid lines at bar edge.
+    x_left = x_positions[0] - 0.5
+    grid_right = bar_right + 0.08
+    ax.set_xlim(x_left, label_x + 1.0)
+    ax.spines["bottom"].set_bounds(x_left, grid_right)
+    for y_tick in ax.get_yticks():
+        if ax.get_ylim()[0] <= y_tick <= ax.get_ylim()[1]:
+            ax.hlines(y_tick, x_left, grid_right, colors="#666666",
+                      linestyles="--", linewidth=0.7, alpha=0.35, zorder=0)
 
     n_labels = len(last_midpoints)
-    y_max = max(totals) * 0.78  # ~70% of full plot height
-    spacing = y_max / (n_labels + 1)
-    even_ys = [spacing * (i + 1) for i in range(n_labels)]
+    y_min, y_max = ax.get_ylim()
+    y_span = y_max - y_min
+    if n_labels > 1:
+        label_ys = np.linspace(y_min + 0.05 * y_span, y_min + 0.75 * y_span, n_labels)
+    else:
+        label_ys = np.array([y_min + 0.5 * y_span])
 
-    # Size of colour swatch in data coords
-    swatch_size = spacing * 0.35
-
-    for (seg_y, cat, color), label_y in zip(last_midpoints, even_ys):
+    for (seg_y, cat, color), label_y in zip(last_midpoints, label_ys):
         # Straight line from segment midpoint to label
         ax.plot(
             [bar_right, label_x - 0.04],
@@ -156,6 +166,7 @@ def draw_animal_comparison(scenarios, stages, ax):
     ax.set_ylabel("Animals", fontsize=12)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.xaxis.grid(False)
 
     # Bracket between first and last bar
     if n_scenarios >= 2:
@@ -175,11 +186,23 @@ def draw_animal_comparison(scenarios, stages, ax):
     # Inline labels
     bar_right = x_positions[last_idx] + bar_width / 2
     label_x = bar_right + 0.30
+    # Keep full room for right-hand labels while truncating grid lines at bar edge.
+    x_left = x_positions[0] - 0.5
+    grid_right = bar_right + 0.08
+    ax.set_xlim(x_left, label_x + 1.0)
+    ax.spines["bottom"].set_bounds(x_left, grid_right)
+    for y_tick in ax.get_yticks():
+        if ax.get_ylim()[0] <= y_tick <= ax.get_ylim()[1]:
+            ax.hlines(y_tick, x_left, grid_right, colors="#666666",
+                      linestyles="--", linewidth=0.7, alpha=0.35, zorder=0)
 
     n_labels = len(last_midpoints)
-    y_max = max(totals) * 0.78
-    spacing = y_max / (n_labels + 1)
-    even_ys = [spacing * (i + 1) for i in range(n_labels)]
+    y_min, y_max = ax.get_ylim()
+    y_span = y_max - y_min
+    if n_labels > 1:
+        even_ys = np.linspace(y_min + 0.05 * y_span, y_min + 0.75 * y_span, n_labels)
+    else:
+        even_ys = np.array([y_min + 0.5 * y_span])
 
     for (seg_y, cat, color), label_y in zip(last_midpoints, even_ys):
         ax.plot([bar_right, label_x - 0.04], [seg_y, label_y],
@@ -271,7 +294,7 @@ def main():
     if oligoai_tox:
         scenarios.append(("OligoAI-tox", oligoai_tox))
     if combined:
-        scenarios.append(("Combined", combined))
+        scenarios.append(("OligoAI +\nOligoAI-tox", combined))
 
     if len(scenarios) < 2:
         raise RuntimeError("No enriched pipeline scenarios found.")

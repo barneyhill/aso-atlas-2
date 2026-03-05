@@ -81,33 +81,33 @@ OligoStack comprises four linked assay categories extracted from USPTO patent fi
 
 The ASO preclinical pipeline consists of seven sequential stages: in vitro efficacy (inhibition \>80%), in vitro potency (IC50 \<500 nM by electroporation), mouse liver toxicity (ALT \<2$times$ULN), mouse neurotoxicity (bFOB ≤1), rat liver toxicity (ALT \<2$times$ULN), rat neurotoxicity (mFOB ≤1), and monkey liver toxicity (@fig2). Back-calculation from OligoStack pass rates shows that producing a single development candidate requires screening approximately #comma(R.pipeline.baseline_n_initial) initial ASOs at an estimated total cost of \$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 1))M. The majority of this cost is concentrated at the in vivo stages, where per-ASO costs range from \$15,000 (mouse) to \$100,000 (monkey).
 
-== Clinical Benchmark: Zilganersen
-
-#figure(
-  image("plots/fig3/fig3.svg", width: 100%),
-  caption: [ION582 in context of OligoStack distributions. Grey bars show all targets; blue bars highlight _UBE3A-ATS_-targeting ASOs; the red arrow marks ION582. *(A)* IC50 distribution under gymnosis/free-uptake conditions. *(B)* Mouse bFOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat mFOB score distribution (IT, 3,000 µg, 3 h post-dose).],
-) <fig3>
-
-To contextualise the dataset, we benchmarked ION582, a clinical-stage ASO targeting _UBE3A-ATS_ for Angelman syndrome, against the OligoStack distributions (@fig3). This demonstrates that the dataset captures the range of preclinical properties relevant to clinical development.
-
 == Toxicity Prediction
 
 #figure(
   image("plots/fig4/fig4.svg", width: 100%),
-  caption: [OligoAI-tox: Hagedorn's dinucleotide RF trained on ASO Atlas 2.0 with GroupKFold cross-validation by target gene. *Top row:* Hepatotoxicity (mouse ALT, rat ALT). *Bottom row:* Neurotoxicity (mouse bFOB, rat mFOB). Each panel pair shows ROC curves and confusion matrices. For neurotoxicity, the dashed grey line shows the Hagedorn linear baseline (5 fixed coefficients). Mouse ALT: accuracy = #str(R.oligoai_tox_hepatotox.accuracy), AUC = #str(R.oligoai_tox_hepatotox.auc). Mouse bFOB: accuracy = #str(R.oligoai_tox_neurotox.accuracy), AUC = #str(R.oligoai_tox_neurotox.auc).],
-) <fig4>
+  caption: [OligoAI-tox: Hagedorn's dinucleotide RF trained on ASO Atlas 2.0 with GroupKFold cross-validation by target gene. *Top row:* Hepatotoxicity (mouse ALT, rat ALT). *Bottom row:* Neurotoxicity (mouse bFOB, rat mFOB). Each panel pair shows ROC curves and confusion matrices. For neurotoxicity, the dashed grey line shows the Hagedorn et al. 2022 baseline (5 fixed coefficients). Mouse ALT: accuracy = #str(R.oligoai_tox_hepatotox.accuracy), AUC = #str(R.oligoai_tox_hepatotox.auc). Mouse bFOB: accuracy = #str(R.oligoai_tox_neurotox.accuracy), AUC = #str(R.oligoai_tox_neurotox.auc).],
+) <fig3>
 
-We trained OligoAI-tox, Hagedorn's dinucleotide random forest architecture applied to ASO Atlas 2.0, adapting it from LNA to DNA/MOE/cET chemistry (@fig4). We trained four explicit models: mouse ALT, mouse bFOB, rat ALT, and rat mFOB, each evaluated with GroupKFold cross-validation (5 folds, grouped by target gene).
+We trained OligoAI-tox, Hagedorn's dinucleotide random forest architecture applied to ASO Atlas 2.0, adapting it from LNA to DNA/MOE/cET chemistry (@fig3). We trained four explicit models: mouse ALT, mouse bFOB, rat ALT, and rat mFOB, each evaluated with GroupKFold cross-validation (5 folds, grouped by target gene).
 
 For hepatotoxicity, the mouse ALT model (128 dinucleotide features, 5,000 trees) achieved an accuracy of #str(R.oligoai_tox_hepatotox.accuracy) with an AUC of #str(R.oligoai_tox_hepatotox.auc) (sensitivity #str(R.oligoai_tox_hepatotox.sensitivity), specificity #str(R.oligoai_tox_hepatotox.specificity)) on #comma(R.oligoai_tox_hepatotox.n) compounds across #comma(R.oligoai_tox_hepatotox.n_groups) target gene groups. The rat ALT model achieved an AUC of #str(R.rat_hepatotox.auc) on #comma(R.rat_hepatotox.n) compounds.
 
-For neurotoxicity, we compared OligoAI-tox against the Hagedorn linear baseline (5 fixed coefficients from the original publication). On mouse bFOB scores (700 µg ICV; neurotoxic bFOB $>$ 1 vs non-toxic bFOB $<=$ 1), OligoAI-tox achieved an accuracy of #str(R.oligoai_tox_neurotox.accuracy) with an AUC of #str(R.oligoai_tox_neurotox.auc) on #comma(R.oligoai_tox_neurotox.n) compounds across #comma(R.oligoai_tox_neurotox.n_groups) target gene groups, compared to an AUC of #str(R.hagedorn_linear_neurotox.auc) for the Hagedorn linear model. The rat mFOB model achieved an AUC of #str(R.rat_neurotox.auc) on #comma(R.rat_neurotox.n) compounds.
+For neurotoxicity, we compared OligoAI-tox against the Hagedorn et al. 2022 baseline (5 fixed coefficients from the original publication). On mouse bFOB scores (700 µg ICV; neurotoxic bFOB $>$ 1 vs non-toxic bFOB $<=$ 1), OligoAI-tox achieved an accuracy of #str(R.oligoai_tox_neurotox.accuracy) with an AUC of #str(R.oligoai_tox_neurotox.auc) on #comma(R.oligoai_tox_neurotox.n) compounds across #comma(R.oligoai_tox_neurotox.n_groups) target gene groups, compared to an AUC of #str(R.hagedorn_linear_neurotox.auc) for the Hagedorn et al. 2022 model. The rat mFOB model achieved an AUC of #str(R.rat_neurotox.auc) on #comma(R.rat_neurotox.n) compounds.
 
-== Cross-Species Concordance
+== Cost Savings from Computational Pre-Screening
 
 #figure(
-  image("plots/fig5/fig5.svg", width: 80%),
-  caption: [Cross-species concordance and biomarker correlations. *(A)* Spearman $rho$ (with Fisher z 95% CIs) for mouse vs rat per-compound mean biomarker values; only Bonferroni-significant correlations shown in colour. *(B)* Mouse bFOB vs rat mFOB score heatmap (integer-rounded); cell values are compound counts. *(C)* Spearman correlation matrix between mouse hepatotoxicity biomarkers (Bonferroni-corrected; n.s. = not significant).],
+  image("plots/fig6/fig6.svg", width: 100%),
+  caption: [Cost savings from computational pre-screening. Stacked bar chart comparing total pipeline costs by stage across four scenarios: baseline (no screening), OligoAI only (in vitro efficacy), OligoAI-tox only (ALT + bFOB), and all models combined.],
+) <fig4>
+
+To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig4). OligoAI-tox (hepatotoxicity + neurotoxicity) enriches the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.oligoai_tox_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction @hill_accurately_2025, achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
+
+== Cross-Species Concordance and Sequence Motifs
+
+#figure(
+  image("plots/fig5/fig5.svg", width: 100%),
+  caption: [Selection bias, cross-assay and cross-biomarker correlations, base composition, and cross-species concordance. *(A)* Selection-bias KDEs showing biomarker distributions for compounds that do (blue) vs don't (grey) advance to the next pipeline stage. *(B)* Cross-assay Spearman $rho$: pairwise correlations between per-compound metrics across pipeline stages (BH-corrected; n.s. = not significant). *(C)* Cross-biomarker Spearman $rho$: correlations between mouse hepatotoxicity biomarkers (Bonferroni-corrected). *(D)* Nucleotide base $times$ biomarker Spearman $rho$: base composition vs toxicity biomarkers (BH-corrected). *(E)* Cross-species bFOB concordance: mouse bFOB vs rat mFOB score heatmap (integer-rounded); cell values are compound counts.],
 ) <fig5>
 
 To assess whether mouse-based screening translates to rat outcomes, we compared per-compound mean biomarker values for compounds tested in both species (@fig5). For hepatotoxicity biomarkers, Spearman correlations were modest but statistically significant: ALT ($rho$ = #str(R.cross_species_hepatotox.ALT.spearman_rho), p < 10#super[--10], n = #str(R.cross_species_hepatotox.ALT.n_shared)), AST ($rho$ = #str(R.cross_species_hepatotox.AST.spearman_rho), p < 10#super[--8], n = #str(R.cross_species_hepatotox.AST.n_shared)), and TBIL ($rho$ = #str(R.cross_species_hepatotox.TBIL.spearman_rho), p < 10#super[--5], n = #str(R.cross_species_hepatotox.TBIL.n_shared)). Binary concordance rates (agreement on high vs low classification using species-specific ULN thresholds) were high: #str(R.cross_species_hepatotox.ALT.concordance_rate) for ALT, #str(R.cross_species_hepatotox.AST.concordance_rate) for AST, and #str(R.cross_species_hepatotox.TBIL.concordance_rate) for TBIL --- though this largely reflects the dominance of concordant low-toxicity compounds.
@@ -115,15 +115,6 @@ To assess whether mouse-based screening translates to rat outcomes, we compared 
 Neurotoxicity showed stronger cross-species concordance. Mouse bFOB and rat mFOB scores (700 $mu$g ICV vs 3,000 $mu$g IT respectively) were well correlated ($rho$ = #str(R.cross_species_neurotox.FOB.spearman_rho), p $approx$ 0, n = #comma(R.cross_species_neurotox.FOB.n_shared)), with a binary concordance rate of #str(R.cross_species_neurotox.FOB.concordance_rate) across #str(R.cross_species_neurotox.FOB.concordance_n) classifiable compounds.
 
 Within mouse, the hepatotoxicity biomarkers show a structured correlation pattern (@fig5 C). ALT and AST are strongly correlated ($rho$ = 0.92), consistent with their shared hepatocellular origin, while TBIL is moderately correlated with both ($rho$ $approx$ 0.4). The renal markers BUN and CREA form a separate cluster ($rho$ = 0.36), largely independent of the liver enzymes. This structure suggests that ALT and AST carry largely redundant information for toxicity classification, while TBIL and renal biomarkers may offer complementary signal.
-
-== Cost Savings from Computational Pre-Screening
-
-#figure(
-  image("plots/fig6/fig6.svg", width: 100%),
-  caption: [Cost savings from computational pre-screening. Stacked bar chart comparing total pipeline costs by stage across four scenarios: baseline (no screening), OligoAI only (in vitro efficacy), OligoAI-tox only (ALT + bFOB), and all models combined.],
-) <fig6>
-
-To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig6). OligoAI-tox (hepatotoxicity + neurotoxicity) enriches the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.oligoai_tox_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction @hill_accurately_2025, achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
 
 = Discussion
 
@@ -197,12 +188,19 @@ All models were evaluated using GroupKFold cross-validation with 5 folds, where 
 
 To translate classification accuracy into practical value, we developed a cost-based evaluation framework. For each pipeline stage, per-ASO costs were estimated from industry benchmarks: \$500 (in vitro efficacy), \$2,000 (dose-response), \$15,000 (mouse hepatotoxicity), \$20,000 (mouse neurotoxicity), \$25,000 (rat hepatotoxicity), \$30,000 (rat neurotoxicity), and \$100,000 (monkey hepatotoxicity).
 
-The *enrichment factor* at a given stage is defined as the ratio of the pass rate among classifier-selected compounds to the base pass rate: $"EF" = P("pass" bar.v "selected") / P("pass")$, where "selected" denotes compounds predicted as low-toxicity (P(high) \< 0.5). An enrichment factor greater than one indicates that the classifier concentrates passing compounds among its predictions.
+The *enrichment factor* at a given stage is defined as the ratio of the pass rate among classifier-selected compounds to the base pass rate: $"EF" = P("pass" bar.v "selected") / P("pass")$, where "selected" denotes the top 25% compounds with lowest predicted toxicity risk (lowest P(high)). An enrichment factor greater than one indicates that the classifier concentrates passing compounds among its predictions.
 
 Pipeline costs are back-calculated by determining the number of initial ASOs needed to yield one development candidate, given the pass rates at each stage. With classifier pre-screening, the effective pass rates at enriched stages increase by the enrichment factor, reducing the required number of initial candidates and the associated costs at all downstream stages.
 
 = Code Availability
 
 // Link to code repository if applicable
+
+= Supplementary Figures
+
+#figure(
+  image("plots/fig3/fig3.svg", width: 100%),
+  caption: [Clinical benchmark: ION582 (Zilganersen) in context of OligoStack distributions. Grey bars show all targets; blue bars highlight _UBE3A-ATS_-targeting ASOs; the red arrow marks ION582. *(A)* IC50 distribution under gymnosis/free-uptake conditions. *(B)* Mouse bFOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat mFOB score distribution (IT, 3,000 µg, 3 h post-dose).],
+) <figS1>
 
 #bibliography("zotero.bib")

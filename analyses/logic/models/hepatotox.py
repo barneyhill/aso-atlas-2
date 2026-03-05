@@ -11,12 +11,15 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import spearmanr
+from scipy.stats import fisher_exact, spearmanr
+from sklearn.metrics import confusion_matrix, roc_auc_score
 
 from analyses.utils.helm import Helm
 from analyses.utils.models import (
     MODELS,
+    _optimal_threshold,
     calc_uln,
+    mean_of_array,
     prepare_data,
     run_model_grouped,
     train_and_evaluate_grouped,
@@ -44,16 +47,6 @@ RAT_LITERATURE_ULN = {
 }
 
 
-def _mean_of_array(val):
-    """Compute mean from array/scalar biomarker column."""
-    if isinstance(val, (np.ndarray, list)):
-        valid = [v for v in val if v is not None and not np.isnan(v)]
-        return np.mean(valid) if valid else np.nan
-    if val is not None and not np.isnan(val):
-        return float(val)
-    return np.nan
-
-
 def load_and_filter():
     """Load hepatic data, filter to mouse + valid chemistry, compute means."""
     df = pd.read_parquet(_data_dir / "hepatictoxicity_processed.parquet")
@@ -65,66 +58,76 @@ def load_and_filter():
     print(f"After filter (mouse, valid chemistry): {len(df):,} rows")
 
     for bm in BIOMARKERS:
-        df[f"mean_{bm}"] = df[bm].apply(_mean_of_array)
+        df[f"mean_{bm}"] = df[bm].apply(mean_of_array)
     return df.reset_index(drop=True)
 
 
 def assign_groups(df: pd.DataFrame) -> pd.Series:
-    """Assign target-level groups for GroupKFold.
-
-    Priority:
-    1. target_RNA column (direct)
-    2. Compound ID join to in_vitro_inhibition target_RNA
-    3. USPTO ID as proxy (92% of patents have 1 target)
-    """
-    groups = df["target_RNA"].copy()
-
-    # Fill gaps via in_vitro Compound ID -> target_RNA
-    missing = groups.isna()
-    if missing.any():
-        invitro = pd.read_parquet(_data_dir / "in_vitro_inhibition_processed.parquet")
-        cid_to_target = (
-            invitro.dropna(subset=["target_RNA"])
-            .groupby("Compound ID")["target_RNA"]
-            .first()
-        )
-        filled = df.loc[missing, "Compound ID"].map(cid_to_target)
-        groups.loc[missing] = filled
-        n_filled = filled.notna().sum()
-        print(f"  Filled {n_filled} groups via in_vitro Compound ID join")
-
-    # Remaining: use USPTO ID as proxy
-    still_missing = groups.isna()
-    if still_missing.any():
-        groups.loc[still_missing] = df.loc[still_missing, "USPTO ID"].apply(
-            lambda x: f"patent_{x}" if pd.notna(x) else None
-        )
-        n_patent = still_missing.sum() - groups.isna().sum()
-        print(f"  Filled {n_patent} groups via USPTO ID proxy")
-
-    print(f"  Total grouped: {groups.notna().sum()}/{len(df)}, {groups.nunique()} unique groups")
+    """Assign patent-level groups for GroupKFold (patent_<USPTO ID>)."""
+    groups = df["USPTO ID"].apply(lambda x: f"patent_{x}" if pd.notna(x) else None)
+    print(f"  Total grouped: {groups.notna().sum()}/{len(df)}, {groups.nunique()} unique patents")
     return groups
 
 
-def build_covariates(df: pd.DataFrame) -> pd.DataFrame:
-    """Build dosing covariate matrix."""
+def build_dosing_covariates(df: pd.DataFrame) -> pd.DataFrame:
+    """Build dosing covariate matrix (num_doses, dosing_period_days)."""
     cov = pd.DataFrame(index=df.index)
-    for col in ["dosage_mg_per_kg", "num_doses", "dosing_period_days"]:
+    for col in ["num_doses", "dosing_period_days"]:
         cov[col] = df[col].fillna(df[col].median())
-
-    cov["admin_subcut"] = (
-        df["administration_method"].str.lower().str.contains("subcut", na=False).astype(int)
-        if "administration_method" in df.columns
-        else 0
-    )
     return cov
 
 
-def run_all_models(df, groups, cov_df):
-    """Run all model x biomarker combinations with GroupKFold CV.
+def _eval_on_dose_subset(df, y, result, dose_mg_per_kg=50):
+    """Re-evaluate OOF predictions on a dosage subset.
 
-    Returns (results_df, predictions_dict) where predictions_dict contains
-    the dinucleotide model × ALT predictions for pipeline enrichment.
+    Returns a dict with subset metrics, or None if insufficient data.
+    ``df`` must share the index of ``y`` (the labelled training subset).
+    """
+    dose_col = df.loc[y.index, "dosage_mg_per_kg"]
+    subset = dose_col == dose_mg_per_kg
+
+    preds_sub = result["predictions"][subset]
+    labels_sub = y[subset].astype(int)
+
+    n = len(labels_sub)
+    n_high = int(labels_sub.sum())
+    n_low = n - n_high
+    print(f"  {dose_mg_per_kg} mg/kg subset: n={n} ({n_high} high, {n_low} low)")
+
+    if n_high < 2 or n_low < 2:
+        print(f"  {dose_mg_per_kg} mg/kg subset: insufficient class balance")
+        return None
+
+    auc = roc_auc_score(labels_sub, preds_sub)
+    threshold = _optimal_threshold(labels_sub, preds_sub)
+    pred_labels = (preds_sub > threshold).astype(int)
+    tn, fp, fn, tp = confusion_matrix(labels_sub, pred_labels).ravel()
+    acc = (tp + tn) / (tp + tn + fp + fn)
+    sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+    spec = tn / (tn + fp) if (tn + fp) > 0 else 0
+    _, pval = fisher_exact([[tp, fn], [fp, tn]])
+
+    print(f"  {dose_mg_per_kg} mg/kg metrics: AUC={auc:.3f}, acc={acc:.3f}")
+
+    return {
+        "predictions": preds_sub.tolist(),
+        "labels": labels_sub.tolist(),
+        "n": n,
+        "accuracy": float(acc),
+        "auc": float(auc),
+        "sensitivity": float(sens),
+        "specificity": float(spec),
+        "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
+        "n_train_total": int(result["n"]),
+    }
+
+
+def run_species_models(df, groups, biomarkers, uln_dict, pred_key_prefix="",
+                       cov_df=None):
+    """Run all model variants × specified biomarkers.
+
+    Evaluates dinucleotide × ALT predictions on 50 mg/kg subset.
+    Returns (results_df, predictions_dict).
     """
     results = []
     predictions_dict = {}
@@ -132,15 +135,17 @@ def run_all_models(df, groups, cov_df):
     for model_key, spec in MODELS.items():
         feature_df = prepare_data(df, model_key)
 
-        for bm in BIOMARKERS:
+        for bm in biomarkers:
             print(f"  {spec.name} x {bm}...", end=" ")
 
             high_mult, low_mult = THRESHOLDS[bm]
 
             gk_result = run_model_grouped(
-                df, feature_df, cov_df, groups, bm, spec.name,
+                df, feature_df, groups, bm, spec.name,
                 high_mult=high_mult, low_mult=low_mult,
-                uln=LITERATURE_ULN.get(bm),
+                uln=uln_dict.get(bm),
+                make_classifier=spec.make_classifier,
+                cov_df=cov_df,
             )
 
             row = {"model": spec.name, "biomarker": bm}
@@ -159,25 +164,25 @@ def run_all_models(df, groups, cov_df):
                 print(f"GK acc={gk_result['accuracy']:.3f}")
 
                 # Save dinucleotide × ALT predictions for pipeline enrichment
-                if model_key == "dinucleotide" and bm == "ALT":
+                if model_key in ("dinucleotide", "dinucleotide_decomposed") and bm == "ALT":
                     col = f"mean_{bm}"
-                    uln_val = LITERATURE_ULN.get(bm)
+                    uln_val = uln_dict.get(bm)
                     y_full = pd.Series(index=df.index, dtype=str)
                     y_full[df[col] >= high_mult * uln_val] = "high"
                     y_full[df[col] < low_mult * uln_val] = "low"
                     mask = y_full.isin(["high", "low"]) & feature_df.notna().all(axis=1) & groups.notna()
                     y = (y_full[mask] == "high")
 
-                    predictions_dict["ALT"] = {
-                        "predictions": gk_result["predictions"].tolist(),
-                        "labels": y.astype(int).tolist(),
-                        "n": int(gk_result["n"]),
-                        "accuracy": float(gk_result["accuracy"]),
-                        "auc": float(gk_result["auc"]),
-                        "sensitivity": float(gk_result["sensitivity"]),
-                        "specificity": float(gk_result["specificity"]),
-                        "confusion": {k: int(v) for k, v in gk_result["confusion"].items()},
-                    }
+                    suffix = "" if model_key == "dinucleotide" else "_decomposed"
+                    pred_key = f"{pred_key_prefix}ALT{suffix}"
+
+                    # Evaluate on 50 mg/kg subset
+                    subset_metrics = _eval_on_dose_subset(df, y, gk_result)
+                    if subset_metrics:
+                        predictions_dict[pred_key] = {**subset_metrics,
+                            "feature_names": gk_result["feature_names"],
+                            "fold_importances": gk_result["fold_importances"],
+                        }
             else:
                 print("GK=skip")
 
@@ -197,7 +202,7 @@ def cross_species_concordance() -> dict:
     df_all = df_all[df_all["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
 
     for bm in BIOMARKERS:
-        df_all[f"mean_{bm}"] = df_all[bm].apply(_mean_of_array)
+        df_all[f"mean_{bm}"] = df_all[bm].apply(mean_of_array)
 
     mouse = df_all[df_all["species"] == "mouse"]
     rat = df_all[df_all["species"] == "rat"]
@@ -279,98 +284,94 @@ def load_and_filter_rat():
     print(f"Rat hepatic data: {len(df):,} rows")
 
     for bm in BIOMARKERS:
-        df[f"mean_{bm}"] = df[bm].apply(_mean_of_array)
+        df[f"mean_{bm}"] = df[bm].apply(mean_of_array)
     return df.reset_index(drop=True)
 
 
-def run_rat_models(df, groups, cov_df):
-    """Run all RF model variants on rat ALT data with GroupKFold.
+def run_combined_models():
+    """Run combined mouse+rat hepatotox model: sequence + species features only.
 
-    Returns (results_df, predictions_dict) — same structure as mouse models.
+    Train on ALL data (all dosage regimes) for maximum power, then report
+    metrics on OOF predictions filtered to the 50 mg/kg subset (controlled
+    evaluation, no dosage confounding).
+
+    Uses species-specific ULN thresholds for binary labels:
+      - Mouse ALT ULN = 75 (Otto et al. 2016)
+      - Rat ALT ULN = 39 (He et al. 2017)
     """
-    results = []
-    predictions_dict = {}
-    uln = RAT_LITERATURE_ULN["ALT"]
+    print("\n" + "=" * 60)
+    print("Combined (Mouse+Rat) Hepatotoxicity Model")
+    print("=" * 60)
+
+    df_all = pd.read_parquet(_data_dir / "hepatictoxicity_processed.parquet")
+    df_all = df_all[
+        df_all["species"].isin(["mouse", "rat"])
+        & df_all["HELM Annotation"].apply(Helm.valid_chemistry)
+    ].copy()
+    print(f"Combined hepatic data: {len(df_all):,} rows")
+
+    for bm in BIOMARKERS:
+        df_all[f"mean_{bm}"] = df_all[bm].apply(mean_of_array)
+
+    # Species-specific ULN for binary labels
     high_mult, low_mult = THRESHOLDS["ALT"]
-
-    for model_key, spec in MODELS.items():
-        print(f"  {spec.name}...", end=" ")
-        gk_result = run_model_grouped(
-            df, prepare_data(df, model_key), cov_df, groups, "ALT", spec.name,
-            high_mult=high_mult, low_mult=low_mult, uln=uln,
-        )
-
-        row = {"model": spec.name, "biomarker": "ALT"}
-        if gk_result:
-            row.update({
-                "N": gk_result["n"],
-                "N_high": gk_result["n_high"],
-                "N_low": gk_result["n_low"],
-                "GK_accuracy": gk_result["accuracy"],
-                "GK_sensitivity": gk_result["sensitivity"],
-                "GK_specificity": gk_result["specificity"],
-                "GK_AUC": gk_result["auc"],
-                "GK_pvalue": gk_result["p_value"],
-                "N_groups": gk_result["n_groups"],
-            })
-            print(f"GK acc={gk_result['accuracy']:.3f}")
-
-            if model_key == "dinucleotide":
-                predictions_dict["rat_ALT"] = {
-                    "predictions": gk_result["predictions"].tolist(),
-                    "labels": (gk_result["predictions"] > 0).astype(int).tolist(),  # placeholder
-                    "n": int(gk_result["n"]),
-                    "accuracy": float(gk_result["accuracy"]),
-                    "auc": float(gk_result["auc"]),
-                    "sensitivity": float(gk_result["sensitivity"]),
-                    "specificity": float(gk_result["specificity"]),
-                    "confusion": {k: int(v) for k, v in gk_result["confusion"].items()},
-                }
-        else:
-            print("GK=skip")
-
-        results.append(row)
-
-    return pd.DataFrame(results), predictions_dict
-
-
-def _run_rat_dinuc_alt(df, groups, cov_df):
-    """Run just the dinucleotide model on rat ALT to get proper labels+predictions.
-
-    We need both predictions AND true labels for enrichment calculation,
-    which run_model_grouped doesn't directly return.
-    """
-    uln = RAT_LITERATURE_ULN["ALT"]
-    high_mult, low_mult = THRESHOLDS["ALT"]
-    feature_df = prepare_data(df, "dinucleotide")
-
     col = "mean_ALT"
-    y_full = pd.Series(index=df.index, dtype=str)
-    y_full[df[col] >= high_mult * uln] = "high"
-    y_full[df[col] < low_mult * uln] = "low"
+    y_full = pd.Series(index=df_all.index, dtype=str)
+    mouse_mask = df_all["species"] == "mouse"
+    rat_mask = df_all["species"] == "rat"
+
+    mouse_uln = LITERATURE_ULN["ALT"]  # 75
+    rat_uln = RAT_LITERATURE_ULN["ALT"]  # 39
+
+    y_full.loc[mouse_mask & (df_all[col] >= high_mult * mouse_uln)] = "high"
+    y_full.loc[mouse_mask & (df_all[col] < low_mult * mouse_uln)] = "low"
+    y_full.loc[rat_mask & (df_all[col] >= high_mult * rat_uln)] = "high"
+    y_full.loc[rat_mask & (df_all[col] < low_mult * rat_uln)] = "low"
+
+    n_mouse = mouse_mask.sum()
+    n_rat = rat_mask.sum()
+    print(f"  Mouse: {n_mouse}, Rat: {n_rat}")
+    print(f"  Labels: {(y_full == 'high').sum()} high, {(y_full == 'low').sum()} low")
+
+    df_all = df_all.reset_index(drop=True)
+    y_full = y_full.reset_index(drop=True)
+    rat_mask = (df_all["species"] == "rat").astype(int)
+
+    groups = assign_groups(df_all)
+
+    # Features: dinucleotide (128) + species_rat (1) + dosing covariates (2) = 131.
+    model_key = "dinucleotide"
+    spec = MODELS[model_key]
+    feature_df = prepare_data(df_all, model_key)
+    cov_df = build_dosing_covariates(df_all)
 
     mask = y_full.isin(["high", "low"]) & feature_df.notna().all(axis=1) & groups.notna()
     if mask.sum() < 50:
-        return None
+        print("  Combined ALT: skip (insufficient data)")
+        return {}
 
     X = pd.concat([feature_df.loc[mask], cov_df.loc[mask]], axis=1)
+    X["species_rat"] = rat_mask[mask].values
     y = (y_full[mask] == "high")
     g = groups[mask]
 
-    result = train_and_evaluate_grouped(X, y, g)
-    if result is None:
-        return None
+    print(f"  Running combined dinucleotide × ALT (n={mask.sum()})...", end=" ")
+    result = train_and_evaluate_grouped(X, y, g, make_classifier=spec.make_classifier)
+    predictions = {}
 
-    return {
-        "predictions": result["predictions"].tolist(),
-        "labels": y.astype(int).tolist(),
-        "n": int(result["n"]),
-        "accuracy": float(result["accuracy"]),
-        "auc": float(result["auc"]),
-        "sensitivity": float(result["sensitivity"]),
-        "specificity": float(result["specificity"]),
-        "confusion": {k: int(v) for k, v in result["confusion"].items()},
-    }
+    if result:
+        print(f"AUC={result['auc']:.3f} (all data)")
+
+        subset_metrics = _eval_on_dose_subset(df_all, y, result)
+        if subset_metrics:
+            predictions["combined_ALT"] = {**subset_metrics,
+                "feature_names": result["feature_names"],
+                "fold_importances": result["fold_importances"],
+            }
+    else:
+        print("skip")
+
+    return predictions
 
 
 MOUSE_BIOMARKERS = ["ALB", "ALT", "AST", "BUN", "CREA", "TBIL"]
@@ -382,7 +383,7 @@ def mouse_biomarker_correlations() -> dict:
     df = df[(df["species"] == "mouse") & df["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
 
     for bm in MOUSE_BIOMARKERS:
-        df[f"mean_{bm}"] = df[bm].apply(_mean_of_array)
+        df[f"mean_{bm}"] = df[bm].apply(mean_of_array)
 
     cols = [f"mean_{bm}" for bm in MOUSE_BIOMARKERS]
     mat = df[cols].dropna(how="all")
@@ -421,10 +422,12 @@ def main():
 
     df = load_and_filter()
     groups = assign_groups(df)
-    cov_df = build_covariates(df)
 
-    print(f"\nRunning models...")
-    results_df, predictions_dict = run_all_models(df, groups, cov_df)
+    cov_df = build_dosing_covariates(df)
+    print(f"\nRunning models (sequence + dosing covariates, eval on 50 mg/kg)...")
+    results_df, predictions_dict = run_species_models(
+        df, groups, BIOMARKERS, LITERATURE_ULN, cov_df=cov_df,
+    )
 
     cross_species = cross_species_concordance()
     biomarker_corr = mouse_biomarker_correlations()
@@ -435,14 +438,14 @@ def main():
     print("=" * 60)
     rat_df = load_and_filter_rat()
     rat_groups = assign_groups(rat_df)
-    rat_cov = build_covariates(rat_df)
-    rat_results_df, _ = run_rat_models(rat_df, rat_groups, rat_cov)
+    rat_cov_df = build_dosing_covariates(rat_df)
+    rat_results_df, rat_predictions = run_species_models(
+        rat_df, rat_groups, ["ALT"], RAT_LITERATURE_ULN, "rat_",
+        cov_df=rat_cov_df,
+    )
 
-    # Get dinucleotide predictions with proper labels for enrichment
-    rat_dinuc = _run_rat_dinuc_alt(rat_df, rat_groups, rat_cov)
-    rat_predictions = {}
-    if rat_dinuc:
-        rat_predictions["rat_ALT"] = rat_dinuc
+    # ── Combined (mouse + rat) model ──
+    combined_predictions = run_combined_models()
 
     # Save consolidated JSON
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -455,6 +458,7 @@ def main():
             "mouse_biomarker_correlations": biomarker_corr,
             "rat_models": rat_results_df.to_dict(orient="records"),
             "rat_predictions": rat_predictions,
+            "combined_predictions": combined_predictions,
         }, f, indent=2)
     print(f"\nSaved {out_path}")
 
