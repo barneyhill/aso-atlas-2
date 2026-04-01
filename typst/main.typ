@@ -1,6 +1,5 @@
-#import "@preview/clean-math-paper:0.2.5": *
+#import "@preview/bloated-neurips:0.7.0": neurips2025
 
-#let date = datetime.today().display("[month repr:long] [day], [year]")
 #let R = json("data/paper_numbers.json")
 #let comma(n) = {
   let s = str(n)
@@ -13,33 +12,73 @@
   out
 }
 
-// Modify some arguments, which can be overwritten in the template call
-#page-args.insert("numbering", "1/1")
-#text-args-title.insert("size", 2em)
-#text-args-title.insert("fill", black)
-#text-args-authors.insert("size", 12pt)
+#let affls = (
+  oxford-paeds: (
+    department: "Department of Paediatrics",
+    institution: "University of Oxford",
+    location: "Oxford",
+    country: "United Kingdom",
+  ),
+  bdi: (
+    department: "Big Data Institute",
+    institution: "University of Oxford",
+    location: "Oxford",
+    country: "United Kingdom",
+  ),
+  broad: (
+    department: "Broad Center for Mendelian Genomics, Program in Medical and Population Genetics",
+    institution: "Broad Institute of MIT and Harvard",
+    location: "Cambridge, MA",
+    country: "USA",
+  ),
+  idrm: (
+    department: "Institute of Developmental and Regenerative Medicine (IDRM)",
+    institution: "University of Oxford",
+    location: "Oxford",
+    country: "United Kingdom",
+  ),
+  nygc: (
+    institution: "New York Genome Center",
+    location: "New York, NY",
+    country: "USA",
+  ),
+  ucsf: (
+    department: "Department of Psychiatry and Behavioral Sciences, UCSF Weill Institute for Neurosciences",
+    institution: "University of California, San Francisco",
+    location: "San Francisco, CA",
+    country: "USA",
+  ),
+)
 
-#show: template.with(
-title: "ASO Atlas 2.0: a cost-based benchmark for antisense oligonuclotioptimise preclinical screening",
-authors: (
-(name: "Barney Hill", affiliation-id: "1,3,5,*"),
-(name: "Nicola Whiffin", affiliation-id: "1,3,4"),
-(name: "Stephan J. Sanders", affiliation-id: "1,5,6,7"),
-(name: "Carlo Rinaldi", affiliation-id: "1,5,*"),
-),
-affiliations: (
-(id: "1", name: "Department of Paediatrics, University of Oxford, OX3 7TY Oxford, United Kingdom"),
-(id: "3", name: "Big Data Institute, University of Oxford, Oxford, UK"),
-(id: "4", name: "Broad Center for Mendelian Genomics, Program in Medical and Population Genetics, Broad Institute of MIT and Harvard, Cambridge, MA, USA"),
-(id: "5", name: "Institute of Developmental and Regenerative Medicine (IDRM), IMS-Tetsuya Nakamura Building, Old Road Campus, OX3 7TY Oxford, United Kingdom"),
-(id: "6", name: "New York Genome Center, New York, NY 10013, USA"),
-(id: "7", name: "Department of Psychiatry and Behavioral Sciences, UCSF Weill Institute for Neurosciences, University of California, San Francisco, San Francisco, CA 94178, USA"),
-(id: "*", name: "Correspondence to barney.hill@merton.ox.ac.uk, carlo.rinaldi@idrm.ox.ac.uk"),
-),
-date: date,
-link-color: rgb("#008002"),
-abstract: [
-Preclinical drug development is a sequential, high-attrition process: candidates must clear in vitro efficacy and dose-response screens before advancing to costly in vivo toxicity studies, and failure at any late stage wastes the cost of every preceding experiment. Despite growing interest in machine-learning-guided drug design, no public benchmark is structured around the sequential preclinical pipeline, linking the same candidates from in vitro efficacy through in vivo toxicity with an evaluation framework that reflects stage-gated decision-making. This gap has left the field without a realistic evaluation setting: models are trained and tested on isolated endpoints, with no framework for quantifying whether predictive accuracy translates into practical savings in animals, time, or cost. Here we introduce ASO Atlas 2.0, the first such multi-endpoint preclinical dataset, built around antisense oligonucleotides (ASOs), short synthetic nucleic acids that silence disease-related genes. ASO Atlas 2.0 comprises #comma(R.in_vitro.n_measurements) in vitro efficacy measurements, #comma(R.dose_response.n_measurements) dose-response curves, #comma(R.hepatic.n_records) hepatotoxicity records, and #comma(R.neuro.n_records) neurotoxicity records across #comma(R.genes.n_unique) target genes, all extracted from Ionis Pharmaceuticals patent filings using an agentic language-model workflow. We propose a cost-based benchmarking framework that evaluates classifiers by their ability to enrich the candidate pool at expensive in vivo stages, quantifying savings in terms of the number of animals and dollars required to yield a development candidate. ASO Atlas 2.0, the benchmarking framework, and all baseline code are publicly available to accelerate computational ASO research.],
+#let authors = (
+  (name: "Barney Hill", affl: ("oxford-paeds", "bdi", "idrm"), email: "barney.hill@merton.ox.ac.uk"),
+  (name: "Nicola Whiffin", affl: ("oxford-paeds", "bdi", "broad")),
+  (name: "Stephan J. Sanders", affl: ("oxford-paeds", "idrm", "nygc", "ucsf")),
+  (name: "Carlo Rinaldi", affl: ("oxford-paeds", "idrm"), email: "carlo.rinaldi@idrm.ox.ac.uk"),
+)
+
+#show: neurips2025.with(
+  title: [ASO Atlas 2.0: a cost-based benchmark for antisense oligonucleotide preclinical screening],
+  authors: (authors, affls),
+  keywords: ("Antisense Oligonucleotides", "Drug Discovery", "Toxicity Prediction", "Benchmarking"),
+  abstract: [
+    Preclinical drug development is a sequential, high-attrition process in which candidates must clear in vitro efficacy and dose-response screens before advancing to costly in vivo toxicity studies, and failure at any late stage wastes the cost of every preceding experiment. Despite growing interest in machine-learning-guided drug design, no public benchmark is structured around the sequential preclinical pipeline, linking the same candidates from in vitro efficacy through in vivo toxicity with an evaluation framework that reflects stage-gated decision-making. This gap has left the field without a realistic evaluation setting. Models are trained and tested on isolated endpoints, with no framework for quantifying whether predictive accuracy translates into practical savings in animals, time, or cost. Here we introduce ASO Atlas 2.0, the first such multi-endpoint preclinical dataset, built around antisense oligonucleotides (ASOs), short synthetic nucleic acids that silence disease-related genes. ASO Atlas 2.0 comprises #comma(R.in_vitro.n_measurements) in vitro efficacy measurements, #comma(R.dose_response.n_measurements) dose-response curves, #comma(R.hepatic.n_records) hepatotoxicity records, and #comma(R.neuro.n_records) neurotoxicity records across #comma(R.genes.n_unique) target genes, all extracted from Ionis Pharmaceuticals patent filings using an agentic language-model workflow. We propose a cost-based benchmarking framework that evaluates classifiers by their ability to enrich the candidate pool at expensive in vivo stages, quantifying savings in terms of the number of animals and dollars required to yield a development candidate. ASO Atlas 2.0, the benchmarking framework, and all baseline code are publicly available to accelerate computational ASO research.
+  ],
+  bibliography: bibliography("zotero.bib"),
+  appendix: [
+    = Supplementary Figures
+
+    #figure(
+      image("plots/fig3/fig3.svg", width: 100%),
+      caption: [Clinical benchmark: ION582 (Zilganersen) in context of ASO Atlas 2.0 distributions. Grey bars show all targets; blue bars highlight _UBE3A-ATS_-targeting ASOs; the red arrow marks ION582. *(A)* IC50 distribution under gymnosis/free-uptake conditions. *(B)* Mouse bFOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat mFOB score distribution (IT, 3,000 µg, 3 h post-dose).],
+    ) <figS1>
+
+    #figure(
+      image("plots/supp_mouse_rat_alt/mouse_vs_rat_alt.svg", width: 70%),
+      caption: [Cross-species hepatotoxicity concordance. Mean ALT per compound in mouse vs rat (log-log), with Spearman correlation shown.],
+    ) <figS2>
+  ],
+  accepted: false,
 )
 
 = Introduction
@@ -80,7 +119,7 @@ ASO Atlas 2.0 comprises four linked assay categories extracted from USPTO patent
 
 The ASO preclinical pipeline consists of seven sequential stages: in vitro efficacy (inhibition \>80%), in vitro potency (IC50 \<500 nM by electroporation), mouse liver toxicity (ALT \<2$times$ULN), mouse neurotoxicity (bFOB ≤1), rat liver toxicity (ALT \<2$times$ULN), rat neurotoxicity (mFOB ≤1), and monkey liver toxicity (@fig2). Back-calculation from ASO Atlas 2.0 pass rates shows that producing a single development candidate requires screening approximately #comma(R.pipeline.baseline_n_initial) initial ASOs at an estimated total cost of \$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 1))M. The majority of this cost is concentrated at the in vivo stages, where per-ASO costs range from \$15,000 (mouse) to \$100,000 (monkey).
 
-== ASO Atlas 2.0ASO Atlas 2.0Toxicity Prediction
+== Toxicity Prediction
 
 #figure(
   image("plots/fig4/fig4.svg", width: 100%),
@@ -195,11 +234,4 @@ Pipeline costs are back-calculated by determining the number of initial ASOs nee
 
 // Link to code repository if applicable
 
-= Supplementary Figures
 
-#figure(
-  image("plots/fig3/fig3.svg", width: 100%),
-  caption: [Clinical benchmark: ION582 (Zilganersen) in context of OligoStack distributions. Grey bars show all targets; blue bars highlight _UBE3A-ATS_-targeting ASOs; the red arrow marks ION582. *(A)* IC50 distribution under gymnosis/free-uptake conditions. *(B)* Mouse bFOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat mFOB score distribution (IT, 3,000 µg, 3 h post-dose).],
-) <figS1>
-
-#bibliography("zotero.bib")

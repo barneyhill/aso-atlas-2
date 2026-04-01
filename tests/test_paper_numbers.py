@@ -30,49 +30,67 @@ def test_dataset_counts_positive(numbers):
     assert numbers["genes"]["n_unique"] > 0
 
 
-# ── Hagedorn hepatotoxicity ─────────────────────────────────────
+# ── OligoAI-tox hepatotoxicity ──────────────────────────────────
 
-def test_hagerdorn_hepatotox_key_exists(numbers):
-    assert "hagerdorn_hepatotox" in numbers, \
-        "Missing 'hagerdorn_hepatotox' key — run `just hagerdorn && just export`"
+def test_oligoai_tox_hepatotox_key_exists(numbers):
+    assert "oligoai_tox_hepatotox" in numbers, \
+        "Missing 'oligoai_tox_hepatotox' key — run `just hagerdorn && just export`"
 
 
-def test_hagerdorn_hepatotox_fields(numbers):
-    h = numbers["hagerdorn_hepatotox"]
+def test_oligoai_tox_hepatotox_fields(numbers):
+    h = numbers["oligoai_tox_hepatotox"]
     for field in ("accuracy", "sensitivity", "specificity", "auc", "n", "n_groups"):
-        assert field in h, f"Missing hagerdorn_hepatotox.{field}"
+        assert field in h, f"Missing oligoai_tox_hepatotox.{field}"
 
 
-def test_hagerdorn_hepatotox_accuracy_in_range(numbers):
-    acc = numbers["hagerdorn_hepatotox"]["accuracy"]
+def test_oligoai_tox_hepatotox_accuracy_in_range(numbers):
+    acc = numbers["oligoai_tox_hepatotox"]["accuracy"]
     assert 0 <= acc <= 1, f"accuracy = {acc} not in [0, 1]"
 
 
-def test_hagerdorn_hepatotox_auc_in_range(numbers):
-    auc = numbers["hagerdorn_hepatotox"]["auc"]
+def test_oligoai_tox_hepatotox_auc_in_range(numbers):
+    auc = numbers["oligoai_tox_hepatotox"]["auc"]
     assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
 
 
-# ── Hagedorn neurotoxicity ──────────────────────────────────────
+# ── OligoAI-tox neurotoxicity ───────────────────────────────────
 
-def test_hagerdorn_neurotox_key_exists(numbers):
-    assert "hagerdorn_neurotox" in numbers, \
-        "Missing 'hagerdorn_neurotox' key — run `just hagerdorn && just export`"
+def test_oligoai_tox_neurotox_key_exists(numbers):
+    assert "oligoai_tox_neurotox" in numbers, \
+        "Missing 'oligoai_tox_neurotox' key — run `just hagerdorn && just export`"
 
 
-def test_hagerdorn_neurotox_fields(numbers):
-    h = numbers["hagerdorn_neurotox"]
+def test_oligoai_tox_neurotox_fields(numbers):
+    h = numbers["oligoai_tox_neurotox"]
     for field in ("accuracy", "sensitivity", "specificity", "auc", "n", "n_groups"):
-        assert field in h, f"Missing hagerdorn_neurotox.{field}"
+        assert field in h, f"Missing oligoai_tox_neurotox.{field}"
 
 
-def test_hagerdorn_neurotox_accuracy_in_range(numbers):
-    acc = numbers["hagerdorn_neurotox"]["accuracy"]
+def test_oligoai_tox_neurotox_accuracy_in_range(numbers):
+    acc = numbers["oligoai_tox_neurotox"]["accuracy"]
     assert 0 <= acc <= 1, f"accuracy = {acc} not in [0, 1]"
 
 
-def test_hagerdorn_neurotox_auc_in_range(numbers):
-    auc = numbers["hagerdorn_neurotox"]["auc"]
+def test_oligoai_tox_neurotox_auc_in_range(numbers):
+    auc = numbers["oligoai_tox_neurotox"]["auc"]
+    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
+
+
+# ── Hagedorn et al. 2022 baseline (neurotox only) ──────────────
+
+def test_hagedorn_linear_neurotox_key_exists(numbers):
+    assert "hagedorn_linear_neurotox" in numbers, \
+        "Missing 'hagedorn_linear_neurotox' key — run `just hagerdorn && just export`"
+
+
+def test_hagedorn_linear_neurotox_fields(numbers):
+    h = numbers["hagedorn_linear_neurotox"]
+    for field in ("accuracy", "sensitivity", "specificity", "auc", "n", "n_groups"):
+        assert field in h, f"Missing hagedorn_linear_neurotox.{field}"
+
+
+def test_hagedorn_linear_neurotox_auc_in_range(numbers):
+    auc = numbers["hagedorn_linear_neurotox"]["auc"]
     assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
 
 
@@ -89,12 +107,12 @@ def test_pipeline_baseline_costs(numbers):
     assert p["baseline_total_cost"] > 0
 
 
-def test_pipeline_hagerdorn_savings(numbers):
+def test_pipeline_oligoai_tox_savings(numbers):
     p = numbers["pipeline"]
-    if "hagerdorn_total_cost" in p:
-        assert p["hagerdorn_total_cost"] < p["baseline_total_cost"], \
-            "Hagedorn pipeline should cost less than baseline"
-        assert 0 < p["hagerdorn_savings_pct"] < 100
+    if "oligoai_tox_total_cost" in p:
+        assert p["oligoai_tox_total_cost"] < p["baseline_total_cost"], \
+            "OligoAI-tox pipeline should cost less than baseline"
+        assert 0 < p["oligoai_tox_savings_pct"] < 100
 
 
 def test_pipeline_oligoai_savings(numbers):
@@ -110,8 +128,8 @@ def test_pipeline_combined_savings(numbers):
     if "combined_total_cost" in p:
         assert p["combined_total_cost"] < p["baseline_total_cost"], \
             "Combined pipeline should cost less than baseline"
-        assert p["combined_total_cost"] <= p["hagerdorn_total_cost"], \
-            "Combined should be at least as good as Hagedorn alone"
+        assert p["combined_total_cost"] <= p["oligoai_tox_total_cost"], \
+            "Combined should be at least as good as OligoAI-tox alone"
         assert 0 < p["combined_savings_pct"] < 100
 
 
@@ -190,6 +208,52 @@ def test_rat_neurotox_auc_in_range(numbers):
     assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
 
 
+# ── Combined (mouse+rat) hepatotoxicity ─────────────────────────
+
+def test_combined_hepatotox_key_exists(numbers):
+    assert "combined_hepatotox" in numbers, \
+        "Missing 'combined_hepatotox' key — run `just hagerdorn && just export`"
+
+
+def test_combined_hepatotox_fields(numbers):
+    h = numbers["combined_hepatotox"]
+    for field in ("accuracy", "sensitivity", "specificity", "auc", "n"):
+        assert field in h, f"Missing combined_hepatotox.{field}"
+
+
+def test_combined_hepatotox_accuracy_in_range(numbers):
+    acc = numbers["combined_hepatotox"]["accuracy"]
+    assert 0 <= acc <= 1, f"accuracy = {acc} not in [0, 1]"
+
+
+def test_combined_hepatotox_auc_in_range(numbers):
+    auc = numbers["combined_hepatotox"]["auc"]
+    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
+
+
+# ── Combined (mouse+rat) neurotoxicity ─────────────────────────
+
+def test_combined_neurotox_key_exists(numbers):
+    assert "combined_neurotox" in numbers, \
+        "Missing 'combined_neurotox' key — run `just hagerdorn && just export`"
+
+
+def test_combined_neurotox_fields(numbers):
+    h = numbers["combined_neurotox"]
+    for field in ("accuracy", "sensitivity", "specificity", "auc", "n"):
+        assert field in h, f"Missing combined_neurotox.{field}"
+
+
+def test_combined_neurotox_accuracy_in_range(numbers):
+    acc = numbers["combined_neurotox"]["accuracy"]
+    assert 0 <= acc <= 1, f"accuracy = {acc} not in [0, 1]"
+
+
+def test_combined_neurotox_auc_in_range(numbers):
+    auc = numbers["combined_neurotox"]["auc"]
+    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
+
+
 # ── Cross-species concordance ────────────────────────────────────
 
 def test_cross_species_neurotox_fob(numbers):
@@ -202,57 +266,3 @@ def test_cross_species_neurotox_fob(numbers):
     assert -1 <= v["spearman_rho"] <= 1
     assert v["spearman_p"] < 0.05
     assert 0 <= v["concordance_rate"] <= 1
-
-
-# ── OligoAI-tox hepatotoxicity ──────────────────────────────────
-
-def test_oligoai_tox_hepatotox_key_exists(numbers):
-    assert "oligoai_tox_hepatotox" in numbers, \
-        "Missing 'oligoai_tox_hepatotox' key — run `just hagerdorn && just export`"
-
-
-def test_oligoai_tox_hepatotox_fields(numbers):
-    h = numbers["oligoai_tox_hepatotox"]
-    for field in ("accuracy", "sensitivity", "specificity", "auc", "n"):
-        assert field in h, f"Missing oligoai_tox_hepatotox.{field}"
-
-
-def test_oligoai_tox_hepatotox_auc_in_range(numbers):
-    auc = numbers["oligoai_tox_hepatotox"]["auc"]
-    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
-
-
-# ── OligoAI-tox neurotoxicity ───────────────────────────────────
-
-def test_oligoai_tox_neurotox_key_exists(numbers):
-    assert "oligoai_tox_neurotox" in numbers, \
-        "Missing 'oligoai_tox_neurotox' key — run `just hagerdorn && just export`"
-
-
-def test_oligoai_tox_neurotox_fields(numbers):
-    h = numbers["oligoai_tox_neurotox"]
-    for field in ("accuracy", "sensitivity", "specificity", "auc", "n"):
-        assert field in h, f"Missing oligoai_tox_neurotox.{field}"
-
-
-def test_oligoai_tox_neurotox_auc_in_range(numbers):
-    auc = numbers["oligoai_tox_neurotox"]["auc"]
-    assert 0.4 <= auc <= 1, f"AUC = {auc} not in [0.4, 1]"
-
-
-# ── OligoAI-tox pipeline ────────────────────────────────────────
-
-def test_pipeline_oligoai_tox_savings(numbers):
-    p = numbers["pipeline"]
-    if "oligoai_tox_total_cost" in p:
-        assert p["oligoai_tox_total_cost"] < p["baseline_total_cost"], \
-            "OligoAI-tox pipeline should cost less than baseline"
-        assert 0 < p["oligoai_tox_savings_pct"] < 100
-
-
-def test_pipeline_combined_cnn_savings(numbers):
-    p = numbers["pipeline"]
-    if "combined_cnn_total_cost" in p:
-        assert p["combined_cnn_total_cost"] < p["baseline_total_cost"], \
-            "Combined CNN pipeline should cost less than baseline"
-        assert 0 < p["combined_cnn_savings_pct"] < 100

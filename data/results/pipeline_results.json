@@ -179004,85 +179004,13 @@
     "total_cost": 1288000,
     "target_candidates": 1
   },
-  "hagerdorn": {
-    "n_initial": 246,
-    "asos_at_stage": [
-      246,
-      29,
-      9,
-      6,
-      4,
-      2,
-      1,
-      1
-    ],
-    "proportions": [
-      0.11810600603167239,
-      0.31436011904761907,
-      0.681835736354274,
-      0.7009679203539823,
-      0.6466240157480315,
-      0.5431160964666293,
-      1.0
-    ],
-    "cumulative_survival": [
-      0.11810600603167239,
-      0.03712781811635535,
-      0.0253150732045927,
-      0.017745054217832165,
-      0.01147437821800118,
-      0.006231919507142519,
-      0.006231919507142519
-    ],
-    "costs_per_stage": [
-      123000,
-      58000,
-      135000,
-      120000,
-      100000,
-      60000,
-      100000
-    ],
-    "total_cost": 696000,
-    "target_candidates": 1,
-    "enriched_stages": {
-      "2": {
-        "enrichment_factor": 1.177,
-        "base_rate": 0.637,
-        "selected_pass_rate": 0.75,
-        "n": 2701,
-        "n_selected": 1928
-      },
-      "3": {
-        "enrichment_factor": 1.575,
-        "base_rate": 0.525,
-        "selected_pass_rate": 0.826,
-        "n": 2282,
-        "n_selected": 1186
-      },
-      "4": {
-        "enrichment_factor": 1.077,
-        "base_rate": 0.611,
-        "selected_pass_rate": 0.657,
-        "n": 714,
-        "n_selected": 575
-      },
-      "5": {
-        "enrichment_factor": 1.542,
-        "base_rate": 0.522,
-        "selected_pass_rate": 0.805,
-        "n": 1193,
-        "n_selected": 621
-      }
-    }
-  },
   "oligoai_tox": {
-    "n_initial": 195,
+    "n_initial": 136,
     "asos_at_stage": [
-      195,
-      23,
-      7,
+      136,
+      16,
       5,
+      4,
       3,
       2,
       1,
@@ -179091,60 +179019,68 @@
     "proportions": [
       0.11810600603167239,
       0.31436011904761907,
-      0.7716271884654995,
-      0.7250011061946903,
-      0.729478346456693,
-      0.5850297251822771,
+      0.8625772399588054,
+      0.8536231563421829,
+      0.7835137795275591,
+      0.7135883342680874,
       1.0
     ],
     "cumulative_survival": [
       0.11810600603167239,
       0.03712781811635535,
-      0.028648833906981714,
-      0.020770436273749693,
-      0.01515158350815904,
-      0.008864126735854606,
-      0.008864126735854606
+      0.03202561087649833,
+      0.027337803040183045,
+      0.021419545383993814,
+      0.015284737711343846,
+      0.015284737711343846
     ],
     "costs_per_stage": [
-      97500,
-      46000,
-      105000,
-      100000,
+      68000,
+      32000,
+      75000,
+      80000,
       75000,
       60000,
       100000
     ],
-    "total_cost": 583500,
+    "total_cost": 490000,
     "target_candidates": 1,
     "enriched_stages": {
       "2": {
-        "enrichment_factor": 1.332,
-        "base_rate": 0.637,
-        "selected_pass_rate": 0.848,
-        "n": 2688,
-        "n_selected": 1355
+        "enrichment_factor": 1.489,
+        "base_rate": 0.512,
+        "selected_pass_rate": 0.763,
+        "n": 1384,
+        "n_selected": 346,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       },
       "3": {
-        "enrichment_factor": 1.629,
-        "base_rate": 0.525,
-        "selected_pass_rate": 0.855,
-        "n": 2282,
-        "n_selected": 1184
+        "enrichment_factor": 1.918,
+        "base_rate": 0.444,
+        "selected_pass_rate": 0.852,
+        "n": 2696,
+        "n_selected": 674,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       },
       "4": {
-        "enrichment_factor": 1.215,
-        "base_rate": 0.611,
-        "selected_pass_rate": 0.742,
-        "n": 714,
-        "n_selected": 384
+        "enrichment_factor": 1.305,
+        "base_rate": 0.619,
+        "selected_pass_rate": 0.807,
+        "n": 438,
+        "n_selected": 109,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       },
       "5": {
-        "enrichment_factor": 1.661,
-        "base_rate": 0.522,
-        "selected_pass_rate": 0.868,
-        "n": 1193,
-        "n_selected": 574
+        "enrichment_factor": 2.026,
+        "base_rate": 0.35,
+        "selected_pass_rate": 0.709,
+        "n": 1779,
+        "n_selected": 444,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       }
     }
   },
@@ -179192,93 +179128,17 @@
     "enriched_stages": {
       "0": {
         "enrichment_factor": 3.14,
-        "source": "Gehrmann et al. 2025, Table 1"
+        "source": "Hill et al. 2025, Table 1"
       }
     }
   },
   "combined": {
-    "n_initial": 79,
+    "n_initial": 44,
     "asos_at_stage": [
-      79,
-      29,
-      9,
-      6,
-      4,
-      2,
-      1,
-      1
-    ],
-    "proportions": [
-      0.3708528589394513,
-      0.31436011904761907,
-      0.681835736354274,
-      0.7009679203539823,
-      0.6466240157480315,
-      0.5431160964666293,
-      1.0
-    ],
-    "cumulative_survival": [
-      0.3708528589394513,
-      0.11658134888535579,
-      0.07948932986242108,
-      0.055719470243993,
-      0.036029547604523704,
-      0.019568227252427507,
-      0.019568227252427507
-    ],
-    "costs_per_stage": [
-      39500,
-      58000,
-      135000,
-      120000,
-      100000,
-      60000,
-      100000
-    ],
-    "total_cost": 612500,
-    "target_candidates": 1,
-    "enriched_stages": {
-      "0": {
-        "enrichment_factor": 3.14,
-        "source": "Gehrmann et al. 2025, Table 1"
-      },
-      "2": {
-        "enrichment_factor": 1.177,
-        "base_rate": 0.637,
-        "selected_pass_rate": 0.75,
-        "n": 2701,
-        "n_selected": 1928
-      },
-      "3": {
-        "enrichment_factor": 1.575,
-        "base_rate": 0.525,
-        "selected_pass_rate": 0.826,
-        "n": 2282,
-        "n_selected": 1186
-      },
-      "4": {
-        "enrichment_factor": 1.077,
-        "base_rate": 0.611,
-        "selected_pass_rate": 0.657,
-        "n": 714,
-        "n_selected": 575
-      },
-      "5": {
-        "enrichment_factor": 1.542,
-        "base_rate": 0.522,
-        "selected_pass_rate": 0.805,
-        "n": 1193,
-        "n_selected": 621
-      }
-    }
-  },
-  "combined_cnn": {
-    "n_initial": 63,
-    "asos_at_stage": [
-      63,
-      23,
-      7,
+      44,
+      16,
       5,
+      4,
       3,
       2,
       1,
@@ -179287,64 +179147,72 @@
     "proportions": [
       0.3708528589394513,
       0.31436011904761907,
-      0.7716271884654995,
-      0.7250011061946903,
-      0.729478346456693,
-      0.5850297251822771,
+      0.8625772399588054,
+      0.8536231563421829,
+      0.7835137795275591,
+      0.7135883342680874,
       1.0
     ],
     "cumulative_survival": [
       0.3708528589394513,
       0.11658134888535579,
-      0.08995733846792259,
-      0.06521916989957403,
-      0.04757597221561939,
-      0.027833357950583466,
-      0.027833357950583466
+      0.10056041815220475,
+      0.08584070154617476,
+      0.06725737250574057,
+      0.04799407641361968,
+      0.04799407641361968
     ],
     "costs_per_stage": [
-      31500,
-      46000,
-      105000,
-      100000,
+      22000,
+      32000,
+      75000,
+      80000,
       75000,
       60000,
       100000
     ],
-    "total_cost": 517500,
+    "total_cost": 444000,
     "target_candidates": 1,
     "enriched_stages": {
       "0": {
         "enrichment_factor": 3.14,
-        "source": "Gehrmann et al. 2025, Table 1"
+        "source": "Hill et al. 2025, Table 1"
       },
       "2": {
-        "enrichment_factor": 1.332,
-        "base_rate": 0.637,
-        "selected_pass_rate": 0.848,
-        "n": 2688,
-        "n_selected": 1355
+        "enrichment_factor": 1.489,
+        "base_rate": 0.512,
+        "selected_pass_rate": 0.763,
+        "n": 1384,
+        "n_selected": 346,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       },
       "3": {
-        "enrichment_factor": 1.629,
-        "base_rate": 0.525,
-        "selected_pass_rate": 0.855,
-        "n": 2282,
-        "n_selected": 1184
+        "enrichment_factor": 1.918,
+        "base_rate": 0.444,
+        "selected_pass_rate": 0.852,
+        "n": 2696,
+        "n_selected": 674,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       },
       "4": {
-        "enrichment_factor": 1.215,
-        "base_rate": 0.611,
-        "selected_pass_rate": 0.742,
-        "n": 714,
-        "n_selected": 384
+        "enrichment_factor": 1.305,
+        "base_rate": 0.619,
+        "selected_pass_rate": 0.807,
+        "n": 438,
+        "n_selected": 109,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       },
       "5": {
-        "enrichment_factor": 1.661,
-        "base_rate": 0.522,
-        "selected_pass_rate": 0.868,
-        "n": 1193,
-        "n_selected": 574
+        "enrichment_factor": 2.026,
+        "base_rate": 0.35,
+        "selected_pass_rate": 0.709,
+        "n": 1779,
+        "n_selected": 444,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
       }
     }
   },
@@ -179371,8 +179239,8 @@
       "color": "#D4A574"
     },
     {
-      "name": "Mouse neurotoxicity",
-      "short_name": "Mouse neuro\ntoxicity",
+      "name": "Mouse neuro tolerability",
+      "short_name": "Mouse neuro\ntolerability",
       "threshold": "bFOB <=1",
       "cost_per_aso": 20000,
       "color": "#E8B88A"
@@ -179385,8 +179253,8 @@
       "color": "#7BAA97"
     },
     {
-      "name": "Rat neurotoxicity",
-      "short_name": "Rat neuro\ntoxicity",
+      "name": "Rat neuro tolerability",
+      "short_name": "Rat neuro\ntolerability",
       "threshold": "mFOB <=1",
       "cost_per_aso": 30000,
       "color": "#94C4A7"

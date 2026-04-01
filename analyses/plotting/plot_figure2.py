@@ -66,7 +66,7 @@ def draw_pipeline_attrition(results, stages, ax, x_positions=None):
         filter_text = stages[i]["threshold"]
         prop_text = f"{props[i] * 100:.0f}% ASOs\nhave\n{filter_text}"
         ax.text((x1 + x2) / 2, y_center, prop_text,
-                ha="center", va="center", fontsize=9.5, color="#404040")
+                ha="center", va="center", fontsize=11, color="#404040")
 
     # Stage boxes
     for i in range(n_stages + 1):
@@ -95,18 +95,18 @@ def draw_pipeline_attrition(results, stages, ax, x_positions=None):
 
         if i < n_stages:
             ax.text(x, y_center + h / 2 + 0.095, label_name,
-                    ha="center", va="center", fontsize=10, fontweight="bold", color="#202020")
+                    ha="center", va="center", fontsize=11, fontweight="bold", color="#202020")
             c = costs[i]
             cost_total = f"{c / 1e6:.1f}M" if c >= 1e6 else f"{c / 1e3:.0f}K"
             cpa = stages[i]["cost_per_aso"]
             cost_per = f"{cpa / 1e3:.0f}K" if cpa >= 1000 else f"{cpa:.0f}"
             cost_text = "\\$" + cost_total + " @ \\$" + cost_per + "/ASO"
             ax.text(x, y_center + h / 2 + 0.035, cost_text,
-                    ha="center", va="center", fontsize=9.5, color="#303030")
+                    ha="center", va="center", fontsize=11, color="#303030")
         else:
             prev_h = box_heights[i - 1]
             ax.text(x, y_center + prev_h / 2 + 0.095, label_name,
-                    ha="center", va="center", fontsize=10, fontweight="bold", color="#202020")
+                    ha="center", va="center", fontsize=11, fontweight="bold", color="#202020")
 
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -196,8 +196,8 @@ def draw_stage_distributions(distributions, sample_sizes, stages, axes):
         elif threshold_ops[i] == "<=":
             ax.axvspan(threshold_plot, xlim[1], alpha=0.15, color="grey")
 
-        ax.set_xlabel(xlabel, fontsize=9)
-        ax.set_ylabel("Count", fontsize=9)
+        ax.set_xlabel(xlabel, fontsize=11)
+        ax.set_ylabel("Count", fontsize=11)
         ax.grid(True, alpha=0.3)
 
         # Two-line title: stage name (bold) + "(X% of ASOs have <threshold>)"
@@ -206,13 +206,13 @@ def draw_stage_distributions(distributions, sample_sizes, stages, axes):
         title_name = stage["short_name"].replace("\n", " ")
         threshold_text = stage["threshold"]
         ax.set_title("")
-        ax.text(0.5, 1.20, title_name, fontsize=9, fontweight="bold",
+        ax.text(0.5, 1.20, title_name, fontsize=11, fontweight="bold",
                 ha="center", va="bottom", transform=ax.transAxes)
         prefix = f"({prop:.0f}% of ASOs have "
-        ta_prefix = TextArea(prefix, textprops=dict(fontsize=8, color="black"))
-        ta_thresh = TextArea(threshold_text, textprops=dict(fontsize=8, color="red",
+        ta_prefix = TextArea(prefix, textprops=dict(fontsize=9, color="black"))
+        ta_thresh = TextArea(threshold_text, textprops=dict(fontsize=9, color="red",
                                                              fontweight="bold"))
-        ta_close = TextArea(")", textprops=dict(fontsize=8, color="black"))
+        ta_close = TextArea(")", textprops=dict(fontsize=9, color="black"))
         pack = HPacker(children=[ta_prefix, ta_thresh, ta_close],
                        pad=0, sep=0, align="baseline")
         ab = AnchoredOffsetbox(loc="lower center", child=pack,
