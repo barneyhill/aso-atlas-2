@@ -20,6 +20,7 @@ MODEL_ORDER = [
     "CNN",
     "CausalCNN",
     "Transformer",
+    "Multi-task Transformer",
 ]
 
 DATASET_ORDER = ["mouse_hepatic", "rat_hepatic", "mouse_neuro", "rat_neuro"]

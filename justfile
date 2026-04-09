@@ -44,6 +44,9 @@ export-models:
 oligogym:
     uv run python -m analyses.logic.models.oligogym_benchmark
 
+multitask:
+    uv run python -m analyses.logic.models.multitask_benchmark
+
 oligogym-table:
     uv run python -m analyses.plotting.plot_oligogym_table
 

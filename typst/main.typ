@@ -136,12 +136,14 @@ For neurotoxicity, we compared OligoAI-tox against the Hagedorn et al. 2022 base
 
 #figure(
   include "data/oligogym_benchmark.typ",
-  caption: [OligoGym benchmark: Spearman $rho$ (mean $plus.minus$ s.d. across folds) for 9 model architectures on four ASO toxicity regression tasks. Best featurizer and hyperparameters selected per model. GroupKFold cross-validation by target gene (5 folds). Bold indicates best model per dataset.],
+  caption: [OligoGym benchmark: Spearman $rho$ (mean $plus.minus$ s.d. across folds) for 9 single-task model architectures and one multi-task Transformer on four ASO toxicity regression tasks. Single-task models use the best featurizer and hyperparameters per model. The multi-task Transformer shares a single encoder across all endpoints with in vitro inhibition as an auxiliary task. GroupKFold cross-validation by target gene (5 folds). Bold indicates best model per dataset.],
 ) <tbl_benchmark>
 
 To contextualise OligoAI-tox within the broader landscape of oligonucleotide property prediction methods, we benchmarked all model architectures from OligoGym on our four toxicity datasets (@tbl_benchmark). Models were trained in regression mode (predicting continuous biomarker values) using OligoGym's OneHotEncoder and KMersCounts featurizers, with GroupKFold cross-validation matching our evaluation protocol.
 
-Neurotoxicity prediction proved substantially more tractable than hepatotoxicity across all model classes. For mouse FOB, the best models achieved Spearman $rho$ $approx$ 0.72, while mouse ALT prediction remained challenging ($rho$ $approx$ 0.35). Gradient-boosted methods (CatBoost, XGBoost) and the Transformer performed competitively, while simpler architectures (CNN, GRU) showed inconsistent performance across endpoints.
+Neurotoxicity prediction proved substantially more tractable than hepatotoxicity across all model classes. For mouse FOB, the best single-task models achieved Spearman $rho$ $approx$ 0.72, while mouse ALT prediction remained challenging ($rho$ $approx$ 0.35). Gradient-boosted methods (CatBoost, XGBoost) performed best for hepatotoxicity, while the Transformer excelled at neurotoxicity.
+
+We also trained a multi-task Transformer with a shared encoder across all four vivo endpoints and in vitro inhibition as an auxiliary task, using round-robin batching to equalise gradient updates across tasks. Despite this balancing, the multi-task model underperformed single-task baselines across all endpoints, with the largest gap for neurotoxicity ($rho$ = 0.34 vs 0.72). This negative transfer suggests that the sequence features predictive of in vitro knockdown and in vivo toxicity are largely distinct, and that naively sharing representations across these tasks degrades specialisation. This finding highlights the value of the multi-endpoint benchmark: future methods should explore task-specific architectures or more selective parameter sharing to exploit cross-endpoint signal without suffering interference.
 
 == Cost Savings from Computational Pre-Screening
 
