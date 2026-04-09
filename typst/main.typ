@@ -132,6 +132,17 @@ For hepatotoxicity, the mouse ALT model (128 dinucleotide features, 5,000 trees)
 
 For neurotoxicity, we compared OligoAI-tox against the Hagedorn et al. 2022 baseline (5 fixed coefficients from the original publication). On mouse bFOB scores (700 µg ICV; neurotoxic bFOB $>$ 1 vs non-toxic bFOB $<=$ 1), OligoAI-tox achieved an accuracy of #str(R.oligoai_tox_neurotox.accuracy) with an AUC of #str(R.oligoai_tox_neurotox.auc) on #comma(R.oligoai_tox_neurotox.n) compounds across #comma(R.oligoai_tox_neurotox.n_groups) target gene groups, compared to an AUC of #str(R.hagedorn_linear_neurotox.auc) for the Hagedorn et al. 2022 model. The rat mFOB model achieved an AUC of #str(R.rat_neurotox.auc) on #comma(R.rat_neurotox.n) compounds.
 
+== OligoGym Model Benchmark
+
+#figure(
+  include "tables/oligogym_benchmark.typ",
+  caption: [OligoGym benchmark: Spearman $rho$ (mean $plus.minus$ s.d. across folds) for 11 model architectures on four ASO toxicity regression tasks. Best featurizer and hyperparameters selected per model. GroupKFold cross-validation by target gene (5 folds). Bold indicates best model per dataset. "---" indicates the model was skipped (GP: dataset too large; GRU: degenerate predictions).],
+) <tbl_benchmark>
+
+To contextualise OligoAI-tox within the broader landscape of oligonucleotide property prediction methods, we benchmarked all model architectures from OligoGym on our four toxicity datasets (@tbl_benchmark). Models were trained in regression mode (predicting continuous biomarker values) using OligoGym's OneHotEncoder and KMersCounts featurizers, with GroupKFold cross-validation matching our evaluation protocol.
+
+Neurotoxicity prediction proved substantially more tractable than hepatotoxicity across all model classes. For mouse FOB, the best models achieved Spearman $rho$ $approx$ 0.72, while mouse ALT prediction remained challenging ($rho$ $approx$ 0.35). Gradient-boosted methods (CatBoost, XGBoost) and the Transformer performed competitively, while simpler architectures (CNN, GRU) showed inconsistent performance across endpoints.
+
 == Cost Savings from Computational Pre-Screening
 
 #figure(

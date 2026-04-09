@@ -21,7 +21,9 @@ Use `uv` for everything (`uv run`, `uv sync`, `uv pip install`).
 - `just plots` = generate all figures (assumes data already built)
 - `just test` = `uv run pytest tests/ -x -q`
 - `just compile` = `typst compile typst/main.typ` (~1s)
-- Do **not** run heavy training (`analyses/05_oligoai2/train.py`) unless explicitly asked.
+- `just oligogym` = run OligoGym benchmark (heavy, ~2-4 hours on CPU)
+- `just oligogym-table` = generate typst table from benchmark results
+- Do **not** run heavy training (`analyses/05_oligoai2/train.py`, `just oligogym`) unless explicitly asked.
 
 ## Project layout
 
@@ -29,6 +31,8 @@ Use `uv` for everything (`uv run`, `uv sync`, `uv pip install`).
 - `analyses/logic/models/hepatotox.py` — Hagedorn 2013 hepatotoxicity model replication
 - `analyses/logic/models/neurotox.py` — Hagedorn 2022 neurotoxicity model replication
 - `analyses/logic/pipeline.py` — pipeline attrition + cost analysis with Hagedorn enrichment
+- `analyses/logic/models/oligogym_benchmark.py` — OligoGym model benchmark (regression, GroupKFold)
+- `analyses/utils/oligogym_adapter.py` — bridges project data to OligoGym models/featurizers
 - `analyses/plotting/` — reads processed data, writes `typst/plots/` and `typst/tables/`
 - `analyses/export_paper_numbers.py` — exports key numbers to `typst/data/paper_numbers.json`
 - `typst/main.typ` — manuscript (reads `paper_numbers.json`, no hardcoded values)

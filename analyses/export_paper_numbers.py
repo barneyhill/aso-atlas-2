@@ -275,6 +275,26 @@ def main() -> None:
     else:
         warnings.warn(f"{PIPELINE_RESULTS_PATH} not found — run `just analysis` first")
 
+    # ── OligoGym benchmark summary ──
+    bench_path = RESULTS_DIR / "oligogym_benchmark.json"
+    if bench_path.exists():
+        bench_data = json.loads(bench_path.read_text())
+        best = bench_data.get("best_per_model", [])
+        if best:
+            # Best model per dataset
+            bench_summary = {}
+            for ds in ["mouse_hepatic", "rat_hepatic", "mouse_neuro", "rat_neuro"]:
+                ds_rows = [r for r in best if r["dataset"] == ds and r.get("spearman") is not None]
+                if ds_rows:
+                    top = max(ds_rows, key=lambda r: r["spearman"])
+                    bench_summary[ds] = {
+                        "best_model": top["model"],
+                        "spearman": round(top["spearman"], 3),
+                        "r2": round(top["r2"], 3) if top.get("r2") is not None else None,
+                        "rmse": round(top["rmse"], 1) if top.get("rmse") is not None else None,
+                    }
+            numbers["oligogym_benchmark"] = bench_summary
+
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(numbers, indent=2) + "\n")
     print(f"Wrote {OUT_PATH}")

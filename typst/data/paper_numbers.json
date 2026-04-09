@@ -191,5 +191,31 @@
     "combined_n_initial": 44,
     "combined_total_cost": 444000,
     "combined_savings_pct": 65.5
+  },
+  "oligogym_benchmark": {
+    "mouse_hepatic": {
+      "best_model": "CatBoost",
+      "spearman": 0.345,
+      "r2": -0.898,
+      "rmse": 1687.3
+    },
+    "rat_hepatic": {
+      "best_model": "CatBoost",
+      "spearman": 0.328,
+      "r2": -0.016,
+      "rmse": 123.7
+    },
+    "mouse_neuro": {
+      "best_model": "Transformer",
+      "spearman": 0.724,
+      "r2": 0.49,
+      "rmse": 1.5
+    },
+    "rat_neuro": {
+      "best_model": "Transformer",
+      "spearman": 0.655,
+      "r2": 0.393,
+      "rmse": 1.2
+    }
   }
 }

@@ -31,6 +31,7 @@ plots:
     uv run python -m analyses.plotting.plot_supp_dinucleotide
     uv run python -m analyses.plotting.plot_supp_alt_ast
     uv run python -m analyses.plotting.plot_supp_biomarker_dist
+    uv run python -m analyses.plotting.plot_oligogym_table
 
 # ── Manuscript ───────────────────────────────────────────
 compile:
@@ -38,6 +39,13 @@ compile:
 
 export-models:
     uv run python -m analyses.export_models
+
+# ── OligoGym benchmark (heavy, run explicitly) ─────────────
+oligogym:
+    uv run python -m analyses.logic.models.oligogym_benchmark
+
+oligogym-table:
+    uv run python -m analyses.plotting.plot_oligogym_table
 
 build: analysis export plots compile
 
