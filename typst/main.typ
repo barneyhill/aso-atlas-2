@@ -135,7 +135,7 @@ For neurotoxicity, we compared OligoAI-tox against the Hagedorn et al. 2022 base
 == OligoGym Model Benchmark
 
 #figure(
-  include "tables/oligogym_benchmark.typ",
+  include "data/oligogym_benchmark.typ",
   caption: [OligoGym benchmark: Spearman $rho$ (mean $plus.minus$ s.d. across folds) for 11 model architectures on four ASO toxicity regression tasks. Best featurizer and hyperparameters selected per model. GroupKFold cross-validation by target gene (5 folds). Bold indicates best model per dataset. "---" indicates the model was skipped (GP: dataset too large; GRU: degenerate predictions).],
 ) <tbl_benchmark>
 

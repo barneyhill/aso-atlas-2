@@ -7,7 +7,7 @@ import numpy as np
 
 _root = Path(__file__).resolve().parents[2]
 RESULTS_PATH = _root / "data/results/oligogym_benchmark.json"
-OUT_PATH = _root / "typst/tables/oligogym_benchmark.typ"
+OUT_PATH = _root / "typst/data/oligogym_benchmark.typ"
 
 # Display order for models
 MODEL_ORDER = [
