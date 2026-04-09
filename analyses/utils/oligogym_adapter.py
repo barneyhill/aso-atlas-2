@@ -48,11 +48,9 @@ _mock_missing_deps()
 from oligogym.features import KMersCounts, OneHotEncoder  # noqa: E402
 from oligogym.models import (  # noqa: E402
     CNN,
-    GRU,
     MLP,
     CatBoostModel,
     CausalCNN,
-    GaussianProcessModel,
     LinearModel,
     NearestNeighborsModel,
     RandomForestModel,
@@ -178,8 +176,6 @@ def is_compatible(feat_name: str, model_name: str) -> bool:
 # Model configs  (name -> list of kwarg dicts to try)
 # ---------------------------------------------------------------------------
 
-_MAX_GP_SAMPLES = 1000
-
 MODEL_CONFIGS: dict[str, tuple[type, list[dict]]] = {
     "Linear": (LinearModel, [{"type": "standard"}, {"type": "ridge"}]),
     "Random Forest": (RandomForestModel, [
@@ -194,7 +190,6 @@ MODEL_CONFIGS: dict[str, tuple[type, list[dict]]] = {
         {"n_neighbors": 5},
         {"n_neighbors": 10},
     ]),
-    "Gaussian Process": (GaussianProcessModel, [{}]),
     "CatBoost": (CatBoostModel, [
         {"iterations": 100},
         {"iterations": 500},
@@ -204,7 +199,6 @@ MODEL_CONFIGS: dict[str, tuple[type, list[dict]]] = {
         {"hidden_dims": [128], "dropout": 0.25},
         {"hidden_dims": [128, 128], "dropout": 0.25},
     ]),
-    "GRU": (GRU, [{"hidden_dim": 64, "num_layers": 1}]),
     "CausalCNN": (CausalCNN, [{"depth": 2, "hidden_dim": 64}]),
     "Transformer": (Transformer, [
         {"d_model": 128, "nhead": 4, "num_layers": 2, "dropout": 0.25},

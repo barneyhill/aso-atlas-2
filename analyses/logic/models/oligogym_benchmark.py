@@ -32,7 +32,6 @@ from analyses.utils.oligogym_adapter import (
     DATASETS,
     FEATURIZER_CONFIGS,
     MODEL_CONFIGS,
-    _MAX_GP_SAMPLES,
     is_compatible,
 )
 
@@ -68,11 +67,11 @@ def _fold_metrics(y_true, y_pred):
 
 def _needs_flatten(model_name: str) -> bool:
     """Sklearn models need flattened 2D input; lightning models keep 3D."""
-    return model_name not in {"CNN", "GRU", "CausalCNN", "Transformer"}
+    return model_name not in {"CNN", "CausalCNN", "Transformer"}
 
 
 def _is_lightning(model_name: str) -> bool:
-    return model_name in {"CNN", "MLP", "GRU", "CausalCNN", "Transformer"}
+    return model_name in {"CNN", "MLP", "CausalCNN", "Transformer"}
 
 
 def run_benchmark():
@@ -89,11 +88,6 @@ def run_benchmark():
         for feat_name, (feat_cls, feat_kwargs) in FEATURIZER_CONFIGS.items():
             for model_name, (model_cls, hp_list) in MODEL_CONFIGS.items():
                 if not is_compatible(feat_name, model_name):
-                    continue
-
-                # Skip GP on large datasets
-                if model_name == "Gaussian Process" and n > _MAX_GP_SAMPLES:
-                    print(f"  SKIP {model_name} x {feat_name} (N={n} > {_MAX_GP_SAMPLES})")
                     continue
 
                 for hp_kwargs in hp_list:

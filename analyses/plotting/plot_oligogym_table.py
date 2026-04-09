@@ -15,11 +15,9 @@ MODEL_ORDER = [
     "Random Forest",
     "XGBoost",
     "KNN",
-    "Gaussian Process",
     "CatBoost",
     "MLP",
     "CNN",
-    "GRU",
     "CausalCNN",
     "Transformer",
 ]

@@ -136,7 +136,7 @@ For neurotoxicity, we compared OligoAI-tox against the Hagedorn et al. 2022 base
 
 #figure(
   include "data/oligogym_benchmark.typ",
-  caption: [OligoGym benchmark: Spearman $rho$ (mean $plus.minus$ s.d. across folds) for 11 model architectures on four ASO toxicity regression tasks. Best featurizer and hyperparameters selected per model. GroupKFold cross-validation by target gene (5 folds). Bold indicates best model per dataset. "---" indicates the model was skipped (GP: dataset too large; GRU: degenerate predictions).],
+  caption: [OligoGym benchmark: Spearman $rho$ (mean $plus.minus$ s.d. across folds) for 9 model architectures on four ASO toxicity regression tasks. Best featurizer and hyperparameters selected per model. GroupKFold cross-validation by target gene (5 folds). Bold indicates best model per dataset.],
 ) <tbl_benchmark>
 
 To contextualise OligoAI-tox within the broader landscape of oligonucleotide property prediction methods, we benchmarked all model architectures from OligoGym on our four toxicity datasets (@tbl_benchmark). Models were trained in regression mode (predicting continuous biomarker values) using OligoGym's OneHotEncoder and KMersCounts featurizers, with GroupKFold cross-validation matching our evaluation protocol.
