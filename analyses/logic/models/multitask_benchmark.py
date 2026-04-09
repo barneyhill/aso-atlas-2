@@ -11,15 +11,12 @@ import time
 import warnings
 from pathlib import Path
 
-os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "0")
 os.environ["PYTHONUNBUFFERED"] = "1"
 
 import torch  # noqa: E402
-
-torch.backends.mps.is_available = lambda: False
-torch.backends.mps.is_built = lambda: False
-
 import numpy as np  # noqa: E402
+
+DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 import torch.nn.functional as F
 from scipy.stats import spearmanr
 from sklearn.metrics import mean_squared_error, r2_score
@@ -42,12 +39,20 @@ SEED = 42
 
 # Training hyperparameters
 CFG = MultiTaskConfig()
-LR = 3e-4
 WEIGHT_DECAY = 1e-5
-MAX_EPOCHS = 100
-PATIENCE = 15
 BATCH_SIZE = 64
 GRAD_CLIP = 1.0
+
+# Phase 1: Pre-train encoder on IV
+PRETRAIN_LR = 3e-4
+PRETRAIN_EPOCHS = 30
+PRETRAIN_PATIENCE = 8
+
+# Phase 2: Fine-tune vivo heads (encoder frozen or low LR)
+FINETUNE_LR_HEADS = 3e-4
+FINETUNE_LR_ENCODER = 1e-5  # discriminative fine-tuning
+FINETUNE_EPOCHS = 100
+FINETUNE_PATIENCE = 15
 
 
 def _metrics(y_true, y_pred):
@@ -80,139 +85,170 @@ def _make_batches(encoded_tensors, sample_indices, y, batch_size, shuffle=True, 
             continue
         idx_valid = idx[valid]
         enc_valid = enc_idx[valid]
-        batch_t = gather(encoded_tensors, enc_valid)
-        batch_y = torch.from_numpy(y[idx_valid])
+        batch_t = {k: v.to(DEVICE) for k, v in gather(encoded_tensors, enc_valid).items()}
+        batch_y = torch.from_numpy(y[idx_valid]).to(DEVICE)
         batches.append((batch_t, batch_y))
     return batches
 
 
-def train_one_fold(
-    vivo_data: dict[str, dict],
-    iv_data: dict | None,
-    vivo_train_idx: dict[str, np.ndarray],
-    vivo_val_idx: dict[str, np.ndarray],
-    encoded_tensors: dict[str, torch.Tensor],
-    iv_sample_indices: np.ndarray | None,
-    iv_train_mask: np.ndarray | None,
-) -> tuple:
-    """Train one fold of the multi-task model. Returns (model, val_metrics)."""
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
-
-    model = MultiTaskTransformer(CFG)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=MAX_EPOCHS)
-
-    rng = np.random.default_rng(SEED)
-
-    best_val_spearman = -np.inf
+def _train_loop(model, optimizer, scheduler, batches_fn, val_fn,
+                max_epochs, patience):
+    """Generic train loop with early stopping. Returns best val metric."""
+    best_val = -np.inf
     best_state = None
     patience_counter = 0
 
-    for epoch in range(MAX_EPOCHS):
+    for epoch in range(max_epochs):
         model.train()
-
-        # Build batches for each task (round-robin)
-        task_batches = {}
-        for ep_name in VIVO_ENDPOINTS:
-            train_si = vivo_data[ep_name]["_sample_idx"][vivo_train_idx[ep_name]]
-            train_y = vivo_data[ep_name]["y"][vivo_train_idx[ep_name]]
-            task_batches[ep_name] = _make_batches(
-                encoded_tensors, train_si, train_y, BATCH_SIZE, shuffle=True, rng=rng,
+        for batch_t, batch_y, task_name in batches_fn():
+            pred = model(
+                batch_t["base_idx"], batch_t["sugar_idx"],
+                batch_t["backbone_idx"], batch_t["mask"],
+                task_name=task_name,
             )
+            loss = F.mse_loss(pred, batch_y)
+            optimizer.zero_grad()
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), GRAD_CLIP)
+            optimizer.step()
 
-        if iv_data is not None and iv_sample_indices is not None and iv_train_mask is not None:
-            iv_si = iv_sample_indices[iv_train_mask]
-            iv_y = iv_data["y"][iv_train_mask]
-            # Subsample IV to match vivo size (equal gradient updates)
-            max_vivo_batches = max(len(b) for b in task_batches.values())
-            n_iv_samples = max_vivo_batches * BATCH_SIZE
-            if len(iv_si) > n_iv_samples:
-                sub = rng.choice(len(iv_si), n_iv_samples, replace=False)
-                iv_si_sub, iv_y_sub = iv_si[sub], iv_y[sub]
-            else:
-                iv_si_sub, iv_y_sub = iv_si, iv_y
-            task_batches["inhibition"] = _make_batches(
-                encoded_tensors, iv_si_sub, iv_y_sub, BATCH_SIZE, shuffle=True, rng=rng,
-            )
+        if scheduler is not None:
+            scheduler.step()
 
-        # Round-robin training
-        all_task_names = list(task_batches.keys())
-        max_batches = max(len(task_batches[t]) for t in all_task_names)
-        task_iters = {t: iter(task_batches[t]) for t in all_task_names}
-
-        epoch_losses = []
-        for step in range(max_batches):
-            total_loss = torch.tensor(0.0)
-            n_tasks = 0
-
-            for task_name in all_task_names:
-                batch = next(task_iters[task_name], None)
-                if batch is None:
-                    # Cycle for smaller tasks
-                    task_iters[task_name] = iter(task_batches[task_name])
-                    batch = next(task_iters[task_name], None)
-                    if batch is None:
-                        continue
-
-                batch_t, batch_y = batch
-                pred = model(
-                    batch_t["base_idx"], batch_t["sugar_idx"],
-                    batch_t["backbone_idx"], batch_t["mask"],
-                    task_name=task_name,
-                )
-                loss_t = F.mse_loss(pred, batch_y)
-
-                # Uncertainty weighting
-                tid = TASK_ID[task_name]
-                precision = torch.exp(-model.log_var[tid])
-                total_loss = total_loss + 0.5 * precision * loss_t + 0.5 * model.log_var[tid]
-                n_tasks += 1
-
-            if n_tasks > 0:
-                total_loss = total_loss / n_tasks
-                optimizer.zero_grad()
-                total_loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), GRAD_CLIP)
-                optimizer.step()
-                epoch_losses.append(total_loss.item())
-
-        scheduler.step()
-
-        # Validate on vivo endpoints only
-        model.eval()
-        val_spearmans = []
-        with torch.no_grad():
-            for ep_name in VIVO_ENDPOINTS:
-                val_si = vivo_data[ep_name]["_sample_idx"][vivo_val_idx[ep_name]]
-                val_y = vivo_data[ep_name]["y"][vivo_val_idx[ep_name]]
-                valid = val_si >= 0
-                if valid.sum() < 5:
-                    continue
-                batch_t = gather(encoded_tensors, val_si[valid])
-                pred = model(
-                    batch_t["base_idx"], batch_t["sugar_idx"],
-                    batch_t["backbone_idx"], batch_t["mask"],
-                    task_name=ep_name,
-                ).numpy()
-                rho, _ = spearmanr(val_y[valid], pred)
-                if np.isfinite(rho):
-                    val_spearmans.append(rho)
-
-        mean_val = np.mean(val_spearmans) if val_spearmans else -1.0
-
-        if mean_val > best_val_spearman:
-            best_val_spearman = mean_val
-            best_state = {k: v.clone() for k, v in model.state_dict().items()}
+        val_metric = val_fn(model)
+        if val_metric > best_val:
+            best_val = val_metric
+            if DEVICE.type == "mps":
+                torch.mps.synchronize()
+            best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
             patience_counter = 0
         else:
             patience_counter += 1
-            if patience_counter >= PATIENCE:
+            if patience_counter >= patience:
                 break
 
     if best_state is not None:
-        model.load_state_dict(best_state)
-    return model, best_val_spearman
+        model.load_state_dict({k: v.to(DEVICE) for k, v in best_state.items()})
+    return best_val
+
+
+def _eval_spearman(model, vivo_data, vivo_idx, encoded_tensors, endpoints):
+    """Compute mean Spearman across specified endpoints."""
+    model.eval()
+    spearmans = []
+    with torch.no_grad():
+        for ep_name in endpoints:
+            si = vivo_data[ep_name]["_sample_idx"][vivo_idx[ep_name]]
+            y = vivo_data[ep_name]["y"][vivo_idx[ep_name]]
+            valid = si >= 0
+            if valid.sum() < 5:
+                continue
+            batch_t = {k: v.to(DEVICE) for k, v in gather(encoded_tensors, si[valid]).items()}
+            pred = model(
+                batch_t["base_idx"], batch_t["sugar_idx"],
+                batch_t["backbone_idx"], batch_t["mask"],
+                task_name=ep_name,
+            ).cpu().numpy()
+            rho, _ = spearmanr(y[valid], pred)
+            if np.isfinite(rho):
+                spearmans.append(rho)
+    return float(np.mean(spearmans)) if spearmans else -1.0
+
+
+def train_one_fold(
+    vivo_data: dict[str, dict],
+    iv_data: dict,
+    vivo_train_idx: dict[str, np.ndarray],
+    vivo_val_idx: dict[str, np.ndarray],
+    encoded_tensors: dict[str, torch.Tensor],
+    iv_sample_indices: np.ndarray,
+    iv_train_mask: np.ndarray,
+) -> tuple:
+    """Two-phase training: pre-train on IV → fine-tune on vivo."""
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    rng = np.random.default_rng(SEED)
+
+    model = MultiTaskTransformer(CFG).to(DEVICE)
+
+    # ── Phase 1: Pre-train encoder + inhibition head on IV ──────────
+    iv_si = iv_sample_indices[iv_train_mask]
+    iv_y = iv_data["y"][iv_train_mask]
+    # Hold out 10% for validation
+    n_iv = len(iv_si)
+    perm = rng.permutation(n_iv)
+    n_iv_val = max(1, n_iv // 10)
+    iv_val_si, iv_val_y = iv_si[perm[:n_iv_val]], iv_y[perm[:n_iv_val]]
+    iv_train_si, iv_train_y = iv_si[perm[n_iv_val:]], iv_y[perm[n_iv_val:]]
+
+    pretrain_opt = torch.optim.AdamW(model.parameters(), lr=PRETRAIN_LR, weight_decay=WEIGHT_DECAY)
+    pretrain_sched = torch.optim.lr_scheduler.CosineAnnealingLR(pretrain_opt, T_max=PRETRAIN_EPOCHS)
+
+    def iv_batches():
+        batches = _make_batches(encoded_tensors, iv_train_si, iv_train_y,
+                                BATCH_SIZE, shuffle=True, rng=rng)
+        for bt, by in batches:
+            yield bt, by, "inhibition"
+
+    def iv_val(m):
+        m.eval()
+        with torch.no_grad():
+            valid = iv_val_si >= 0
+            if valid.sum() < 5:
+                return -1.0
+            bt = {k: v.to(DEVICE) for k, v in gather(encoded_tensors, iv_val_si[valid]).items()}
+            pred = m(bt["base_idx"], bt["sugar_idx"], bt["backbone_idx"],
+                     bt["mask"], task_name="inhibition").cpu().numpy()
+            rho, _ = spearmanr(iv_val_y[valid], pred)
+            return float(rho) if np.isfinite(rho) else -1.0
+
+    pretrain_val = _train_loop(model, pretrain_opt, pretrain_sched,
+                               iv_batches, iv_val, PRETRAIN_EPOCHS, PRETRAIN_PATIENCE)
+    print(f"      Phase 1 (IV pre-train): val Spearman={pretrain_val:.3f}")
+
+    # ── Phase 2: Fine-tune on vivo with discriminative LR ───────────
+    # Encoder gets very low LR; heads get full LR
+    encoder_params = list(model.encoder.parameters()) + list(model.pool.parameters())
+    head_params = []
+    for ep_name in VIVO_ENDPOINTS:
+        head_params.extend(model.heads[ep_name].parameters())
+    head_params.append(model.log_var)
+
+    finetune_opt = torch.optim.AdamW([
+        {"params": encoder_params, "lr": FINETUNE_LR_ENCODER},
+        {"params": head_params, "lr": FINETUNE_LR_HEADS},
+    ], weight_decay=WEIGHT_DECAY)
+    finetune_sched = torch.optim.lr_scheduler.CosineAnnealingLR(finetune_opt, T_max=FINETUNE_EPOCHS)
+
+    def vivo_batches():
+        """Round-robin across vivo tasks."""
+        task_b = {}
+        for ep_name in VIVO_ENDPOINTS:
+            si = vivo_data[ep_name]["_sample_idx"][vivo_train_idx[ep_name]]
+            y = vivo_data[ep_name]["y"][vivo_train_idx[ep_name]]
+            task_b[ep_name] = _make_batches(encoded_tensors, si, y,
+                                            BATCH_SIZE, shuffle=True, rng=rng)
+        max_b = max(len(v) for v in task_b.values())
+        iters = {t: iter(b) for t, b in task_b.items()}
+        for _ in range(max_b):
+            for task_name in VIVO_ENDPOINTS:
+                batch = next(iters[task_name], None)
+                if batch is None:
+                    iters[task_name] = iter(task_b[task_name])
+                    batch = next(iters[task_name], None)
+                if batch is not None:
+                    yield batch[0], batch[1], task_name
+
+    active_val_eps = [ep for ep in VIVO_ENDPOINTS if len(vivo_val_idx.get(ep, [])) > 0]
+
+    def vivo_val(m):
+        return _eval_spearman(m, vivo_data, vivo_val_idx, encoded_tensors, active_val_eps)
+
+    finetune_val = _train_loop(model, finetune_opt, finetune_sched,
+                               vivo_batches, vivo_val, FINETUNE_EPOCHS, FINETUNE_PATIENCE)
+    print(f"      Phase 2 (vivo fine-tune): val Spearman={finetune_val:.3f}")
+
+    return model, finetune_val
 
 
 def run_multitask_benchmark():
@@ -327,12 +363,12 @@ def run_multitask_benchmark():
                     if valid.sum() < 5:
                         results[ep_name].append({"spearman": np.nan, "r2": np.nan, "rmse": np.nan})
                         continue
-                    batch_t = gather(encoded_tensors, test_si[valid])
+                    batch_t = {k: v.to(DEVICE) for k, v in gather(encoded_tensors, test_si[valid]).items()}
                     pred = model(
                         batch_t["base_idx"], batch_t["sugar_idx"],
                         batch_t["backbone_idx"], batch_t["mask"],
                         task_name=ep_name,
-                    ).numpy()
+                    ).cpu().numpy()
                     m = _metrics(test_y[valid], pred)
                     results[ep_name].append(m)
                     print(f"    {ep_name}: Spearman={m['spearman']:.3f}")
