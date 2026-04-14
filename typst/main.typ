@@ -104,9 +104,46 @@ In this work, we make three contributions:
 
 + A *baseline benchmark* replicating the Hagedorn hepatotoxicity @hagedorn_hepatotoxic_2013 and neurotoxicity @hagedorn_acute_2022 models on ASO Atlas 2.0 with proper GroupKFold cross-validation by target gene, establishing reference performance for future methods.
 
-= Results
+= Related Work
 
-== ASO Atlas 2.0 Dataset
+// TODO: Fill in these subsections
+
+== ASO Datasets
+
+// Existing public ASO datasets and their limitations.
+// - ASO Atlas 1.0 (if applicable), Ionis patent data used in prior work
+// - Contrast with proprietary datasets used by Hagedorn, OligoAI, etc.
+// - Key gap: no public dataset links multiple preclinical endpoints for the same compounds
+
+== Computational ASO Design
+
+// Computational methods for ASO property prediction.
+// - Hagedorn 2013 (hepatotox, LNA gapmers, dinucleotide RF)
+// - Hagedorn 2022 (neurotox, 5-feature logistic regression)
+// - OligoAI (Hill et al. 2025, deep learning, in vitro efficacy)
+// - OligoGym (benchmark framework for oligo models)
+// - Key gap: models developed and evaluated in isolation, no cross-endpoint comparison
+
+== Cost-Based Evaluation in Drug Discovery
+
+// Prior work on translating model accuracy into economic value.
+// - Enrichment-based evaluation in HTS/virtual screening
+// - Stage-gate pipeline modelling
+// - Key gap: no framework specific to the sequential ASO preclinical pipeline
+
+= ASO Atlas 2.0
+
+== Extraction Pipeline
+
+ASO Atlas 2.0 was constructed using a three-stage language-model-powered pipeline that converts unstructured tables in USPTO patent XML files into flat, structured preclinical ASO datasets annotated with HELM chemical-structure strings.
+
+*Stage 1 — Table extraction.* USPTO patent XML documents filed after 2001 by ISIS Pharmaceuticals (now Ionis Pharmaceuticals) were retrieved via the USPTO bulk-data API and split into individual table files, each paired with the five paragraphs of prose immediately preceding the table. Tables were deduplicated in two phases: exact MD5 hash matching, followed by pairwise sequence similarity (Python `SequenceMatcher`, 90% threshold) with length-based pruning; connected components were resolved by depth-first search to select a single canonical file per group, reducing 35,871 raw tables from 1,125 Ionis Pharmaceuticals patents to 8,435 canonical tables. For each canonical table, GPT-5-mini generated a bespoke Python extraction function tailored to that table's XML layout. Generated scripts were executed in a sandboxed subprocess with a restricted import whitelist (`json`, `re`, `xml.etree.ElementTree`, `math`) and a ten-second timeout. An agentic self-repair loop allowed the model to observe execution output or errors and regenerate corrected code, for up to five attempts per table.
+
+*Stage 2 — HELM annotation.* For each canonical table the model received the surrounding patent prose and a table preview, then generated a function that constructs Hierarchical Editing Language for Macromolecules (HELM) strings nucleotide-by-nucleotide from the chemistry description. To avoid hallucinated annotations, the function was required to return null when explicit modification data could not be found in the patent text. All HELM strings were validated by a rule-based checker that enforces correct sugar tokens (`[moe]`, `d`, `r`, `m`, `[cet]`, `[fR]`, `[lna]`), canonical bases (`A`, `C`, `G`, `T`, `U`, `[5meC]`), backbone tokens (`[sp]`, `[am]`, `.`), balanced bracket syntax, and terminal-nucleotide constraints.
+
+*Stage 3 — Schema-driven collation.* Each assay category was extracted in a separate pass by supplying a schema dictionary that maps desired column names to natural-language descriptions. GPT-5 generated a mapping function per table that translates table-specific field names to the target schema, performs unit conversions, and unpivots multi-measurement rows into separate records. The same sandboxed execution and self-repair loop as Stage~1 were applied. HELM annotations were merged into each output record by compound identifier, following canonical-link chains across duplicate tables. Four schemas were defined, one per assay category: (i)~in vitro inhibition --- percent inhibition, cell line, dosage in nM, transfection method, treatment period, and target gene; (ii)~dose response --- the same fields with dosage in the original unit (nM or~$mu$M); (iii)~hepatorenal toxicity --- seven serum biomarkers (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio), dosage, species, strain, number of doses, dosing period, measurement source, and administration route; and (iv)~neurotoxicity --- FOB score (bFOB or mFOB), dosage, species, strain, latency, administration method, and score type.
+
+== Dataset Overview
 
 #figure(
   image("plots/fig1/fig1.svg", width: 100%),
@@ -123,6 +160,45 @@ ASO Atlas 2.0 comprises four linked assay categories extracted from USPTO patent
 ) <fig2>
 
 The ASO preclinical pipeline consists of seven sequential stages: in vitro efficacy (inhibition \>80%), in vitro potency (IC50 \<500 nM by electroporation), mouse liver toxicity (ALT \<2$times$ULN), mouse neurotoxicity (bFOB ≤1), rat liver toxicity (ALT \<2$times$ULN), rat neurotoxicity (mFOB ≤1), and monkey liver toxicity (@fig2). Back-calculation from ASO Atlas 2.0 pass rates shows that producing a single development candidate requires screening approximately #comma(R.pipeline.baseline_n_initial) initial ASOs at an estimated total cost of \$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 1))M. The majority of this cost is concentrated at the in vivo stages, where per-ASO costs range from \$15,000 (mouse) to \$100,000 (monkey).
+
+== Cross-Species Concordance and Dataset Characterisation
+
+#figure(
+  image("plots/fig5/fig5.svg", width: 100%),
+  caption: [Selection bias, cross-assay and cross-biomarker correlations, base composition, and cross-species concordance. *(A)* Selection-bias KDEs showing biomarker distributions for compounds that do (blue) vs don't (grey) advance to the next pipeline stage. *(B)* Cross-assay Spearman $rho$: pairwise correlations between per-compound metrics across pipeline stages (BH-corrected; n.s. = not significant). *(C)* Cross-biomarker Spearman $rho$: correlations between mouse hepatotoxicity biomarkers (Bonferroni-corrected). *(D)* Nucleotide base $times$ biomarker Spearman $rho$: base composition vs toxicity biomarkers (BH-corrected). *(E)* Cross-species bFOB concordance: mouse bFOB vs rat mFOB score heatmap (integer-rounded); cell values are compound counts.],
+) <fig5>
+
+To assess whether mouse-based screening translates to rat outcomes, we compared per-compound mean biomarker values for compounds tested in both species (@fig5). For hepatotoxicity biomarkers, Spearman correlations were modest but statistically significant: ALT ($rho$ = #str(R.cross_species_hepatotox.ALT.spearman_rho), p < 10#super[--10], n = #str(R.cross_species_hepatotox.ALT.n_shared)), AST ($rho$ = #str(R.cross_species_hepatotox.AST.spearman_rho), p < 10#super[--8], n = #str(R.cross_species_hepatotox.AST.n_shared)), and TBIL ($rho$ = #str(R.cross_species_hepatotox.TBIL.spearman_rho), p < 10#super[--5], n = #str(R.cross_species_hepatotox.TBIL.n_shared)). Binary concordance rates (agreement on high vs low classification using species-specific ULN thresholds) were high: #str(R.cross_species_hepatotox.ALT.concordance_rate) for ALT, #str(R.cross_species_hepatotox.AST.concordance_rate) for AST, and #str(R.cross_species_hepatotox.TBIL.concordance_rate) for TBIL --- though this largely reflects the dominance of concordant low-toxicity compounds.
+
+Neurotoxicity showed stronger cross-species concordance. Mouse bFOB and rat mFOB scores (700 $mu$g ICV vs 3,000 $mu$g IT respectively) were well correlated ($rho$ = #str(R.cross_species_neurotox.FOB.spearman_rho), p $approx$ 0, n = #comma(R.cross_species_neurotox.FOB.n_shared)), with a binary concordance rate of #str(R.cross_species_neurotox.FOB.concordance_rate) across #str(R.cross_species_neurotox.FOB.concordance_n) classifiable compounds.
+
+Within mouse, the hepatotoxicity biomarkers show a structured correlation pattern (@fig5 C). ALT and AST are strongly correlated ($rho$ = 0.92), consistent with their shared hepatocellular origin, while TBIL is moderately correlated with both ($rho$ $approx$ 0.4). The renal markers BUN and CREA form a separate cluster ($rho$ = 0.36), largely independent of the liver enzymes. This structure suggests that ALT and AST carry largely redundant information for toxicity classification, while TBIL and renal biomarkers may offer complementary signal.
+
+= Benchmark Design
+
+== Cost-Based Evaluation Framework
+
+To translate classification accuracy into practical value, we developed a cost-based evaluation framework. For each pipeline stage, per-ASO costs were estimated from industry benchmarks: \$500 (in vitro efficacy), \$2,000 (dose-response), \$15,000 (mouse hepatotoxicity), \$20,000 (mouse neurotoxicity), \$25,000 (rat hepatotoxicity), \$30,000 (rat neurotoxicity), and \$100,000 (monkey hepatotoxicity).
+
+The *enrichment factor* at a given stage is defined as the ratio of the pass rate among classifier-selected compounds to the base pass rate: $"EF" = P("pass" bar.v "selected") / P("pass")$, where "selected" denotes the top 25% compounds with lowest predicted toxicity risk (lowest P(high)). An enrichment factor greater than one indicates that the classifier concentrates passing compounds among its predictions.
+
+Pipeline costs are back-calculated by determining the number of initial ASOs needed to yield one development candidate, given the pass rates at each stage. With classifier pre-screening, the effective pass rates at enriched stages increase by the enrichment factor, reducing the required number of initial candidates and the associated costs at all downstream stages.
+
+== Evaluation Protocol
+
+All models were evaluated using GroupKFold cross-validation with 5 folds, where groups were defined by target gene. This ensures that all compounds targeting the same gene appear exclusively in either the training or test set within each fold, preventing inflated performance estimates from gene-level information leakage. Group assignment prioritised direct target gene annotations, supplemented by compound-level cross-referencing to the in vitro dataset and USPTO patent ID as a fallback proxy.
+
+== Software and Data Access
+
+// TODO: Fill in
+// - Data format and hosting (e.g., Hugging Face, Zenodo, GitHub)
+// - Python package / data loaders
+// - Evaluation scripts and reproducibility
+// - Leaderboard plans (if any)
+// - Licensing (e.g., CC-BY, MIT)
+// - Maintenance plan
+
+= Baseline Experiments
 
 == Toxicity Prediction
 
@@ -159,22 +235,7 @@ We also trained a multi-task Transformer with a shared encoder and task-specific
 
 To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig4). OligoAI-tox (hepatotoxicity + neurotoxicity) enriches the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.oligoai_tox_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction @hill_accurately_2025, achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
 
-== Cross-Species Concordance and Sequence Motifs
-
-#figure(
-  image("plots/fig5/fig5.svg", width: 100%),
-  caption: [Selection bias, cross-assay and cross-biomarker correlations, base composition, and cross-species concordance. *(A)* Selection-bias KDEs showing biomarker distributions for compounds that do (blue) vs don't (grey) advance to the next pipeline stage. *(B)* Cross-assay Spearman $rho$: pairwise correlations between per-compound metrics across pipeline stages (BH-corrected; n.s. = not significant). *(C)* Cross-biomarker Spearman $rho$: correlations between mouse hepatotoxicity biomarkers (Bonferroni-corrected). *(D)* Nucleotide base $times$ biomarker Spearman $rho$: base composition vs toxicity biomarkers (BH-corrected). *(E)* Cross-species bFOB concordance: mouse bFOB vs rat mFOB score heatmap (integer-rounded); cell values are compound counts.],
-) <fig5>
-
-To assess whether mouse-based screening translates to rat outcomes, we compared per-compound mean biomarker values for compounds tested in both species (@fig5). For hepatotoxicity biomarkers, Spearman correlations were modest but statistically significant: ALT ($rho$ = #str(R.cross_species_hepatotox.ALT.spearman_rho), p < 10#super[--10], n = #str(R.cross_species_hepatotox.ALT.n_shared)), AST ($rho$ = #str(R.cross_species_hepatotox.AST.spearman_rho), p < 10#super[--8], n = #str(R.cross_species_hepatotox.AST.n_shared)), and TBIL ($rho$ = #str(R.cross_species_hepatotox.TBIL.spearman_rho), p < 10#super[--5], n = #str(R.cross_species_hepatotox.TBIL.n_shared)). Binary concordance rates (agreement on high vs low classification using species-specific ULN thresholds) were high: #str(R.cross_species_hepatotox.ALT.concordance_rate) for ALT, #str(R.cross_species_hepatotox.AST.concordance_rate) for AST, and #str(R.cross_species_hepatotox.TBIL.concordance_rate) for TBIL --- though this largely reflects the dominance of concordant low-toxicity compounds.
-
-Neurotoxicity showed stronger cross-species concordance. Mouse bFOB and rat mFOB scores (700 $mu$g ICV vs 3,000 $mu$g IT respectively) were well correlated ($rho$ = #str(R.cross_species_neurotox.FOB.spearman_rho), p $approx$ 0, n = #comma(R.cross_species_neurotox.FOB.n_shared)), with a binary concordance rate of #str(R.cross_species_neurotox.FOB.concordance_rate) across #str(R.cross_species_neurotox.FOB.concordance_n) classifiable compounds.
-
-Within mouse, the hepatotoxicity biomarkers show a structured correlation pattern (@fig5 C). ALT and AST are strongly correlated ($rho$ = 0.92), consistent with their shared hepatocellular origin, while TBIL is moderately correlated with both ($rho$ $approx$ 0.4). The renal markers BUN and CREA form a separate cluster ($rho$ = 0.36), largely independent of the liver enzymes. This structure suggests that ALT and AST carry largely redundant information for toxicity classification, while TBIL and renal biomarkers may offer complementary signal.
-
 = Discussion
-
-We have introduced ASO Atlas 2.0, a public multi-endpoint ASO preclinical dataset, and a cost-based benchmarking framework for evaluating computational screening methods. OligoAI-tox --- Hagedorn's dinucleotide random forest trained on ASO Atlas 2.0 --- establishes baseline performance for future methods to improve upon.
 
 OligoAI-tox achieves moderate classification accuracy on ASO Atlas 2.0, consistent with the original Hagedorn publications despite the shift from LNA to MOE/cET chemistry. The use of GroupKFold cross-validation by target gene provides a more realistic estimate of generalisation performance than random splits, since in practice new ASO programmes target novel genes not seen during model development.
 
@@ -184,19 +245,13 @@ Even modest enrichment at the expensive in vivo stages translates into meaningfu
 
 Several limitations should be noted. First, OligoAI-tox uses only chemistry-derived sequence features and does not incorporate target gene context, target site thermodynamics, or off-target binding potential. Second, ASO Atlas 2.0 is derived from Ionis Pharmaceuticals patents and therefore reflects the design space and chemical modifications used by a single organisation. Third, the binary classification approach (high vs low toxicity) discards intermediate cases and may oversimplify the dose-response relationship between sequence features and toxicity.
 
+= Conclusion
+
+We have introduced ASO Atlas 2.0, the largest public multi-endpoint ASO preclinical dataset, and a cost-based benchmarking framework that translates model accuracy into practical screening savings. Baseline experiments with OligoAI-tox establish reference performance for future methods to improve upon, and demonstrate that even modest enrichment at expensive in vivo stages yields meaningful cost and animal reductions.
+
 Future directions include: (i) deep learning models that operate directly on HELM strings rather than hand-crafted features; (ii) multi-task approaches that jointly predict across endpoints; (iii) target-aware models that incorporate gene-level information; and (iv) regression rather than classification to capture the full spectrum of toxicity outcomes.
 
 = Methods
-
-== ASO Atlas 2.0 Extraction Pipeline
-
-ASO Atlas 2.0 is a three-stage language-model-powered pipeline that converts unstructured tables in USPTO patent XML files into flat, structured preclinical ASO datasets annotated with HELM chemical-structure strings.
-
-*Stage 1 — Table extraction.* USPTO patent XML documents filed after 2001 by ISIS Pharmaceuticals (now Ionis Pharmaceuticals) were retrieved via the USPTO bulk-data API and split into individual table files, each paired with the five paragraphs of prose immediately preceding the table. Tables were deduplicated in two phases: exact MD5 hash matching, followed by pairwise sequence similarity (Python `SequenceMatcher`, 90% threshold) with length-based pruning; connected components were resolved by depth-first search to select a single canonical file per group, reducing 35,871 raw tables from 1,125 Ionis Pharmaceuticals patents to 8,435 canonical tables. For each canonical table, GPT-5-mini generated a bespoke Python extraction function tailored to that table's XML layout. Generated scripts were executed in a sandboxed subprocess with a restricted import whitelist (`json`, `re`, `xml.etree.ElementTree`, `math`) and a ten-second timeout. An agentic self-repair loop allowed the model to observe execution output or errors and regenerate corrected code, for up to five attempts per table.
-
-*Stage 2 — HELM annotation.* For each canonical table the model received the surrounding patent prose and a table preview, then generated a function that constructs Hierarchical Editing Language for Macromolecules (HELM) strings nucleotide-by-nucleotide from the chemistry description. To avoid hallucinated annotations, the function was required to return null when explicit modification data could not be found in the patent text. All HELM strings were validated by a rule-based checker that enforces correct sugar tokens (`[moe]`, `d`, `r`, `m`, `[cet]`, `[fR]`, `[lna]`), canonical bases (`A`, `C`, `G`, `T`, `U`, `[5meC]`), backbone tokens (`[sp]`, `[am]`, `.`), balanced bracket syntax, and terminal-nucleotide constraints.
-
-*Stage 3 — Schema-driven collation.* Each assay category was extracted in a separate pass by supplying a schema dictionary that maps desired column names to natural-language descriptions. GPT-5 generated a mapping function per table that translates table-specific field names to the target schema, performs unit conversions, and unpivots multi-measurement rows into separate records. The same sandboxed execution and self-repair loop as Stage~1 were applied. HELM annotations were merged into each output record by compound identifier, following canonical-link chains across duplicate tables. Four schemas were defined, one per assay category: (i)~in vitro inhibition --- percent inhibition, cell line, dosage in nM, transfection method, treatment period, and target gene; (ii)~dose response --- the same fields with dosage in the original unit (nM or~$mu$M); (iii)~hepatorenal toxicity --- seven serum biomarkers (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio), dosage, species, strain, number of doses, dosing period, measurement source, and administration route; and (iv)~neurotoxicity --- FOB score (bFOB or mFOB), dosage, species, strain, latency, administration method, and score type.
 
 == Data Collection and Preprocessing
 
@@ -235,21 +290,5 @@ We replicated the @hagedorn_acute_2022 approach for predicting ASO neurotoxicity
 *RF models.* The same four random forest feature sets used for hepatotoxicity were also evaluated for neurotoxicity, without dosing covariates (all neurotoxicity data used the same ICV 700 µg protocol).
 
 *Label assignment.* Compounds with mean bFOB > 1 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic".
-
-== Cross-Validation Procedure
-
-All models were evaluated using GroupKFold cross-validation with 5 folds, where groups were defined by target gene. This ensures that all compounds targeting the same gene appear exclusively in either the training or test set within each fold, preventing inflated performance estimates from gene-level information leakage. Group assignment prioritised direct target gene annotations, supplemented by compound-level cross-referencing to the in vitro dataset and USPTO patent ID as a fallback proxy.
-
-== Cost-Based Evaluation Framework
-
-To translate classification accuracy into practical value, we developed a cost-based evaluation framework. For each pipeline stage, per-ASO costs were estimated from industry benchmarks: \$500 (in vitro efficacy), \$2,000 (dose-response), \$15,000 (mouse hepatotoxicity), \$20,000 (mouse neurotoxicity), \$25,000 (rat hepatotoxicity), \$30,000 (rat neurotoxicity), and \$100,000 (monkey hepatotoxicity).
-
-The *enrichment factor* at a given stage is defined as the ratio of the pass rate among classifier-selected compounds to the base pass rate: $"EF" = P("pass" bar.v "selected") / P("pass")$, where "selected" denotes the top 25% compounds with lowest predicted toxicity risk (lowest P(high)). An enrichment factor greater than one indicates that the classifier concentrates passing compounds among its predictions.
-
-Pipeline costs are back-calculated by determining the number of initial ASOs needed to yield one development candidate, given the pass rates at each stage. With classifier pre-screening, the effective pass rates at enriched stages increase by the enrichment factor, reducing the required number of initial candidates and the associated costs at all downstream stages.
-
-= Code Availability
-
-// Link to code repository if applicable
 
 
