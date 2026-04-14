@@ -77,6 +77,11 @@
       image("plots/supp_mouse_rat_alt/mouse_vs_rat_alt.svg", width: 70%),
       caption: [Cross-species hepatotoxicity concordance. Mean ALT per compound in mouse vs rat (log-log), with Spearman correlation shown.],
     ) <figS2>
+
+    #figure(
+      image("plots/supp_enrichment/supp_enrichment_sweep.svg", width: 100%),
+      caption: [Sensitivity of enrichment and pipeline savings to the selection budget. *(A)* Enrichment factor for each toxicity endpoint as a function of the top-X% compounds selected (lowest predicted toxicity probability). *(B)* Pipeline cost savings under OligoAI-tox only and combined (OligoAI + OligoAI-tox) scenarios. Dashed line marks the chosen operating point (top 25%).],
+    ) <figS3>
   ],
   accepted: false,
 )
