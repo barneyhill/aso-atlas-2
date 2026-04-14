@@ -82,6 +82,46 @@
       image("plots/supp_enrichment/supp_enrichment_sweep.svg", width: 100%),
       caption: [Sensitivity of enrichment and pipeline savings to the selection budget. *(A)* Enrichment factor for each toxicity endpoint as a function of the top-X% compounds selected (lowest predicted toxicity probability). *(B)* Pipeline cost savings under OligoAI-tox only and combined (OligoAI + OligoAI-tox) scenarios. Dashed line marks the chosen operating point (top 25%).],
     ) <figS3>
+
+    = Data Collection and Preprocessing
+
+    All preclinical ASO data were extracted from USPTO patent filings using the ASO Atlas 2.0 pipeline. Raw tables were parsed into four assay categories: in vitro hit screening (single-concentration percent inhibition), in vitro dose response (multi-dose percent inhibition), in vivo hepatorenal toxicity (serum biomarkers), and in vivo neurological toxicity (functional observational battery scores). Each category underwent a standardised cleaning pipeline described below.
+
+    Five HELM-level quality filters were applied uniformly across all four assay categories before any assay-specific cleaning. Compounds whose HELM annotation contained uncertain sugar or backbone tokens (indicated by `?` placeholders in the HELM string) were removed, as were sequences with ten or fewer nucleotides (likely extraction artefacts), uniformly modified compounds with no DNA gap (steric-blocking ASOs outside the scope of gapmer-focused analysis), homopolymer sequences comprising a single repeated nucleotide (extraction artefacts from poly-T or poly-A placeholder annotations), and naked DNA oligonucleotides lacking any sugar modifications (unmodified sequences where the extraction model could not identify the modification pattern).
+
+    *In vitro inhibition.* Inhibition values outside the range \[--1000%, 100%\] were discarded as extraction artefacts. Cell line names and species labels were standardised to canonical forms (e.g.~"A-431" $arrow$ "A431", "cynomolgus" $arrow$ "monkey"). Duplicate measurements --- defined as identical compound ID and inhibition value --- were collapsed, retaining the most recent patent. This yielded #comma(R.in_vitro.n_measurements) measurements across #comma(R.in_vitro.n_asos) ASOs.
+
+    *Dose response.* Dosages reported in $mu$M were converted to nM. The same inhibition range filter and species standardisation were applied. Rows with non-positive dosages were removed. Cell line names were harmonised using a lookup table of 150+ known aliases. Deduplication on compound, dosage, and inhibition yielded #comma(R.dose_response.n_measurements) measurements across #comma(R.dose_response.n_asos) ASOs.
+
+    *Hepatorenal toxicity.* Dosage strings were parsed into numeric values and units. Weekly dosing rates (mg/kg/wk) were converted to per-dose equivalents (mg/kg) using the reported number of doses and dosing period. Only subcutaneous and intraperitoneal administration routes with plasma or urine measurement sources were retained. Extreme dosages ($>$ 10,000 mg/kg) were excluded. Biomarker values were range-filtered (ALT and AST: 10--50,000 IU/L; ALB: 1--100 g/dL). Rows sharing the same compound, species, dosing regimen, and administration method were collapsed, aggregating biomarker replicates into lists. Species and strain names were standardised. The final dataset contained #comma(R.hepatic.n_records) collapsed records across #comma(R.hepatic.n_asos) ASOs, with #R.hepatic.n_biomarker_channels biomarker channels (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio).
+
+    *Neurological toxicity.* Tolerability score strings (bFOB for mice, mFOB for rats) were parsed into numeric lists, retaining only values in the valid range \[0, 7\].
+
+    ASO Atlas 2.0 contains two complementary tolerability scoring systems developed at Ionis Pharmaceuticals. In each system, seven criteria are each scored 0 (met) or 1 (not met), and summed into a tolerability score ranging from 0 (no signs) to 7 (all criteria failed). The _behavioural FOB_ (bFOB) assesses consciousness and motor responsiveness 3 h after intracerebroventricular (ICV) delivery of 700 µg in C57BL/6 mice: bright/alert/responsive, standing or hunched without stimuli, any movement without stimuli, forward movement after lifting, any movement after lifting, response to tail pinch, and regular breathing. The _motor FOB_ (mFOB) assesses segmental motor function 3 h after intrathecal (IT) delivery of 3,000 µg in Sprague-Dawley rats: movement of the tail, posterior posture, hind limbs, hind paws, forepaws, anterior posture, and head. In the processed dataset, bFOB accounts for 2,928 mouse records and mFOB for 1,804 rat records. Species and strain names were standardised (e.g.~"C57/B16 mice" $arrow$ "C57BL/6 mice"). Since the raw neurotoxicity data lacked target gene annotations, compound-to-gene mappings were inferred in two steps: first by direct lookup against the in vitro and dose response datasets, then by patent-level majority vote for remaining compounds (assigning the most frequent target gene within each USPTO patent). This resolved target gene identity for #R.neuro.gene_coverage_pct% of neurotoxicity records. Deduplication on HELM annotation, species, administration method, score type, and dosage yielded #comma(R.neuro.n_records) records across #comma(R.neuro.n_asos) ASOs.
+
+    *Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ #emph[MAPT], "PKK" $arrow$ #emph[PRKDC], "K-Ras" $arrow$ #emph[KRAS]). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
+
+    = Baseline Model Details
+
+    == Hagedorn Hepatotoxicity Model (2013)
+
+    We replicated the @hagedorn_hepatotoxic_2013 approach for predicting ASO hepatotoxicity from sequence composition. The original method uses random forest classifiers trained on dinucleotide features of LNA gapmers to classify compounds as high or low hepatotoxicity based on serum ALT levels.
+
+    *Feature extraction.* Four feature sets of increasing complexity were evaluated: (i) a baseline model with 5 features (presence of chemical modification, MOE/cET/DNA nucleotide counts, and sequence length); (ii) a counts model with 15 features (sugar-base combination counts plus phosphorothioate linkage count); (iii) the Hagedorn dinucleotide model with 288 features (all pairwise dinucleotide transitions across 12 nucleotide types and 2 linkage types); and (iv) a position-specific model with 480 features (nucleotide identity at each position from both ends). Dosing covariates (mg/kg, number of doses, dosing period, administration route) were included as additional features.
+
+    *Label assignment.* Species-specific upper limits of normal (ULN) were taken from published reference intervals as the mean of male and female 97.5th percentiles: 75 IU/L for C57BL/6J mice @otto_clinical_2016, 39 IU/L for Sprague-Dawley rats @he_sex-specific_2017, and 103 IU/L for adult cynomolgus macaques @bakker_reference_2023. The pipeline pass threshold was set at 2$times$ULN (150 IU/L mouse, 78 IU/L rat, 206 IU/L monkey). For classifier training, compounds with mean ALT $≥$ 2$times$ULN were labelled "high" toxicity; those with ALT < 2$times$ULN were labelled "low".
+
+    *Model training.* Random forest classifiers (1000 trees, max 8 features per split, balanced class weights) were trained with GroupKFold cross-validation (5 folds, grouped by target gene). This prevents information leakage from compounds targeting the same gene appearing in both training and test sets.
+
+    == Hagedorn Neurotoxicity Model (2022)
+
+    We replicated the @hagedorn_acute_2022 approach for predicting ASO neurotoxicity from sequence features, evaluated on mouse bFOB scores from ICV administration at 700 µg.
+
+    *Linear model.* The original 5-feature logistic regression model uses: G nucleotide count, A nucleotide count, G-free stretch from the 3' end, G-free stretch from the 5' end, and total sequence length. Balanced class weights were applied.
+
+    *RF models.* The same four random forest feature sets used for hepatotoxicity were also evaluated for neurotoxicity, without dosing covariates (all neurotoxicity data used the same ICV 700 µg protocol).
+
+    *Label assignment.* Compounds with mean bFOB > 1 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic".
   ],
   accepted: false,
 )
@@ -251,44 +291,5 @@ We have introduced ASO Atlas 2.0, the largest public multi-endpoint ASO preclini
 
 Future directions include: (i) deep learning models that operate directly on HELM strings rather than hand-crafted features; (ii) multi-task approaches that jointly predict across endpoints; (iii) target-aware models that incorporate gene-level information; and (iv) regression rather than classification to capture the full spectrum of toxicity outcomes.
 
-= Methods
-
-== Data Collection and Preprocessing
-
-All preclinical ASO data were extracted from USPTO patent filings using the ASO Atlas 2.0 pipeline. Raw tables were parsed into four assay categories: in vitro hit screening (single-concentration percent inhibition), in vitro dose response (multi-dose percent inhibition), in vivo hepatorenal toxicity (serum biomarkers), and in vivo neurological toxicity (functional observational battery scores). Each category underwent a standardised cleaning pipeline described below.
-
-Five HELM-level quality filters were applied uniformly across all four assay categories before any assay-specific cleaning. Compounds whose HELM annotation contained uncertain sugar or backbone tokens (indicated by `?` placeholders in the HELM string) were removed, as were sequences with ten or fewer nucleotides (likely extraction artefacts), uniformly modified compounds with no DNA gap (steric-blocking ASOs outside the scope of gapmer-focused analysis), homopolymer sequences comprising a single repeated nucleotide (extraction artefacts from poly-T or poly-A placeholder annotations), and naked DNA oligonucleotides lacking any sugar modifications (unmodified sequences where the extraction model could not identify the modification pattern).
-
-*In vitro inhibition.* Inhibition values outside the range \[--1000%, 100%\] were discarded as extraction artefacts. Cell line names and species labels were standardised to canonical forms (e.g.~"A-431" $arrow$ "A431", "cynomolgus" $arrow$ "monkey"). Duplicate measurements --- defined as identical compound ID and inhibition value --- were collapsed, retaining the most recent patent. This yielded #comma(R.in_vitro.n_measurements) measurements across #comma(R.in_vitro.n_asos) ASOs.
-
-*Dose response.* Dosages reported in $mu$M were converted to nM. The same inhibition range filter and species standardisation were applied. Rows with non-positive dosages were removed. Cell line names were harmonised using a lookup table of 150+ known aliases. Deduplication on compound, dosage, and inhibition yielded #comma(R.dose_response.n_measurements) measurements across #comma(R.dose_response.n_asos) ASOs.
-
-*Hepatorenal toxicity.* Dosage strings were parsed into numeric values and units. Weekly dosing rates (mg/kg/wk) were converted to per-dose equivalents (mg/kg) using the reported number of doses and dosing period. Only subcutaneous and intraperitoneal administration routes with plasma or urine measurement sources were retained. Extreme dosages ($>$ 10,000 mg/kg) were excluded. Biomarker values were range-filtered (ALT and AST: 10--50,000 IU/L; ALB: 1--100 g/dL). Rows sharing the same compound, species, dosing regimen, and administration method were collapsed, aggregating biomarker replicates into lists. Species and strain names were standardised. The final dataset contained #comma(R.hepatic.n_records) collapsed records across #comma(R.hepatic.n_asos) ASOs, with #R.hepatic.n_biomarker_channels biomarker channels (ALB, ALT, AST, BUN, CREA, TBIL, protein/creatinine ratio).
-
-*Neurological toxicity.* Tolerability score strings (bFOB for mice, mFOB for rats) were parsed into numeric lists, retaining only values in the valid range \[0, 7\].
-
-ASO Atlas 2.0 contains two complementary tolerability scoring systems developed at Ionis Pharmaceuticals. In each system, seven criteria are each scored 0 (met) or 1 (not met), and summed into a tolerability score ranging from 0 (no signs) to 7 (all criteria failed). The _behavioural FOB_ (bFOB) assesses consciousness and motor responsiveness 3 h after intracerebroventricular (ICV) delivery of 700 µg in C57BL/6 mice: bright/alert/responsive, standing or hunched without stimuli, any movement without stimuli, forward movement after lifting, any movement after lifting, response to tail pinch, and regular breathing. The _motor FOB_ (mFOB) assesses segmental motor function 3 h after intrathecal (IT) delivery of 3,000 µg in Sprague-Dawley rats: movement of the tail, posterior posture, hind limbs, hind paws, forepaws, anterior posture, and head. In the processed dataset, bFOB accounts for 2,928 mouse records and mFOB for 1,804 rat records. Species and strain names were standardised (e.g.~"C57/B16 mice" $arrow$ "C57BL/6 mice"). Since the raw neurotoxicity data lacked target gene annotations, compound-to-gene mappings were inferred in two steps: first by direct lookup against the in vitro and dose response datasets, then by patent-level majority vote for remaining compounds (assigning the most frequent target gene within each USPTO patent). This resolved target gene identity for #R.neuro.gene_coverage_pct% of neurotoxicity records. Deduplication on HELM annotation, species, administration method, score type, and dosage yielded #comma(R.neuro.n_records) records across #comma(R.neuro.n_asos) ASOs.
-
-*Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ #emph[MAPT], "PKK" $arrow$ #emph[PRKDC], "K-Ras" $arrow$ #emph[KRAS]). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
-
-== Hagedorn Hepatotoxicity Model (2013)
-
-We replicated the @hagedorn_hepatotoxic_2013 approach for predicting ASO hepatotoxicity from sequence composition. The original method uses random forest classifiers trained on dinucleotide features of LNA gapmers to classify compounds as high or low hepatotoxicity based on serum ALT levels.
-
-*Feature extraction.* Four feature sets of increasing complexity were evaluated: (i) a baseline model with 5 features (presence of chemical modification, MOE/cET/DNA nucleotide counts, and sequence length); (ii) a counts model with 15 features (sugar-base combination counts plus phosphorothioate linkage count); (iii) the Hagedorn dinucleotide model with 288 features (all pairwise dinucleotide transitions across 12 nucleotide types and 2 linkage types); and (iv) a position-specific model with 480 features (nucleotide identity at each position from both ends). Dosing covariates (mg/kg, number of doses, dosing period, administration route) were included as additional features.
-
-*Label assignment.* Species-specific upper limits of normal (ULN) were taken from published reference intervals as the mean of male and female 97.5th percentiles: 75 IU/L for C57BL/6J mice @otto_clinical_2016, 39 IU/L for Sprague-Dawley rats @he_sex-specific_2017, and 103 IU/L for adult cynomolgus macaques @bakker_reference_2023. The pipeline pass threshold was set at 2$times$ULN (150 IU/L mouse, 78 IU/L rat, 206 IU/L monkey). For classifier training, compounds with mean ALT $≥$ 2$times$ULN were labelled "high" toxicity; those with ALT < 2$times$ULN were labelled "low".
-
-*Model training.* Random forest classifiers (1000 trees, max 8 features per split, balanced class weights) were trained with GroupKFold cross-validation (5 folds, grouped by target gene). This prevents information leakage from compounds targeting the same gene appearing in both training and test sets.
-
-== Hagedorn Neurotoxicity Model (2022)
-
-We replicated the @hagedorn_acute_2022 approach for predicting ASO neurotoxicity from sequence features, evaluated on mouse bFOB scores from ICV administration at 700 µg.
-
-*Linear model.* The original 5-feature logistic regression model uses: G nucleotide count, A nucleotide count, G-free stretch from the 3' end, G-free stretch from the 5' end, and total sequence length. Balanced class weights were applied.
-
-*RF models.* The same four random forest feature sets used for hepatotoxicity were also evaluated for neurotoxicity, without dosing covariates (all neurotoxicity data used the same ICV 700 µg protocol).
-
-*Label assignment.* Compounds with mean bFOB > 1 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic".
 
 
