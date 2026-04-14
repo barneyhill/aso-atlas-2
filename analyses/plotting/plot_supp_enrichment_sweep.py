@@ -95,7 +95,7 @@ def main():
     stage_costs = [s["cost_per_aso"] for s in pipe["stages"]]
     oligoai_ef = pipe.get("oligoai", {}).get("enriched_stages", {}).get("0", {}).get("enrichment_factor", 3.14)
 
-    top_x = list(range(50, 0, -1))  # 50 -> 1
+    top_x = list(range(100, 0, -1))  # 100 -> 1
     fractions = [x / 100 for x in top_x]
 
     ef_curves = {t: [] for t in TASKS}
@@ -140,9 +140,8 @@ def main():
     ax2.grid(alpha=0.25)
     ax2.legend(fontsize=8, frameon=False, loc="lower right")
 
-    # Match x-axis direction to requested top50 -> top1 sweep.
-    ax1.set_xlim(50, 1)
-    ax2.set_xlim(50, 1)
+    ax1.set_xlim(100, 1)
+    ax2.set_xlim(100, 1)
 
     fig.tight_layout()
 
