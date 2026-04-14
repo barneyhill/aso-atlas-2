@@ -66,23 +66,6 @@
   ],
   bibliography: bibliography("zotero.bib"),
   appendix: [
-    = Supplementary Figures
-
-    #figure(
-      image("plots/fig3/fig3.svg", width: 100%),
-      caption: [Clinical benchmark: ION582 (Zilganersen) in context of ASO Atlas 2.0 distributions. Grey bars show all targets; blue bars highlight _UBE3A-ATS_-targeting ASOs; the red arrow marks ION582. *(A)* IC50 distribution under gymnosis/free-uptake conditions. *(B)* Mouse bFOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat mFOB score distribution (IT, 3,000 µg, 3 h post-dose).],
-    ) <figS1>
-
-    #figure(
-      image("plots/supp_mouse_rat_alt/mouse_vs_rat_alt.svg", width: 70%),
-      caption: [Cross-species hepatotoxicity concordance. Mean ALT per compound in mouse vs rat (log-log), with Spearman correlation shown.],
-    ) <figS2>
-
-    #figure(
-      image("plots/supp_enrichment/supp_enrichment_sweep.svg", width: 100%),
-      caption: [Sensitivity of enrichment and pipeline savings to the selection budget. *(A)* Enrichment factor for each toxicity endpoint as a function of the top-X% compounds selected (lowest predicted toxicity probability). *(B)* Pipeline cost savings under OligoAI-tox only and combined (OligoAI + OligoAI-tox) scenarios. Dashed line marks the chosen operating point (top 25%).],
-    ) <figS3>
-
     = Data Collection and Preprocessing
 
     All preclinical ASO data were extracted from USPTO patent filings using the ASO Atlas 2.0 pipeline. Raw tables were parsed into four assay categories: in vitro hit screening (single-concentration percent inhibition), in vitro dose response (multi-dose percent inhibition), in vivo hepatorenal toxicity (serum biomarkers), and in vivo neurological toxicity (functional observational battery scores). Each category underwent a standardised cleaning pipeline described below.
@@ -100,6 +83,16 @@
     ASO Atlas 2.0 contains two complementary tolerability scoring systems developed at Ionis Pharmaceuticals. In each system, seven criteria are each scored 0 (met) or 1 (not met), and summed into a tolerability score ranging from 0 (no signs) to 7 (all criteria failed). The _behavioural FOB_ (bFOB) assesses consciousness and motor responsiveness 3 h after intracerebroventricular (ICV) delivery of 700 µg in C57BL/6 mice: bright/alert/responsive, standing or hunched without stimuli, any movement without stimuli, forward movement after lifting, any movement after lifting, response to tail pinch, and regular breathing. The _motor FOB_ (mFOB) assesses segmental motor function 3 h after intrathecal (IT) delivery of 3,000 µg in Sprague-Dawley rats: movement of the tail, posterior posture, hind limbs, hind paws, forepaws, anterior posture, and head. In the processed dataset, bFOB accounts for 2,928 mouse records and mFOB for 1,804 rat records. Species and strain names were standardised (e.g.~"C57/B16 mice" $arrow$ "C57BL/6 mice"). Since the raw neurotoxicity data lacked target gene annotations, compound-to-gene mappings were inferred in two steps: first by direct lookup against the in vitro and dose response datasets, then by patent-level majority vote for remaining compounds (assigning the most frequent target gene within each USPTO patent). This resolved target gene identity for #R.neuro.gene_coverage_pct% of neurotoxicity records. Deduplication on HELM annotation, species, administration method, score type, and dosage yielded #comma(R.neuro.n_records) records across #comma(R.neuro.n_asos) ASOs.
 
     *Gene symbol mapping.* Target RNA names from the patent text were mapped to canonical HGNC gene symbols using the Ensembl REST API, supplemented by a manually curated dictionary of 300+ aliases (e.g.~"Tau" $arrow$ #emph[MAPT], "PKK" $arrow$ #emph[PRKDC], "K-Ras" $arrow$ #emph[KRAS]). After merging synonyms, the combined dataset spans #comma(R.genes.n_unique) unique target genes and #comma(R.genes.n_total_measurements) total measurements.
+
+    #figure(
+      image("plots/fig3/fig3.svg", width: 100%),
+      caption: [Clinical benchmark: ION582 (Zilganersen) in context of ASO Atlas 2.0 distributions. Grey bars show all targets; blue bars highlight _UBE3A-ATS_-targeting ASOs; the red arrow marks ION582. *(A)* IC50 distribution under gymnosis/free-uptake conditions. *(B)* Mouse bFOB score distribution (ICV, 700 µg, 3 h post-dose). *(C)* Rat mFOB score distribution (IT, 3,000 µg, 3 h post-dose).],
+    ) <figS1>
+
+    #figure(
+      image("plots/supp_mouse_rat_alt/mouse_vs_rat_alt.svg", width: 70%),
+      caption: [Cross-species hepatotoxicity concordance. Mean ALT per compound in mouse vs rat (log-log), with Spearman correlation shown.],
+    ) <figS2>
 
     = Baseline Model Details
 
@@ -122,6 +115,13 @@
     *RF models.* The same four random forest feature sets used for hepatotoxicity were also evaluated for neurotoxicity, without dosing covariates (all neurotoxicity data used the same ICV 700 µg protocol).
 
     *Label assignment.* Compounds with mean bFOB > 1 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic".
+
+    = Enrichment Sensitivity Analysis
+
+    #figure(
+      image("plots/supp_enrichment/supp_enrichment_sweep.svg", width: 100%),
+      caption: [Sensitivity of enrichment and pipeline savings to the selection budget. *(A)* Enrichment factor for each toxicity endpoint as a function of the top-X% compounds selected (lowest predicted toxicity probability). *(B)* Pipeline cost savings under OligoAI-tox only and combined (OligoAI + OligoAI-tox) scenarios. Dashed line marks the chosen operating point (top 25%).],
+    ) <figS3>
   ],
   accepted: false,
 )
