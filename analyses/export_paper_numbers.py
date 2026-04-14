@@ -242,9 +242,20 @@ def main() -> None:
         oligoai = pipeline_data.get("oligoai")
         combined = pipeline_data.get("combined")
 
+        # Per-stage p_k (pass rate), r_k (cost per ASO), N_k (back-calculated ASOs entering stage)
+        stages_list = []
+        for i, stage in enumerate(pipeline_data["stages"]):
+            stages_list.append({
+                "name": stage["name"],
+                "p_k": round(pipeline_data["proportions"][i], 4),
+                "r_k": stage["cost_per_aso"],
+                "N_k": baseline["asos_at_stage"][i],
+            })
+
         pipeline_numbers = {
             "baseline_n_initial": baseline["n_initial"],
             "baseline_total_cost": baseline["total_cost"],
+            "stages": stages_list,
         }
         if oligoai_tox_pipeline:
             pipeline_numbers["oligoai_tox_n_initial"] = oligoai_tox_pipeline["n_initial"]

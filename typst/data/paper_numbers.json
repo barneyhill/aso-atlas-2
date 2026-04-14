@@ -178,6 +178,50 @@
   "pipeline": {
     "baseline_n_initial": 568,
     "baseline_total_cost": 1288000,
+    "stages": [
+      {
+        "name": "In vitro efficacy",
+        "p_k": 0.1181,
+        "r_k": 500,
+        "N_k": 568
+      },
+      {
+        "name": "In vitro potency",
+        "p_k": 0.3144,
+        "r_k": 2000,
+        "N_k": 67
+      },
+      {
+        "name": "Mouse liver toxicity",
+        "p_k": 0.5793,
+        "r_k": 15000,
+        "N_k": 21
+      },
+      {
+        "name": "Mouse neuro tolerability",
+        "p_k": 0.4451,
+        "r_k": 20000,
+        "N_k": 12
+      },
+      {
+        "name": "Rat liver toxicity",
+        "p_k": 0.6004,
+        "r_k": 25000,
+        "N_k": 5
+      },
+      {
+        "name": "Rat neuro tolerability",
+        "p_k": 0.3522,
+        "r_k": 30000,
+        "N_k": 3
+      },
+      {
+        "name": "Monkey liver toxicity",
+        "p_k": 1.0,
+        "r_k": 100000,
+        "N_k": 1
+      }
+    ],
     "oligoai_tox_n_initial": 136,
     "oligoai_tox_total_cost": 490000,
     "oligoai_tox_savings_pct": 62.0,
@@ -206,9 +250,9 @@
       "rmse": 123.7
     },
     "mouse_neuro": {
-      "best_model": "Transformer",
-      "spearman": 0.724,
-      "r2": 0.49,
+      "best_model": "Multi-task Transformer",
+      "spearman": 0.735,
+      "r2": 0.488,
       "rmse": 1.5
     },
     "rat_neuro": {
