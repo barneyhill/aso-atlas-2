@@ -179222,49 +179222,91 @@
       "short_name": "In vitro\nefficacy",
       "threshold": "Inhibition >80%",
       "cost_per_aso": 500,
-      "color": "#4878A8"
+      "color": "#4878A8",
+      "threshold_value": 80,
+      "threshold_op": ">",
+      "transform": "clip01",
+      "xlabel": "Inhibition (%)",
+      "bins": 30,
+      "xlim_lo": 0
     },
     {
       "name": "In vitro potency",
       "short_name": "In vitro\npotency",
       "threshold": "IC50 <500nM",
       "cost_per_aso": 2000,
-      "color": "#6A9BC3"
+      "color": "#6A9BC3",
+      "threshold_value": 500,
+      "threshold_op": "<",
+      "transform": "log10",
+      "xlabel": "IC\u2085\u2080 (nM)",
+      "bins": 30,
+      "xlim_lo": 1
     },
     {
       "name": "Mouse liver toxicity",
       "short_name": "Mouse liver\ntoxicity",
       "threshold": "ALT <2\u00d7ULN",
       "cost_per_aso": 15000,
-      "color": "#D4A574"
+      "color": "#D4A574",
+      "threshold_value": 150,
+      "threshold_op": "<",
+      "transform": "log10",
+      "xlabel": "ALT (IU/L)",
+      "bins": 30,
+      "xlim_lo": 1
     },
     {
       "name": "Mouse neuro tolerability",
       "short_name": "Mouse neuro\ntolerability",
       "threshold": "bFOB <=1",
       "cost_per_aso": 20000,
-      "color": "#E8B88A"
+      "color": "#E8B88A",
+      "threshold_value": 1,
+      "threshold_op": "<=",
+      "transform": "integer",
+      "xlabel": "bFOB Score",
+      "bins": "integer",
+      "xlim_lo": -0.5
     },
     {
       "name": "Rat liver toxicity",
       "short_name": "Rat liver\ntoxicity",
       "threshold": "ALT <2\u00d7ULN",
       "cost_per_aso": 25000,
-      "color": "#7BAA97"
+      "color": "#7BAA97",
+      "threshold_value": 78,
+      "threshold_op": "<",
+      "transform": "log10",
+      "xlabel": "ALT (IU/L)",
+      "bins": 30,
+      "xlim_lo": 1
     },
     {
       "name": "Rat neuro tolerability",
       "short_name": "Rat neuro\ntolerability",
       "threshold": "mFOB <=1",
       "cost_per_aso": 30000,
-      "color": "#94C4A7"
+      "color": "#94C4A7",
+      "threshold_value": 1,
+      "threshold_op": "<=",
+      "transform": "integer",
+      "xlabel": "mFOB Score",
+      "bins": "integer",
+      "xlim_lo": -0.5
     },
     {
       "name": "Monkey liver toxicity",
       "short_name": "Monkey liver\ntoxicity",
       "threshold": "ALT <2\u00d7ULN",
       "cost_per_aso": 100000,
-      "color": "#9B8AA6"
+      "color": "#9B8AA6",
+      "threshold_value": 206,
+      "threshold_op": "<",
+      "transform": "log10",
+      "xlabel": "ALT (IU/L)",
+      "bins": 12,
+      "xlim_lo": 1
     }
   ]
 }
