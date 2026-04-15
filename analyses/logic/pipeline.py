@@ -42,16 +42,30 @@ class PipelineStage:
     threshold: str
     cost_per_aso: float
     color: str
+    # Plotting metadata
+    threshold_value: float = 0.0
+    threshold_op: str = "<"
+    transform: str = "none"       # "clip01", "log10", "integer"
+    xlabel: str = ""
+    bins: int | str = 30           # int or "integer" for unit-spaced
+    xlim_lo: float | None = None   # explicit lower xlim (None = auto)
 
 
 PIPELINE_STAGES = [
-    PipelineStage("In vitro efficacy", "In vitro\nefficacy", "Inhibition >80%", 500, "#4878A8"),
-    PipelineStage("In vitro potency", "In vitro\npotency", "IC50 <500nM", 2000, "#6A9BC3"),
-    PipelineStage("Mouse liver toxicity", "Mouse liver\ntoxicity", "ALT <2×ULN", 15000, "#D4A574"),
-    PipelineStage("Mouse neuro tolerability", "Mouse neuro\ntolerability", "bFOB <=1", 20000, "#E8B88A"),
-    PipelineStage("Rat liver toxicity", "Rat liver\ntoxicity", "ALT <2×ULN", 25000, "#7BAA97"),
-    PipelineStage("Rat neuro tolerability", "Rat neuro\ntolerability", "mFOB <=1", 30000, "#94C4A7"),
-    PipelineStage("Monkey liver toxicity", "Monkey liver\ntoxicity", "ALT <2×ULN", 100000, "#9B8AA6"),
+    PipelineStage("In vitro efficacy", "In vitro\nefficacy", "Inhibition >80%", 500, "#4878A8",
+                  threshold_value=80, threshold_op=">", transform="clip01", xlabel="Inhibition (%)", xlim_lo=0),
+    PipelineStage("In vitro potency", "In vitro\npotency", "IC50 <500nM", 2000, "#6A9BC3",
+                  threshold_value=500, threshold_op="<", transform="log10", xlabel="IC\u2085\u2080 (nM)", xlim_lo=1),
+    PipelineStage("Mouse liver toxicity", "Mouse liver\ntoxicity", "ALT <2×ULN", 15000, "#D4A574",
+                  threshold_value=150, threshold_op="<", transform="log10", xlabel="ALT (IU/L)", xlim_lo=1),
+    PipelineStage("Mouse neuro tolerability", "Mouse neuro\ntolerability", "bFOB <=1", 20000, "#E8B88A",
+                  threshold_value=1, threshold_op="<=", transform="integer", xlabel="bFOB Score", bins="integer", xlim_lo=-0.5),
+    PipelineStage("Rat liver toxicity", "Rat liver\ntoxicity", "ALT <2×ULN", 25000, "#7BAA97",
+                  threshold_value=78, threshold_op="<", transform="log10", xlabel="ALT (IU/L)", xlim_lo=1),
+    PipelineStage("Rat neuro tolerability", "Rat neuro\ntolerability", "mFOB <=1", 30000, "#94C4A7",
+                  threshold_value=1, threshold_op="<=", transform="integer", xlabel="mFOB Score", bins="integer", xlim_lo=-0.5),
+    PipelineStage("Monkey liver toxicity", "Monkey liver\ntoxicity", "ALT <2×ULN", 100000, "#9B8AA6",
+                  threshold_value=206, threshold_op="<", transform="log10", xlabel="ALT (IU/L)", bins=12, xlim_lo=1),
 ]
 
 TARGET_CANDIDATES = 1
@@ -445,7 +459,10 @@ def main():
         "combined": combined,
         "stages": [
             {"name": s.name, "short_name": s.short_name, "threshold": s.threshold,
-             "cost_per_aso": s.cost_per_aso, "color": s.color}
+             "cost_per_aso": s.cost_per_aso, "color": s.color,
+             "threshold_value": s.threshold_value, "threshold_op": s.threshold_op,
+             "transform": s.transform, "xlabel": s.xlabel, "bins": s.bins,
+             "xlim_lo": s.xlim_lo}
             for s in PIPELINE_STAGES
         ],
     }

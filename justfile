@@ -21,11 +21,10 @@ export:
 # ── Plotting (reads processed data from data/results/) ──
 plots:
     uv run python -m analyses.plotting.plot_figure1
-    uv run python -m analyses.plotting.plot_figure2
+    uv run python -m analyses.plotting.plot_fig2_fig6_combined
     uv run python -m analyses.plotting.plot_figure3
     uv run python -m analyses.plotting.plot_figure4
     uv run python -m analyses.plotting.plot_figure5
-    uv run python -m analyses.plotting.plot_figure6
     uv run python -m analyses.plotting.plot_figure7
     uv run python -m analyses.plotting.plot_supp_enrichment_sweep
     uv run python -m analyses.plotting.plot_supp_dinucleotide
