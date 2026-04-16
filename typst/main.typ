@@ -84,6 +84,11 @@
     ) <figS3>
 
     #figure(
+      image("plots/fig4/fig4.svg", width: 100%),
+      caption: [Dinucleotide RF baseline: ROC curves and confusion matrices with GroupKFold cross-validation by target gene. *Top row:* Hepatotoxicity (mouse ALT, rat ALT). *Bottom row:* Neurotoxicity (mouse bFOB, rat mFOB). For neurotoxicity, the dashed grey line shows the Hagedorn et al. 2022 baseline (5 fixed coefficients). Mouse ALT: accuracy = #str(R.oligoai_tox_hepatotox.accuracy), AUC = #str(R.oligoai_tox_hepatotox.auc). Mouse bFOB: accuracy = #str(R.oligoai_tox_neurotox.accuracy), AUC = #str(R.oligoai_tox_neurotox.auc).],
+    ) <figS_roc>
+
+    #figure(
       image("plots/fig5/fig5.svg", width: 100%),
       caption: [Selection bias, cross-assay and cross-biomarker correlations, base composition, and cross-species concordance. *(A)* Selection-bias KDEs showing biomarker distributions for compounds that do (blue) vs don't (grey) advance to the next pipeline stage. *(B)* Cross-assay Spearman $rho$: pairwise correlations between per-compound metrics across pipeline stages (BH-corrected; n.s. = not significant). *(C)* Cross-biomarker Spearman $rho$: correlations between mouse hepatotoxicity biomarkers (Bonferroni-corrected). *(D)* Nucleotide base $times$ biomarker Spearman $rho$: base composition vs toxicity biomarkers (BH-corrected). *(E)* Cross-species bFOB concordance: mouse bFOB vs rat mFOB score heatmap (integer-rounded); cell values are compound counts.],
     ) <fig5>
@@ -131,12 +136,7 @@ The ASO preclinical pipeline consists of seven sequential stages: in vitro effic
 
 == Toxicity Prediction
 
-#figure(
-  image("plots/fig4/fig4.svg", width: 100%),
-  caption: [OligoAI-tox: Hagedorn's dinucleotide RF trained on ASO Atlas 2.0 with GroupKFold cross-validation by target gene. *Top row:* Hepatotoxicity (mouse ALT, rat ALT). *Bottom row:* Neurotoxicity (mouse bFOB, rat mFOB). Each panel pair shows ROC curves and confusion matrices. For neurotoxicity, the dashed grey line shows the Hagedorn et al. 2022 baseline (5 fixed coefficients). Mouse ALT: accuracy = #str(R.oligoai_tox_hepatotox.accuracy), AUC = #str(R.oligoai_tox_hepatotox.auc). Mouse bFOB: accuracy = #str(R.oligoai_tox_neurotox.accuracy), AUC = #str(R.oligoai_tox_neurotox.auc).],
-) <fig3>
-
-We trained OligoAI-tox, Hagedorn's dinucleotide random forest architecture applied to ASO Atlas 2.0, adapting it from LNA to DNA/MOE/cET chemistry (@fig3). We trained four explicit models: mouse ALT, mouse bFOB, rat ALT, and rat mFOB, each evaluated with GroupKFold cross-validation (5 folds, grouped by target gene).
+We trained Hagedorn's dinucleotide random forest architecture on ASO Atlas 2.0, adapting it from LNA to DNA/MOE/cET chemistry (@figS_roc). We trained four independent models: mouse ALT, mouse bFOB, rat ALT, and rat mFOB, each evaluated with GroupKFold cross-validation (5 folds, grouped by target gene).
 
 For hepatotoxicity, the mouse ALT model (128 dinucleotide features, 5,000 trees) achieved an accuracy of #str(R.oligoai_tox_hepatotox.accuracy) with an AUC of #str(R.oligoai_tox_hepatotox.auc) (sensitivity #str(R.oligoai_tox_hepatotox.sensitivity), specificity #str(R.oligoai_tox_hepatotox.specificity)) on #comma(R.oligoai_tox_hepatotox.n) compounds across #comma(R.oligoai_tox_hepatotox.n_groups) target gene groups. The rat ALT model achieved an AUC of #str(R.rat_hepatotox.auc) on #comma(R.rat_hepatotox.n) compounds.
 
@@ -157,7 +157,12 @@ We also trained a multi-task Transformer with a shared encoder and task-specific
 
 == Cost Savings from Computational Pre-Screening
 
-To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig2 C). OligoAI-tox (hepatotoxicity + neurotoxicity) enriches the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.oligoai_tox_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction @hill_accurately_2025, achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
+#figure(
+  image("plots/fig3_demo/fig3_demo.svg", width: 100%),
+  caption: [Enrichment and cost impact of computational pre-screening. *(A)* Enrichment factor at each pipeline stage: the ratio of the pass rate among classifier-selected compounds (top 25% safest) to the base pass rate. In vitro efficacy enrichment from OligoAI @hill_accurately_2025; toxicity enrichment from the dinucleotide RF baseline. Stages without baselines are marked. *(B)* Total pipeline cost as a percentage of the baseline (no screening) for three scenarios: OligoAI only (in vitro efficacy), OligoAI-tox only (hepatotoxicity + neurotoxicity), and all models combined. Stacked bars show cost contribution by stage.],
+) <fig3>
+
+To quantify the practical value of computational pre-screening, we compared three enrichment scenarios against the baseline pipeline (@fig3). OligoAI-tox (hepatotoxicity + neurotoxicity) enriches the candidate pool at the mouse ALT and mouse bFOB stages, reducing cost by #str(R.pipeline.oligoai_tox_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M. OligoAI, a recently published deep learning model for in vitro efficacy prediction @hill_accurately_2025, achieves a 3.14$times$ enrichment at the inhibition stage, reducing cost by #str(R.pipeline.oligoai_savings_pct)% to \$#str(calc.round(R.pipeline.oligoai_total_cost / 1000000, digits: 2))M. Combining all enrichment stages yields a #str(R.pipeline.combined_savings_pct)% total reduction to \$#str(calc.round(R.pipeline.combined_total_cost / 1000000, digits: 2))M --- requiring only #comma(R.pipeline.combined_n_initial) initial ASOs instead of #comma(R.pipeline.baseline_n_initial).
 
 == Cross-Species Concordance and Sequence Motifs
 

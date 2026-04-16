@@ -179019,20 +179019,20 @@
     "proportions": [
       0.11810600603167239,
       0.31436011904761907,
-      0.8625772399588054,
-      0.8536231563421829,
-      0.7835137795275591,
-      0.7135883342680874,
+      0.8312950566426365,
+      0.8923432890855457,
+      0.8063287401574804,
+      0.7836791923724061,
       1.0
     ],
     "cumulative_survival": [
       0.11810600603167239,
       0.03712781811635535,
-      0.03202561087649833,
-      0.027337803040183045,
-      0.021419545383993814,
-      0.015284737711343846,
-      0.015284737711343846
+      0.030864171664053124,
+      0.027541436457602066,
+      0.022207451760985573,
+      0.017403517860698343,
+      0.017403517860698343
     ],
     "costs_per_stage": [
       68000,
@@ -179047,36 +179047,36 @@
     "target_candidates": 1,
     "enriched_stages": {
       "2": {
-        "enrichment_factor": 1.489,
-        "base_rate": 0.512,
-        "selected_pass_rate": 0.763,
-        "n": 1384,
-        "n_selected": 346,
+        "enrichment_factor": 1.435,
+        "base_rate": 0.637,
+        "selected_pass_rate": 0.914,
+        "n": 2701,
+        "n_selected": 675,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
+      },
+      "4": {
+        "enrichment_factor": 1.343,
+        "base_rate": 0.611,
+        "selected_pass_rate": 0.82,
+        "n": 714,
+        "n_selected": 178,
         "selection_policy": "top_k_safest",
         "selection_fraction": 0.25
       },
       "3": {
-        "enrichment_factor": 1.918,
+        "enrichment_factor": 2.005,
         "base_rate": 0.444,
-        "selected_pass_rate": 0.852,
+        "selected_pass_rate": 0.89,
         "n": 2696,
         "n_selected": 674,
         "selection_policy": "top_k_safest",
         "selection_fraction": 0.25
       },
-      "4": {
-        "enrichment_factor": 1.305,
-        "base_rate": 0.619,
-        "selected_pass_rate": 0.807,
-        "n": 438,
-        "n_selected": 109,
-        "selection_policy": "top_k_safest",
-        "selection_fraction": 0.25
-      },
       "5": {
-        "enrichment_factor": 2.026,
+        "enrichment_factor": 2.225,
         "base_rate": 0.35,
-        "selected_pass_rate": 0.709,
+        "selected_pass_rate": 0.779,
         "n": 1779,
         "n_selected": 444,
         "selection_policy": "top_k_safest",
@@ -179147,20 +179147,20 @@
     "proportions": [
       0.3708528589394513,
       0.31436011904761907,
-      0.8625772399588054,
-      0.8536231563421829,
-      0.7835137795275591,
-      0.7135883342680874,
+      0.8312950566426365,
+      0.8923432890855457,
+      0.8063287401574804,
+      0.7836791923724061,
       1.0
     ],
     "cumulative_survival": [
       0.3708528589394513,
       0.11658134888535579,
-      0.10056041815220475,
-      0.08584070154617476,
-      0.06725737250574057,
-      0.04799407641361968,
-      0.04799407641361968
+      0.0969134990251268,
+      0.08648011047687049,
+      0.0697313985294947,
+      0.05464704608259279,
+      0.05464704608259279
     ],
     "costs_per_stage": [
       22000,
@@ -179179,36 +179179,36 @@
         "source": "Hill et al. 2025, Table 1"
       },
       "2": {
-        "enrichment_factor": 1.489,
-        "base_rate": 0.512,
-        "selected_pass_rate": 0.763,
-        "n": 1384,
-        "n_selected": 346,
+        "enrichment_factor": 1.435,
+        "base_rate": 0.637,
+        "selected_pass_rate": 0.914,
+        "n": 2701,
+        "n_selected": 675,
+        "selection_policy": "top_k_safest",
+        "selection_fraction": 0.25
+      },
+      "4": {
+        "enrichment_factor": 1.343,
+        "base_rate": 0.611,
+        "selected_pass_rate": 0.82,
+        "n": 714,
+        "n_selected": 178,
         "selection_policy": "top_k_safest",
         "selection_fraction": 0.25
       },
       "3": {
-        "enrichment_factor": 1.918,
+        "enrichment_factor": 2.005,
         "base_rate": 0.444,
-        "selected_pass_rate": 0.852,
+        "selected_pass_rate": 0.89,
         "n": 2696,
         "n_selected": 674,
         "selection_policy": "top_k_safest",
         "selection_fraction": 0.25
       },
-      "4": {
-        "enrichment_factor": 1.305,
-        "base_rate": 0.619,
-        "selected_pass_rate": 0.807,
-        "n": 438,
-        "n_selected": 109,
-        "selection_policy": "top_k_safest",
-        "selection_fraction": 0.25
-      },
       "5": {
-        "enrichment_factor": 2.026,
+        "enrichment_factor": 2.225,
         "base_rate": 0.35,
-        "selected_pass_rate": 0.709,
+        "selected_pass_rate": 0.779,
         "n": 1779,
         "n_selected": 444,
         "selection_policy": "top_k_safest",

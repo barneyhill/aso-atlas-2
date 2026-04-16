@@ -268,8 +268,23 @@ def load_and_filter_rat():
     return df
 
 
+def _helm_groups(df: pd.DataFrame) -> pd.Series:
+    """Assign HELM-based groups for GroupKFold (sequence-level dedup).
+
+    Identical HELM sequences always land in the same fold, preventing
+    train/test leakage when the same ASO appears in both species.
+    """
+    groups = df["HELM Annotation"].copy()
+    n_unique = groups.nunique()
+    print(f"  HELM groups: {groups.notna().sum()}/{len(df)} assigned, {n_unique} unique sequences")
+    return groups
+
+
 def run_combined_models():
-    """Run combined mouse+rat neurotox model with species as a binary covariate.
+    """Run combined mouse+rat neurotox model with HELM-level dedup.
+
+    Groups by HELM annotation so identical sequences across species
+    always appear in the same CV fold, preventing sequence-level leakage.
 
     Applies species-specific dosing filters:
       - Mouse: 700μg ICV
@@ -299,12 +314,18 @@ def run_combined_models():
     df_combined = pd.concat([mouse, rat], ignore_index=True)
     print(f"Combined neurotox data: {len(df_combined):,} rows (Mouse: {len(mouse)}, Rat: {len(rat)})")
 
+    # Count shared sequences
+    mouse_helms = set(mouse["HELM Annotation"].dropna())
+    rat_helms = set(rat["HELM Annotation"].dropna())
+    shared = mouse_helms & rat_helms
+    print(f"  Shared HELM sequences: {len(shared)} (mouse: {len(mouse_helms)}, rat: {len(rat_helms)})")
+
     is_rat = (df_combined["species"] == "Rat").astype(int)
 
     y_labels = binary_labels(df_combined)
     print(f"  Labels: {(y_labels == 'high').sum()} high, {(y_labels == 'low').sum()} low")
 
-    groups = assign_groups(df_combined)
+    groups = _helm_groups(df_combined)
     predictions = {}
 
     # ---- Hagedorn score (fixed coefficients) on combined data ----
@@ -357,20 +378,55 @@ def run_combined_models():
     y = (y_labels[mask] == "high")
     g = groups[mask]
 
-    print(f"  Dinucleotide + species (n={mask.sum()})...", end=" ")
+    print(f"  Dinucleotide + species (n={mask.sum()}, {g.nunique()} HELM groups)...", end=" ")
     result = train_and_evaluate_grouped(X, y, g, make_classifier=model_spec.make_classifier)
 
     if result:
-        print(f"AUC={result['auc']:.3f}")
+        print(f"AUC={result['auc']:.3f} (all data)")
+
+        # Split OOF predictions by species for per-species enrichment
+        is_rat_filtered = is_rat[mask].values.astype(bool)
+        oof_preds = np.array(result["predictions"])
+        oof_labels = y.astype(int).values
+
+        for species_name, species_mask in [("mouse", ~is_rat_filtered), ("rat", is_rat_filtered)]:
+            sp = oof_preds[species_mask]
+            sl = oof_labels[species_mask]
+            n_sp = len(sl)
+            n_high = int(sl.sum())
+            n_low = n_sp - n_high
+
+            if n_high < 2 or n_low < 2:
+                print(f"    {species_name}: skip (n_high={n_high}, n_low={n_low})")
+                continue
+
+            sp_auc = roc_auc_score(sl, sp)
+            threshold = _optimal_threshold(sl, sp)
+            sp_pred = (sp > threshold).astype(int)
+            tn, fp, fn, tp = confusion_matrix(sl, sp_pred).ravel()
+            acc = (tp + tn) / (tp + tn + fp + fn)
+            sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+            spec_val = tn / (tn + fp) if (tn + fp) > 0 else 0
+            print(f"    {species_name}: n={n_sp}, AUC={sp_auc:.3f}, acc={acc:.3f}")
+
+            pred_key = f"combined_FOB_{species_name}"
+            predictions[pred_key] = {
+                "predictions": sp.tolist(),
+                "labels": sl.tolist(),
+                "n": n_sp,
+                "accuracy": float(acc),
+                "auc": float(sp_auc),
+                "sensitivity": float(sens),
+                "specificity": float(spec_val),
+                "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
+            }
+
+        # Also save all-data predictions for reference
         predictions["combined_FOB"] = {
-            "predictions": result["predictions"].tolist(),
-            "labels": y.astype(int).tolist(),
+            "predictions": oof_preds.tolist(),
+            "labels": oof_labels.tolist(),
             "n": int(result["n"]),
-            "accuracy": float(result["accuracy"]),
             "auc": float(result["auc"]),
-            "sensitivity": float(result["sensitivity"]),
-            "specificity": float(result["specificity"]),
-            "confusion": {k: int(v) for k, v in result["confusion"].items()},
             "feature_names": result["feature_names"],
             "fold_importances": result["fold_importances"],
         }

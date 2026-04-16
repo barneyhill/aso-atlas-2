@@ -1,5 +1,7 @@
 """
 Bridge between project data (parquet, double-brace HELM) and OligoGym models/featurizers.
+
+Per-species training with HELM-level dedup. Hepatic models include dosage covariates.
 """
 
 import sys
@@ -47,14 +49,11 @@ _mock_missing_deps()
 
 from oligogym.features import KMersCounts, OneHotEncoder  # noqa: E402
 from oligogym.models import (  # noqa: E402
-    CNN,
     MLP,
     CatBoostModel,
-    CausalCNN,
     LinearModel,
     NearestNeighborsModel,
     RandomForestModel,
-    Transformer,
     XGBoostModel,
 )
 
@@ -71,77 +70,111 @@ def convert_helm(helm: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Dataset loaders
+# Chemistry features from HELM
 # ---------------------------------------------------------------------------
 
-def load_mouse_hepatic() -> dict:
+CHEM_FEATURES = ["n_MOE", "n_cEt", "n_DNA", "n_PS", "n_PO"]
+
+
+def _extract_chemistry(helms: np.ndarray) -> np.ndarray:
+    """Extract sugar/backbone counts from HELM strings.
+
+    Returns (n_samples, 5) array: [n_MOE, n_cEt, n_DNA, n_PS, n_PO].
+    """
+    from collections import Counter
+    rows = []
+    for h in helms:
+        parsed = Helm.parse(h)
+        if parsed is None:
+            rows.append([0] * 5)
+            continue
+        sc = Counter(parsed.sugars)
+        bc = Counter(parsed.backbones)
+        rows.append([sc.get("MOE", 0), sc.get("cEt", 0), sc.get("DNA", 0),
+                     bc.get("PS", 0), bc.get("PO", 0)])
+    return np.array(rows, dtype=np.float32)
+
+
+# ---------------------------------------------------------------------------
+# Dataset loaders (per-species, HELM-level dedup, dosage + chemistry covariates)
+# ---------------------------------------------------------------------------
+
+def _load_hepatic(species: str, species_label: str) -> dict:
+    """Load hepatic data for one species with dosage + chemistry covariates."""
     df = pd.read_parquet(_data_dir / "hepatictoxicity_processed.parquet")
-    df = df[(df["species"] == "mouse") & df["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
+    df = df[(df["species"] == species) & df["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
     df["mean_ALT"] = df["ALT"].apply(mean_of_array)
     df = df[df["mean_ALT"].notna()].reset_index(drop=True)
-    groups = df["USPTO ID"].apply(lambda x: f"patent_{x}" if pd.notna(x) else None)
+
+    groups = df["HELM Annotation"].copy()
     mask = groups.notna()
+
+    helms_raw = df.loc[mask, "HELM Annotation"].values
+    x = np.array([convert_helm(h) for h in helms_raw])
+
+    # Dosage covariates (median-fill NaN)
+    dose_cols = ["dosage_mg_per_kg", "num_doses", "dosing_period_days"]
+    dose_cov = np.column_stack([
+        df.loc[mask, col].fillna(df[col].median()).values.astype(np.float32)
+        for col in dose_cols
+    ])
+
+    # Chemistry covariates from original HELM (before conversion)
+    chem_cov = _extract_chemistry(helms_raw)
+
+    covariates = np.column_stack([dose_cov, chem_cov])
+
     return {
-        "x": np.array([convert_helm(h) for h in df.loc[mask, "HELM Annotation"]]),
+        "x": x,
         "y": df.loc[mask, "mean_ALT"].values.astype(float),
         "groups": groups[mask].values,
-        "name": "Mouse Hepatic (ALT)",
+        "covariates": covariates,
+        "name": f"{species_label} Hepatic (ALT)",
     }
 
 
+def load_mouse_hepatic() -> dict:
+    return _load_hepatic("mouse", "Mouse")
+
+
 def load_rat_hepatic() -> dict:
-    df = pd.read_parquet(_data_dir / "hepatictoxicity_processed.parquet")
-    df = df[(df["species"] == "rat") & df["HELM Annotation"].apply(Helm.valid_chemistry)].copy()
-    df["mean_ALT"] = df["ALT"].apply(mean_of_array)
-    df = df[df["mean_ALT"].notna()].reset_index(drop=True)
-    groups = df["USPTO ID"].apply(lambda x: f"patent_{x}" if pd.notna(x) else None)
+    return _load_hepatic("rat", "Rat")
+
+
+def _load_neuro(species: str, species_label: str, dosage_ug: int,
+                admin_method: str = None, latency: int = None) -> dict:
+    """Load neuro data for one species with chemistry covariates."""
+    df = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
+    filt = (df["species"] == species) & (df["dosage_ug"] == dosage_ug) & df["HELM Annotation"].apply(Helm.valid_chemistry)
+    if admin_method:
+        filt = filt & (df["administration_method"] == admin_method)
+    if latency:
+        filt = filt & (df["latency_time_hours"] == latency)
+    df = df[filt].copy()
+    df["mean_FOB"] = df["FOB_score"].apply(mean_of_array)
+    df = df[df["mean_FOB"].notna()].reset_index(drop=True)
+    groups = df["HELM Annotation"].copy()
     mask = groups.notna()
+
+    helms_raw = df.loc[mask, "HELM Annotation"].values
+    x = np.array([convert_helm(h) for h in helms_raw])
+    chem_cov = _extract_chemistry(helms_raw)
+
     return {
-        "x": np.array([convert_helm(h) for h in df.loc[mask, "HELM Annotation"]]),
-        "y": df.loc[mask, "mean_ALT"].values.astype(float),
+        "x": x,
+        "y": df.loc[mask, "mean_FOB"].values.astype(float),
         "groups": groups[mask].values,
-        "name": "Rat Hepatic (ALT)",
+        "covariates": chem_cov,
+        "name": f"{species_label} Neuro (FOB)",
     }
 
 
 def load_mouse_neuro() -> dict:
-    df = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
-    df = df[
-        (df["species"] == "Mouse")
-        & (df["dosage_ug"] == 700)
-        & (df["administration_method"] == "ICV")
-        & df["HELM Annotation"].apply(Helm.valid_chemistry)
-    ].copy()
-    df["mean_FOB"] = df["FOB_score"].apply(mean_of_array)
-    df = df[df["mean_FOB"].notna()].reset_index(drop=True)
-    groups = df["USPTO ID"].apply(lambda x: f"patent_{x}" if pd.notna(x) else None)
-    mask = groups.notna()
-    return {
-        "x": np.array([convert_helm(h) for h in df.loc[mask, "HELM Annotation"]]),
-        "y": df.loc[mask, "mean_FOB"].values.astype(float),
-        "groups": groups[mask].values,
-        "name": "Mouse Neuro (FOB)",
-    }
+    return _load_neuro("Mouse", "Mouse", dosage_ug=700, admin_method="ICV")
 
 
 def load_rat_neuro() -> dict:
-    df = pd.read_parquet(_data_dir / "neurotoxicity_processed.parquet")
-    df = df[
-        (df["species"] == "Rat")
-        & (df["dosage_ug"] == 3000)
-        & (df["latency_time_hours"] == 3)
-        & df["HELM Annotation"].apply(Helm.valid_chemistry)
-    ].copy()
-    df["mean_FOB"] = df["FOB_score"].apply(mean_of_array)
-    df = df[df["mean_FOB"].notna()].reset_index(drop=True)
-    groups = df["USPTO ID"].apply(lambda x: f"patent_{x}" if pd.notna(x) else None)
-    mask = groups.notna()
-    return {
-        "x": np.array([convert_helm(h) for h in df.loc[mask, "HELM Annotation"]]),
-        "y": df.loc[mask, "mean_FOB"].values.astype(float),
-        "groups": groups[mask].values,
-        "name": "Rat Neuro (FOB)",
-    }
+    return _load_neuro("Rat", "Rat", dosage_ug=3000, latency=3)
 
 
 DATASETS = {
@@ -161,19 +194,14 @@ FEATURIZER_CONFIGS = {
     "KMer_1_2": (KMersCounts, {"k": [1, 2]}),
 }
 
-# Sequential models need 3D input (OneHot only); tabular models can use either
-_SEQUENTIAL_MODELS = {"CNN", "GRU", "CausalCNN", "Transformer"}
-
 
 def is_compatible(feat_name: str, model_name: str) -> bool:
-    """Check featurizer-model compatibility."""
-    if model_name in _SEQUENTIAL_MODELS:
-        return feat_name.startswith("OneHot")
+    """Check featurizer-model compatibility. All remaining models are tabular."""
     return True
 
 
 # ---------------------------------------------------------------------------
-# Model configs  (name -> list of kwarg dicts to try)
+# Model configs (tabular only — sequential models dropped)
 # ---------------------------------------------------------------------------
 
 MODEL_CONFIGS: dict[str, tuple[type, list[dict]]] = {
@@ -194,13 +222,8 @@ MODEL_CONFIGS: dict[str, tuple[type, list[dict]]] = {
         {"iterations": 100},
         {"iterations": 500},
     ]),
-    "CNN": (CNN, [{"depth": 1, "hidden_dim": 64, "kernel_size": 5}]),
     "MLP": (MLP, [
         {"hidden_dims": [128], "dropout": 0.25},
         {"hidden_dims": [128, 128], "dropout": 0.25},
-    ]),
-    "CausalCNN": (CausalCNN, [{"depth": 2, "hidden_dim": 64}]),
-    "Transformer": (Transformer, [
-        {"d_model": 128, "nhead": 4, "num_layers": 2, "dropout": 0.25},
     ]),
 }
