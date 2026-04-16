@@ -179220,7 +179220,7 @@
     {
       "name": "In vitro efficacy",
       "short_name": "In vitro\nefficacy",
-      "threshold": "Inhibition >80%",
+      "threshold": "inhibition >80%",
       "cost_per_aso": 500,
       "color": "#4878A8",
       "threshold_value": 80,

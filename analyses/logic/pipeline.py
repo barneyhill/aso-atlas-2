@@ -52,7 +52,7 @@ class PipelineStage:
 
 
 PIPELINE_STAGES = [
-    PipelineStage("In vitro efficacy", "In vitro\nefficacy", "Inhibition >80%", 500, "#4878A8",
+    PipelineStage("In vitro efficacy", "In vitro\nefficacy", "inhibition >80%", 500, "#4878A8",
                   threshold_value=80, threshold_op=">", transform="clip01", xlabel="Inhibition (%)", xlim_lo=0),
     PipelineStage("In vitro potency", "In vitro\npotency", "IC50 <500nM", 2000, "#6A9BC3",
                   threshold_value=500, threshold_op="<", transform="log10", xlabel="IC\u2085\u2080 (nM)", xlim_lo=1),
