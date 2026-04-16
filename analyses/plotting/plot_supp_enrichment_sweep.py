@@ -123,10 +123,10 @@ def main():
     for task in TASKS:
         ax1.plot(top_x, ef_curves[task], linewidth=2, color=TASK_COLORS[task], label=TASK_LABELS[task])
     ax1.axvline(25, color="#444444", linestyle="--", linewidth=1, alpha=0.8)
-    ax1.text(25.8, ax1.get_ylim()[1] * 0.96, "chosen = top 25%", fontsize=8, color="#444444", va="top")
     ax1.set_xlabel("Top X% selected (lowest predicted toxicity)")
     ax1.set_ylabel("Enrichment factor (EF)")
     ax1.set_title("A. Enrichment vs selection budget")
+    ax1.set_xticks([0, 25, 50, 75, 100])
     ax1.grid(alpha=0.25)
     ax1.legend(fontsize=8, frameon=False, loc="upper right")
 
@@ -137,11 +137,12 @@ def main():
     ax2.set_xlabel("Top X% selected (lowest predicted toxicity)")
     ax2.set_ylabel("Pipeline cost savings (%)")
     ax2.set_title("B. Pipeline savings vs selection budget")
+    ax2.set_xticks([0, 25, 50, 75, 100])
     ax2.grid(alpha=0.25)
     ax2.legend(fontsize=8, frameon=False, loc="lower right")
 
-    ax1.set_xlim(100, 1)
-    ax2.set_xlim(100, 1)
+    ax1.set_xlim(100, 0)
+    ax2.set_xlim(100, 0)
 
     fig.tight_layout()
 

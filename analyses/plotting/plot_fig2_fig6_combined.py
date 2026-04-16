@@ -297,15 +297,8 @@ def main():
     distributions = data["distributions"]
     sample_sizes = data["sample_sizes"]
 
-    scenarios = [("Baseline", baseline)]
-    for key, label in [("oligoai", "OligoAI"), ("oligoai_tox", "OligoAI-tox")]:
-        if data.get(key):
-            scenarios.append((label, data[key]))
-    if data.get("combined"):
-        scenarios.append(("OligoAI +\nOligoAI-tox", data["combined"]))
-
     n_stages = len(stages)
-    fig_w, fig_h = 18, 20
+    fig_w, fig_h = 18, 14
     fig = plt.figure(figsize=(fig_w, fig_h), dpi=300)
 
     # Shared x-positions (figure coordinates)
@@ -317,13 +310,13 @@ def main():
     spacing = shared_x[1] - shared_x[0]
     pa_w = spacing - 0.02
     pa_h = pa_w * fig_w / fig_h
-    pa_bot = 0.82 - pa_h
+    pa_bot = 0.78 - pa_h
     draw_histograms(fig, stages, distributions, sample_sizes,
                     hist_x, pa_bot, pa_w, pa_h)
 
     # ── Panel B: funnel ──
     funnel_left, funnel_width = 0.01, 0.98
-    funnel_bot, funnel_h = 0.36, 0.30
+    funnel_bot, funnel_h = 0.05, 0.35
     ax_funnel = fig.add_axes([funnel_left, funnel_bot, funnel_width, funnel_h])
     funnel_x = (shared_x - funnel_left) / funnel_width  # convert to axes coords
     box_h = draw_funnel(ax_funnel, baseline, stages, funnel_x)
@@ -331,24 +324,11 @@ def main():
     # ── Arrows A → B ──
     draw_arrows(fig, hist_x, flow_cx, box_h, pa_bot - 0.03, funnel_bot, funnel_h)
 
-    # ── Panel C: cost bars ──
-    cost_bot, cost_h = 0.12, 0.25
-    ax_cost = fig.add_axes([0.05, cost_bot, 0.90, cost_h])
-    draw_cost_bars(ax_cost, scenarios, stages)
-
-    # Reposition C so bar midpoint aligns with figure centre
-    xlim = ax_cost.get_xlim()
-    frac = (1.5 - xlim[0]) / (xlim[1] - xlim[0])
-    cw = 0.90
-    ax_cost.set_position([0.5 - cw * frac, cost_bot, cw, cost_h])
-
     # ── Panel labels ──
     lx = -0.01
-    fig.text(lx, 0.82 + pa_h * 0.20 + 0.02, "A",
+    fig.text(lx, 0.78 + pa_h * 0.20 + 0.02, "A",
              fontsize=PANEL_LABEL_SIZE, fontweight="bold", va="bottom")
     fig.text(lx, funnel_bot + funnel_h - 0.01, "B",
-             fontsize=PANEL_LABEL_SIZE, fontweight="bold", va="top")
-    fig.text(lx, cost_bot + cost_h - 0.01, "C",
              fontsize=PANEL_LABEL_SIZE, fontweight="bold", va="top")
 
     # ── Save ──
