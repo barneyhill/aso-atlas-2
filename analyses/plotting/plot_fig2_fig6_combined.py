@@ -34,7 +34,7 @@ BOX_WORD_SIZE = 11      # "ASOs" word inside funnel boxes
 # Aliases for clarity in code
 TITLE_SIZE = TEXT_SIZE
 LABEL_SIZE = TEXT_SIZE
-COST_LABEL_SIZE = TEXT_SIZE
+COST_LABEL_SIZE = 20
 FLOW_TEXT_SIZE = TEXT_SIZE
 COST_TEXT_SIZE = TEXT_SIZE
 
@@ -109,11 +109,13 @@ def draw_histograms(fig, stages, distributions, sample_sizes, positions, bot, wi
         else:
             ax.axvspan(threshold_plot, xl[1], alpha=0.15, color="grey")
 
-        ax.set_xlabel(stage["xlabel"], fontsize=LABEL_SIZE)
-        ax.set_ylabel("Count", fontsize=LABEL_SIZE)
+        ax.set_xlabel(stage["xlabel"], fontsize=TEXT_SIZE)
+        if i == 0:
+            ax.set_ylabel("Count", fontsize=TEXT_SIZE)
+        ax.tick_params(axis="both", labelsize=TEXT_SIZE)
         ax.grid(True, alpha=0.3)
-        ax.text(0.5, 1.12, stage["short_name"],
-                fontsize=TITLE_SIZE, fontweight="bold",
+        ax.text(0.5, 1.06, stage["short_name"],
+                fontsize=TITLE_SIZE + 2, fontweight="bold",
                 ha="center", va="bottom", transform=ax.transAxes)
         ylo, yhi = ax.get_ylim()
         ax.set_ylim(ylo, yhi * 1.08)
@@ -158,7 +160,7 @@ def draw_funnel(ax, baseline, stages, x_positions):
 
         text = f"{props[i]*100:.0f}% ASOs\nhave\n{stages[i]['threshold']}"
         ax.text((x1 + x2) / 2, y_center, text, ha="center", va="center",
-                fontsize=FLOW_TEXT_SIZE, color="#404040")
+                fontsize=FLOW_TEXT_SIZE - 1, color="#404040")
 
     # Stage boxes
     for i in range(n + 1):
@@ -178,9 +180,9 @@ def draw_funnel(ax, baseline, stages, x_positions):
                 fontsize=BOX_WORD_SIZE, fontweight="bold", color="white", zorder=11)
 
         ref_h = h if i < n else box_h[i - 1]
-        ax.text(x, y_center + ref_h/2 + 0.095,
-                label.replace("\n", " ") if i == n else label,
-                ha="center", va="center", fontsize=TITLE_SIZE, fontweight="bold", color="#202020")
+        ax.text(x, y_center + ref_h/2 + 0.115,
+                label,
+                ha="center", va="center", fontsize=TITLE_SIZE + 2, fontweight="bold", color="#202020")
         if i < n:
             cpa = stages[i]["cost_per_aso"]
             cost_str = f"${cpa/1e3:.0f}K/ASO" if cpa >= 1000 else f"${cpa:.0f}/ASO"
@@ -252,7 +254,8 @@ def draw_cost_bars(ax, scenarios, stages, bar_width=0.45):
                 ha="center", va="bottom", fontsize=COST_LABEL_SIZE, fontweight="bold")
 
     ax.set_ylim(0, 1.5)
-    ax.set_ylabel("Total Cost ($M)", fontsize=LABEL_SIZE)
+    ax.set_ylabel("Total Cost ($M)", fontsize=COST_LABEL_SIZE)
+    ax.tick_params(axis="both", labelsize=COST_LABEL_SIZE)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.xaxis.grid(False)
@@ -329,7 +332,7 @@ def main():
     draw_arrows(fig, hist_x, flow_cx, box_h, pa_bot - 0.03, funnel_bot, funnel_h)
 
     # ── Panel C: cost bars ──
-    cost_bot, cost_h = 0.09, 0.25
+    cost_bot, cost_h = 0.12, 0.25
     ax_cost = fig.add_axes([0.05, cost_bot, 0.90, cost_h])
     draw_cost_bars(ax_cost, scenarios, stages)
 
