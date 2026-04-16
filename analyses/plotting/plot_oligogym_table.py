@@ -9,7 +9,6 @@ _root = Path(__file__).resolve().parents[2]
 RESULTS_PATH = _root / "data/results/oligogym_benchmark.json"
 OUT_PATH = _root / "typst/data/oligogym_benchmark.typ"
 
-# Display order for models
 MODEL_ORDER = [
     "Linear",
     "Random Forest",
@@ -17,10 +16,6 @@ MODEL_ORDER = [
     "KNN",
     "CatBoost",
     "MLP",
-    "CNN",
-    "CausalCNN",
-    "Transformer",
-    "Multi-task Transformer",
 ]
 
 DATASET_ORDER = ["mouse_hepatic", "rat_hepatic", "mouse_neuro", "rat_neuro"]
@@ -33,7 +28,6 @@ DATASET_LABELS = {
 
 
 def _fmt(val, std=None):
-    """Format a metric value, bolding will be handled separately."""
     if val is None or (isinstance(val, float) and np.isnan(val)):
         return "---"
     s = f"{val:.3f}"
@@ -46,7 +40,6 @@ def main():
     data = json.loads(RESULTS_PATH.read_text())
     best = data["best_per_model"]
 
-    # Build lookup: (dataset, model) -> {spearman, spearman_std, r2, rmse, featurizer}
     lookup = {}
     for row in best:
         key = (row["dataset"], row["model"])
@@ -63,7 +56,6 @@ def main():
                     best_val = row["spearman"]
                     best_per_ds[ds] = m
 
-    # Generate typst table
     lines = []
     lines.append("#table(")
     lines.append("  columns: (auto, 1fr, 1fr, 1fr, 1fr),")
@@ -71,7 +63,6 @@ def main():
     lines.append("  stroke: none,")
     lines.append("  inset: (x: 6pt, y: 4pt),")
     lines.append("")
-    # Header
     lines.append("  table.hline(),")
     lines.append("  table.header(")
     lines.append("    [*Model*],")

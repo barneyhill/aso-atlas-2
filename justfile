@@ -23,6 +23,7 @@ plots:
     uv run python -m analyses.plotting.plot_figure1
     uv run python -m analyses.plotting.plot_fig2_fig6_combined
     uv run python -m analyses.plotting.plot_figure3
+    uv run python -m analyses.plotting.plot_figure3_demo
     uv run python -m analyses.plotting.plot_figure4
     uv run python -m analyses.plotting.plot_figure5
     uv run python -m analyses.plotting.plot_figure7

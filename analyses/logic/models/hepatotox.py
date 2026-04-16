@@ -288,12 +288,23 @@ def load_and_filter_rat():
     return df.reset_index(drop=True)
 
 
-def run_combined_models():
-    """Run combined mouse+rat hepatotox model: sequence + species features only.
+def _helm_groups(df: pd.DataFrame) -> pd.Series:
+    """Assign HELM-based groups for GroupKFold (sequence-level dedup).
 
-    Train on ALL data (all dosage regimes) for maximum power, then report
-    metrics on OOF predictions filtered to the 50 mg/kg subset (controlled
-    evaluation, no dosage confounding).
+    Identical HELM sequences always land in the same fold, preventing
+    train/test leakage when the same ASO appears in both species.
+    """
+    groups = df["HELM Annotation"].copy()
+    n_unique = groups.nunique()
+    print(f"  HELM groups: {groups.notna().sum()}/{len(df)} assigned, {n_unique} unique sequences")
+    return groups
+
+
+def run_combined_models():
+    """Run combined mouse+rat hepatotox model with HELM-level dedup.
+
+    Groups by HELM annotation so identical sequences across species
+    always appear in the same CV fold, preventing sequence-level leakage.
 
     Uses species-specific ULN thresholds for binary labels:
       - Mouse ALT ULN = 75 (Otto et al. 2016)
@@ -337,7 +348,7 @@ def run_combined_models():
     y_full = y_full.reset_index(drop=True)
     rat_mask = (df_all["species"] == "rat").astype(int)
 
-    groups = assign_groups(df_all)
+    groups = _helm_groups(df_all)
 
     # Features: dinucleotide (128) + species_rat (1) + dosing covariates (2) = 131.
     model_key = "dinucleotide"
@@ -355,19 +366,59 @@ def run_combined_models():
     y = (y_full[mask] == "high")
     g = groups[mask]
 
-    print(f"  Running combined dinucleotide × ALT (n={mask.sum()})...", end=" ")
+    print(f"  Running combined dinucleotide × ALT (n={mask.sum()}, {g.nunique()} HELM groups)...", end=" ")
     result = train_and_evaluate_grouped(X, y, g, make_classifier=spec.make_classifier)
     predictions = {}
 
     if result:
         print(f"AUC={result['auc']:.3f} (all data)")
 
-        subset_metrics = _eval_on_dose_subset(df_all, y, result)
-        if subset_metrics:
-            predictions["combined_ALT"] = {**subset_metrics,
-                "feature_names": result["feature_names"],
-                "fold_importances": result["fold_importances"],
+        # Split OOF predictions by species for per-species enrichment
+        is_rat = rat_mask[mask].values.astype(bool)
+        oof_preds = np.array(result["predictions"])
+        oof_labels = y.astype(int).values
+
+        for species_name, species_mask in [("mouse", ~is_rat), ("rat", is_rat)]:
+            sp = oof_preds[species_mask]
+            sl = oof_labels[species_mask]
+            n_sp = len(sl)
+            n_high = int(sl.sum())
+            n_low = n_sp - n_high
+
+            if n_high < 2 or n_low < 2:
+                print(f"    {species_name}: skip (n_high={n_high}, n_low={n_low})")
+                continue
+
+            sp_auc = roc_auc_score(sl, sp)
+            threshold = _optimal_threshold(sl, sp)
+            sp_pred = (sp > threshold).astype(int)
+            tn, fp, fn, tp = confusion_matrix(sl, sp_pred).ravel()
+            acc = (tp + tn) / (tp + tn + fp + fn)
+            sens = tp / (tp + fn) if (tp + fn) > 0 else 0
+            spec_val = tn / (tn + fp) if (tn + fp) > 0 else 0
+            print(f"    {species_name}: n={n_sp}, AUC={sp_auc:.3f}, acc={acc:.3f}")
+
+            pred_key = f"combined_ALT_{species_name}"
+            predictions[pred_key] = {
+                "predictions": sp.tolist(),
+                "labels": sl.tolist(),
+                "n": n_sp,
+                "accuracy": float(acc),
+                "auc": float(sp_auc),
+                "sensitivity": float(sens),
+                "specificity": float(spec_val),
+                "confusion": {"tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn)},
             }
+
+        # Also save all-data predictions for reference
+        predictions["combined_ALT"] = {
+            "predictions": oof_preds.tolist(),
+            "labels": oof_labels.tolist(),
+            "n": int(result["n"]),
+            "auc": float(result["auc"]),
+            "feature_names": result["feature_names"],
+            "fold_importances": result["fold_importances"],
+        }
     else:
         print("skip")
 

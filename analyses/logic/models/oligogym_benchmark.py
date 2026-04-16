@@ -1,8 +1,9 @@
 """
-OligoGym benchmark: train all OligoGym model architectures on the four
-mouse/rat × hepatic/neuro toxicity datasets.
+OligoGym benchmark: train OligoGym model architectures on per-species
+hepatic/neuro toxicity datasets.
 
-Regression task, GroupKFold by patent, reports Spearman / R² / RMSE.
+Per-species training with HELM-level dedup. Hepatic models include
+dosage covariates. Reports Spearman / R² / RMSE.
 """
 
 import json
@@ -65,13 +66,8 @@ def _fold_metrics(y_true, y_pred):
     }
 
 
-def _needs_flatten(model_name: str) -> bool:
-    """Sklearn models need flattened 2D input; lightning models keep 3D."""
-    return model_name not in {"CNN", "CausalCNN", "Transformer"}
-
-
 def _is_lightning(model_name: str) -> bool:
-    return model_name in {"CNN", "MLP", "CausalCNN", "Transformer"}
+    return model_name in {"MLP"}
 
 
 def run_benchmark():
@@ -83,7 +79,9 @@ def run_benchmark():
         print("=" * 60)
         data = loader()
         n = len(data["y"])
-        print(f"  N={n}, y range=[{data['y'].min():.1f}, {data['y'].max():.1f}]")
+        has_covariates = "covariates" in data
+        print(f"  N={n}, y range=[{data['y'].min():.1f}, {data['y'].max():.1f}]"
+              f"{', with dosage covariates' if has_covariates else ''}")
 
         for feat_name, (feat_cls, feat_kwargs) in FEATURIZER_CONFIGS.items():
             for model_name, (model_cls, hp_list) in MODEL_CONFIGS.items():
@@ -97,8 +95,10 @@ def run_benchmark():
                     t0 = time.time()
 
                     try:
-                        flatten = _needs_flatten(model_name)
-                        X = _featurize(feat_cls, feat_kwargs, data["x"], flatten=flatten)
+                        X = _featurize(feat_cls, feat_kwargs, data["x"], flatten=True)
+                        # Append dosage covariates if available
+                        if has_covariates:
+                            X = np.column_stack([X, data["covariates"]])
                         y = data["y"]
                         groups = data["groups"]
 
@@ -117,12 +117,9 @@ def run_benchmark():
                             X_train, X_test = X[train_idx], X[test_idx]
                             y_train, y_test = y[train_idx], y[test_idx]
 
-                            # Construct model — Lightning models need input_dim
                             init_kwargs = {"task": "regression", **hp_kwargs}
                             if _is_lightning(model_name):
                                 init_kwargs["input_dim"] = X.shape[-1]
-                                if model_name == "Transformer":
-                                    init_kwargs["seq_len"] = X.shape[1]
 
                             with warnings.catch_warnings():
                                 warnings.simplefilter("ignore")
@@ -191,7 +188,7 @@ def run_benchmark():
 
 
 def select_best(results: list[dict]) -> list[dict]:
-    """Select the best HP config per model × featurizer × dataset by Spearman."""
+    """Select the best HP config per model × dataset by Spearman."""
     df = pd.DataFrame(results)
     df["spearman"] = pd.to_numeric(df["spearman"], errors="coerce")
 
@@ -207,19 +204,17 @@ def select_best(results: list[dict]) -> list[dict]:
 
 
 def main():
-    print("OligoGym Benchmark")
+    print("OligoGym Benchmark (per-species, HELM dedup, dosage covariates)")
     print("=" * 60)
     t0 = time.time()
 
     all_results = run_benchmark()
 
-    # Select best per model × dataset
     best = select_best(all_results)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out_path = RESULTS_DIR / "oligogym_benchmark.json"
 
-    # Clean NaN for JSON serialization
     def clean(obj):
         if isinstance(obj, float) and np.isnan(obj):
             return None
@@ -238,8 +233,10 @@ def main():
         "best_per_model": clean(best),
         "metadata": {
             "n_folds": N_SPLITS,
-            "split_strategy": "GroupKFold_patent",
+            "split_strategy": "GroupKFold_HELM",
             "task": "regression",
+            "training": "per_species",
+            "covariates": "dosage (hepatic only)",
             "datasets": list(DATASETS.keys()),
         },
     }
