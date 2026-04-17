@@ -128,7 +128,7 @@ ASO Atlas 2.0 comprises four linked assay categories extracted from USPTO patent
 == The Preclinical Screening Pipeline
 
 #figure(
-  image("plots/fig2_fig6_combined.svg", width: 100%),
+  image("plots/fig2/fig2.svg", width: 100%),
   caption: [The ASO preclinical screening pipeline. *(A)* Distribution of measurements at each pipeline stage with pass/fail thresholds (red dashed lines); grey shading marks the failing region. *(B)* Attrition funnel showing the number of ASO candidates entering each stage, per-stage pass rates, and cumulative costs. Box heights are proportional to log(ASO count).],
 ) <fig2>
 
