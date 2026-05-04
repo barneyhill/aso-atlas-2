@@ -1,0 +1,195 @@
+#import "@preview/bloated-neurips:0.8.0": neurips2026
+
+#import "utils.typ": R, comma, mstd
+
+#let affls = (
+  oxford-paeds: (
+    department: "Department of Paediatrics",
+    institution: "University of Oxford",
+    location: "Oxford",
+    country: "United Kingdom",
+  ),
+  bdi: (
+    department: "Big Data Institute",
+    institution: "University of Oxford",
+    location: "Oxford",
+    country: "United Kingdom",
+  ),
+  broad: (
+    department: "Broad Center for Mendelian Genomics, Program in Medical and Population Genetics",
+    institution: "Broad Institute of MIT and Harvard",
+    location: "Cambridge, MA",
+    country: "USA",
+  ),
+  idrm: (
+    department: "Institute of Developmental and Regenerative Medicine (IDRM)",
+    institution: "University of Oxford",
+    location: "Oxford",
+    country: "United Kingdom",
+  ),
+  nygc: (
+    institution: "New York Genome Center",
+    location: "New York, NY",
+    country: "USA",
+  ),
+  ucsf: (
+    department: "Department of Psychiatry and Behavioral Sciences, UCSF Weill Institute for Neurosciences",
+    institution: "University of California, San Francisco",
+    location: "San Francisco, CA",
+    country: "USA",
+  ),
+)
+
+#let authors = (
+  (name: "Barney Hill", affl: ("oxford-paeds", "bdi", "idrm"), email: "barney.hill@merton.ox.ac.uk"),
+  (name: "Nicola Whiffin", affl: ("bdi", "broad")),
+  (name: "Carlo Rinaldi", affl: ("oxford-paeds", "idrm")),
+  (name: "Stephan J. Sanders", affl: ("oxford-paeds", "idrm", "nygc", "ucsf"), email: "stephan.sanders@paediatrics.ox.ac.uk"),
+)
+
+#show: neurips2026.with(
+  title: [ASO Atlas 2.0: Evaluating antisense oligonucleotide \ prediction across the preclinical pipeline],
+  authors: (authors, affls),
+  keywords: ("Antisense Oligonucleotides", "Drug Discovery", "Toxicity Prediction", "Benchmarking"),
+  abstract: [
+    Predictive models are increasingly used to prioritise preclinical drug candidates, but standard accuracy metrics treat all pipeline stages equally, leaving the true impact of these models on total screening costs unclear. This issue is particularly acute in the context of antisense oligonucleotides (ASOs), where producing a single development candidate currently requires screening hundreds of sequences. We introduce a cost-based evaluation framework that translates per-stage classifier enrichment into projected cost savings under a representative preclinical pipeline model. Alongside this framework, we present ASO Atlas 2.0, the largest public multi-endpoint ASO preclinical dataset, spanning #comma(R.in_vitro.n_measurements+R.dose_response.n_measurements) in vitro efficacy measurements and #comma(R.hepatic.n_measurements+R.neuro.n_measurements) in vivo toxicology measurements across #comma(R.genes.n_unique) target genes. We find that incorporating model predictions across all stages reduces projected pipeline cost by #str(R.pipeline.combined_savings_pct)%. This saving is largely attributable to modest enrichment at costly late-stage in vivo studies rather than strong enrichment at lower-cost in vitro assays, reversing the model ranking suggested by accuracy alone and highlighting the need for improved toxicology modelling.
+  ],
+  bibliography: bibliography("paper2_preclinical.bib"),
+  appendix: {
+    include "appendix.typ"
+    include "checklist.typ"
+  },
+  accepted: none,
+  aux: (lineno: true, get-notice: accepted => [Submitted to 40th Conference on Neural Information Processing Systems (NeurIPS 2026). Do not distribute.]),
+)
+
+= Introduction
+
+Preclinical drug development screens candidate compounds through sequential stages of increasing cost and complexity, from in vitro assays to animal toxicity studies, with late-stage failures dominating total programme expenditure @kolaCanPharmaceuticalIndustry2004 @paulHowImproveRD2010. Predictive models are increasingly used to prioritise candidates in this process, but are typically developed and evaluated on individual assay endpoints in isolation. Because each stage acts as a filter, pass rates compound multiplicatively: a higher failure rate at any stage forces more candidates into every preceding stage, so total programme cost is governed by the product of stage-wise attrition rates, not by any single stage in isolation @dimasiInnovationPharmaceuticalIndustry2016. This makes it impossible to assess the value of improved prediction at one stage without modelling its interaction with every other stage.
+
+We study this disconnect in the context of antisense oligonucleotides (ASOs), short synthetic nucleic acids that hybridise to target RNA to modulate gene expression @crookeAntisenseTechnologyOverview2021a. In recent years, ASOs have emerged as a leading therapeutic modality for central nervous system disorders, with the approved drug tofersen for _SOD1_-linked ALS @millerTrialAntisenseOligonucleotide2022 and multiple programmes in late-stage trials @mengTherapyAngelmanSyndrome2015 @minikelPrionProteinLowering2020. Yet producing a single development candidate still requires empirical screening of hundreds of designs @goyenvalleConsiderationsPreclinicalAssessment2023 @oliverModelSelectionPreclinical2026. Candidates progress through in vitro efficacy and potency assays, then hepatic and neurological toxicity studies in mouse, rat, and non-human primate, a pipeline in which per-compound costs escalate sharply at each stage. @crookeAntisenseDrugDiscovery2021
+
+Existing ASO datasets and models each address individual endpoints in isolation, making it impossible to assess whether improved prediction at one stage reduces total pipeline cost. To address this gap, we release ASO Atlas 2.0, the largest public multi-endpoint ASO preclinical dataset, extracted from Ionis Pharmaceuticals' USPTO patent filings and annotated with Hierarchical Editing Language for Macromolecules (HELM) @zhangHELMHierarchicalNotation2012 chemical-structure strings. The dataset spans #comma(R.in_vitro.n_measurements+R.dose_response.n_measurements) in vitro efficacy and #comma(R.hepatic.n_measurements+R.neuro.n_measurements) in vivo toxicology measurements across #comma(R.genes.n_unique) target genes and four assay types. We pair it with a cost-based evaluation framework that translates per-stage classifier enrichment into projected pipeline cost savings and animal reduction, and benchmark seven sequence-based architectures.
+
+= Related work
+
+*Computational modelling of ASO properties.* Existing methods have addressed individual endpoints in isolation. Early efficacy prediction relied on sequence motifs correlated with antisense activity @matveevaIdentificationSequenceMotifs2000a and hybridisation thermodynamics, as in OligoWalk @luOligoWalkOnlineSiRNA2008. More recently, ASOptimizer combines a linear regression on thermodynamic features for sequence selection with a graph neural network for chemical modification optimisation, but treats the two as independent problems @hwangASOptimizerOptimizingAntisense2024b. Our previous model, OligoAI, jointly encodes sequence and chemistry to achieve 3.14$times$ enrichment for in vitro knockdown @hillAccuratelyModellingRNase2025. For toxicity, nucleotide composition has been shown to predict hepatotoxicity in LNA gapmers @hagedornHepatotoxicPotentialTherapeutic2013 @burdickSequenceMotifsAssociated2014, and this approach was extended to neurotoxicity @hagedornAcuteNeurotoxicityAntisense2022. Each of these methods targets a single assay type; none has been evaluated across the full preclinical pipeline.
+
+*Benchmarking oligonucleotide and molecular property prediction.* Our previous dataset, ASO Atlas, comprises 188,521 in vitro efficacy measurements @hillAccuratelyModellingRNase2025, and OligoGym is the first standardised benchmark suite for oligonucleotide property prediction, spanning multiple endpoints including efficacy, toxicity, and pharmacokinetics @rotrattanadumrongOligoGymCuratedDatasets2025. However, OligoGym's datasets are drawn from independent sources with no shared compounds between endpoints, precluding cross-stage analyses of how prediction at one endpoint affects outcomes at another. In the broader drug discovery literature, shared benchmarks such as ChEMBL @mendezChEMBLDirectDeposition2019, MoleculeNet @wuMoleculeNetBenchmarkMolecular2018, and Therapeutics Data Commons @huangTherapeuticsDataCommons2021 have demonstrated how standardised evaluation accelerates method development.
+
+*Economics of personalised ASO therapy.* In recent years, individualised ASO therapies have demonstrated clinical proof-of-concept for patients with ultra-rare mutations @serranoNLoremFoundationAnnounces2026, and frameworks for N-of-1 trials are now being established @kimFrameworkIndividualizedSpliceswitching2023 @belgradN1CollaborativeAdvancing2025 @kim-mcmanusFrameworkNof1Trials2024. However, each individualised programme must still screen hundreds of candidates through the full preclinical pipeline @goyenvalleConsiderationsPreclinicalAssessment2023. Scaling this approach to the millions of patients with ultra-rare mutations will require drug discovery that is "rapid, automated and cost-effective" @crookeEstablishingCommercialSolution2026. Computational models that reduce the number of candidates entering expensive late stages could therefore have outsized impact on the feasibility of personalised programmes, yet no framework translates preclinical-stage classifier enrichment into projected cost savings.
+
+= ASO Atlas 2.0 <sec_atlas>
+
+ASO Atlas 2.0 is the first public ASO dataset to link chemical structure to multiple preclinical endpoints across the screening pipeline. Prior public resources cover individual assays in isolation, which precludes the cross-stage analyses needed to evaluate sequential screening. The dataset comprises four linked assay categories extracted from USPTO patent filings: #comma(R.in_vitro.n_measurements) single-concentration in vitro inhibition measurements across #comma(R.in_vitro.n_asos) ASOs, #comma(R.dose_response.n_measurements) multi-dose response measurements across #comma(R.dose_response.n_asos) ASOs, #comma(R.hepatic.n_measurements) hepatorenal toxicity measurements across #comma(R.hepatic.n_asos) ASOs with #R.hepatic.n_biomarker_channels biomarkers, and #comma(R.neuro.n_measurements) neurotoxicity measurements across #comma(R.neuro.n_asos) ASOs (@fig_atlas). All compounds are annotated with HELM chemical-structure strings enabling extraction of chemistry-aware features.
+
+// Panel A: Figma (manual diagram)
+// Panels B & C: analyses/plotting/plot_fig_atlas.py
+#figure(
+  image("plots/fig_atlas/fig_atlas.svg", width: 100%),
+  caption: [Overview of ASO Atlas 2.0. *(A)* Three-stage LLM-powered pipeline converting USPTO patent tables into structured preclinical datasets with HELM annotations. *(B)* Sankey diagram of compound overlap between assay stages; box heights are proportional to measurement count and flow heights are proportional to the fraction of compounds shared between adjacent stages. *(C)* Donut chart of measurement distribution across #R.genes.n_unique target genes. The #R.genes.n_major largest genes are labelled individually and account for #R.genes.major_pct% of all measurements; the remaining #R.genes.n_minor genes are grouped as "Other".],
+) <fig_atlas>
+
+== Extraction Pipeline <sec_extraction>
+
+ASO Atlas 2.0 was constructed by a three-stage language-model-powered pipeline that converted unstructured tables in USPTO patent XML files into flat, structured preclinical ASO datasets annotated with HELM chemical-structure strings. The full pipeline used GPT-5-mini (Stages 1--2) and GPT-5 (Stage 3) via the OpenAI API at an approximate total cost of \$500.
+
+*Stage 1 (table discovery).* Patent XML documents were retrieved, split into individual tables, deduplicated, and reduced from 35,871 raw tables across 1,125 Ionis Pharmaceuticals patents to 8,435 canonical tables. For each table, GPT-5-mini generated a bespoke Python extraction function executed in a sandboxed subprocess with an agentic self-repair loop (up to five attempts per table).
+
+*Stage 2 (chemistry annotation).* The model generated functions to construct HELM chemical-structure strings nucleotide-by-nucleotide from the patent prose, returning null when explicit modification data could not be found. All HELM strings were validated by a rule-based checker enforcing correct sugar, base, and backbone tokens, balanced bracket syntax, and terminal-nucleotide constraints.
+
+*Stage 3 (assay extraction).* Each assay category was extracted by supplying a target schema; GPT-5 generated per-table mapping functions that translated heterogeneous field names, performed unit conversions, and unpivoted multi-measurement rows. HELM annotations were merged by compound identifier, following canonical-link chains across duplicate tables. Full collation details and schema definitions are given in @secS_collation and @secS_schema.
+
+Each assay category underwent standardised HELM-level quality filtering (removing uncertain annotations, short sequences, non-gapmer designs, homopolymers, and unmodified DNA) followed by assay-specific range filtering, unit harmonisation, species/cell-line standardisation, and deduplication. Target RNA names were mapped to canonical HGNC gene symbols via the Ensembl REST API supplemented by a manually curated alias dictionary. Full preprocessing details are given in @secS_preprocessing. Dataset characterisation, including cross-endpoint correlations and cross-species concordance, is reported in @secS_concordance.
+
+As ASO Atlas 2.0 was constructed by LLM-driven extraction rather than manual curation, we performed a manual validation audit to quantify end-to-end accuracy. A stratified random sample of 100 rows was drawn across all four assay categories, and each was independently verified against its source patent on three axes: (i) HELM chemical-structure string (correct sugar, backbone, and base annotations matching the patent's modification table), (ii) chemistry metadata (species, cell line, dosage, and administration route), and (iii) primary data point (the reported assay value (percent inhibition, IC50, biomarker level, or FOB score)). #text(fill: red)[*\[TODO: insert accuracy figures once audit is complete\]*]
+
+= Evaluation Framework <sec_framework>
+
+== Pipeline Structure and Cost Model
+
+// Both panels: analyses/plotting/plot_fig_pipeline.py
+#figure(
+  image("plots/fig_pipeline/fig_pipeline.svg", width: 100%),
+  caption: [The ASO preclinical screening pipeline across 7 sequential stages. *(A)* Histograms of assay readouts observed in ASO Atlas 2.0 at each stage; red dashed lines indicate the pass/fail threshold used to define stage advancement, grey shading marks the failing region. *(B)* Attrition funnel back-calculated from ASO Atlas 2.0 pass rates: #comma(R.pipeline.baseline_n_initial) initial ASOs are screened to yield one clinical candidate at an illustrative total cost of ~\$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 1))M under representative pricing assumptions. Box heights are proportional to log(ASO count); annotations show per-stage pass rates and cumulative costs.],
+) <fig_pipeline>
+
+We model the ASO preclinical pipeline as seven sequential stages, each with a representative pass/fail threshold: in vitro efficacy (inhibition \>80%), in vitro potency (IC50 \<500 nM by electroporation), mouse hepatotoxicity (ALT \<1.5$times$ the upper limit of normal (ULN)), mouse neurotoxicity (bFOB ≤1), rat hepatotoxicity (ALT \<1.5$times$ULN), rat neurotoxicity (mFOB ≤1), and monkey hepatotoxicity (@fig_pipeline). The sequential ordering follows standard industry practice @goyenvalleConsiderationsPreclinicalAssessment2023; pass rates at each stage are computed from ASO Atlas 2.0 by applying these thresholds to the observed assay readouts. Back-calculation from the observed pass rates yields approximately #comma(R.pipeline.baseline_n_initial) initial ASOs required to produce a single development candidate, at an estimated total cost of \$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 2))M. Per-ASO costs, estimated from CRO pricing schedules and expert consultation, increase by roughly two orders of magnitude across the pipeline: \$500 (in vitro efficacy), \$2,000 (dose-response), \$15,000 (mouse hepatotoxicity), \$20,000 (mouse neurotoxicity), \$25,000 (rat hepatotoxicity), \$30,000 (rat neurotoxicity), and \$100,000 (monkey hepatotoxicity).
+
+To quantify a model's value at a given stage we measure how much it can improve the pass rate when used to prioritise which compounds to advance. We evaluate this at the budget-neutral operating point: compounds are ranked by predicted score and the top $K = q_k N$ are selected, where $q_k$ is the base pass rate and $N$ is the number of compounds evaluated. This selects the same number of compounds as would pass under brute-force screening, so any improvement reflects model quality rather than a change in screening budget. The enrichment factor is then $"EF"_k = P("pass" | "selected") slash q_k$: the ratio of the observed pass rate among the $K$ model-selected compounds to the base rate. Random selection yields $"EF" = 1$; perfect prediction yields $"EF" = 1 slash q_k$ (every selected compound passes). Because the effective pass rate under model pre-screening is $tilde(q)_k = q_k dot "EF"_k = P("pass" | "selected")$, the enrichment factor directly multiplies the stage pass rate in the cost model with no additional parameters.
+
+Pipeline costs are back-calculated by determining the number of initial ASOs $N_0$ needed to yield one development candidate. For a pipeline with $S$ sequential stages, each with pass rate $q_k$, the number of ASOs entering stage $k$ is $N_k = ceil(N_(k+1) slash q_k)$ (working backwards from $N_(S+1) = 1$), and the total cost is $C = sum_(k=1)^S N_k r_k$, where $r_k$ is the per-ASO cost at stage $k$. With classifier pre-screening, the effective pass rate at enriched stages becomes $tilde(q)_k = min(q_k dot "EF"_k, 1)$.
+
+== Assumptions
+
+The cost model makes several assumptions. For each, we describe the assumption and the evidence or analysis that mitigates it.
+
+*(i) Fixed stage ordering.* The pipeline assumes a single canonical progression (in vitro efficacy, potency, mouse hepatotoxicity, mouse neurotoxicity, rat hepatotoxicity, rat neurotoxicity, monkey hepatotoxicity). ASO preclinical screening is increasingly performed as a linear stage-gate process: n-Lorem's platform screens \~500 candidates through sequential in vitro potency, selectivity, cytotoxicity, immunotoxicity, and in vivo tolerability gates before selecting a single clinical candidate @crookeAddressingNeedsPatients2022 @serranoLesson17Science2025, and a similar sequential safety-filtering workflow has been described for ASOs more broadly @goyenvalleConsiderationsPreclinicalAssessment2023. Our model omits stages present in these workflows for which ASO Atlas 2.0 lacks data, notably immunotoxicity screening; actual workflows may also include parallel assays, iterative design cycles, and organisation-specific orderings.
+
+*(ii) Marginal pass rates as proxies for conditional rates.* The back-calculation multiplies per-stage pass rates as if each stage screens an independent, correctly filtered population. In practice, pass rates are computed as marginal rates on the observed assay data, implicitly assuming that compounds tested at a later stage (e.g. rat) have already been filtered through all preceding gates. The patent data do not explicitly confirm prior-stage outcomes, but the selection-bias analysis in @fig_concordance A provides direct evidence for pipeline survivorship. At each gate, the biomarker distribution of compounds that advance to the next stage is systematically shifted relative to the full population: compounds progressing to dose-response have higher maximum inhibition; those reaching in vivo testing have lower IC#sub[50]; and, most critically for the cost model, compounds tested in rat show lower mouse ALT and lower mouse bFOB scores than those not tested in rat, indicating that mouse-toxic compounds were filtered before rat studies. If compounds were tested in rat irrespective of mouse outcome, these distributions would overlap; the observed shifts confirm that the rat-tested population has already passed through mouse-based selection. Two further observations support this: #R.concordance.rat_hep_overlap_pct% of rat hepatic and #R.concordance.rat_neuro_overlap_pct% of rat neurotoxicity compounds also appear in the mouse data, confirming high cross-stage overlap; and the monkey stage shows a 100% pass rate (n = #str(R.pipeline.stages.at(6).n_total)), consistent with prior-stage filtering removing toxic compounds before primate studies.
+
+*(iii) Threshold choices.* Each stage uses a single fixed pass/fail threshold. Hepatotoxicity thresholds are defined relative to the upper limit of normal (ULN), taken as the sex-averaged 97.5th percentile of ALT in healthy animals from published reference interval studies (mouse C57BL/6N: 70 IU/L @ottoClinicalChemistryReference2016; rat Sprague-Dawley: 39 IU/L @heSexspecificReferenceIntervals2017; cynomolgus macaque: 103 IU/L @bakkerReferenceIntervalsPercentiles2023). ASOs with ALT \<2$times$ULN have been classified as having no or very low hepatotoxic potential and those \>5$times$ULN as clearly hepatotoxic @hagedornHepatotoxicPotentialTherapeutic2013; 1.5-fold has been identified as the lower boundary at which any hepatotoxicity signal becomes detectable @kamolaStrategiesVivoScreening2017; our threshold of 1.5$times$ULN therefore selects only compounds with no detectable transaminase elevation. Neurotoxicity is scored using Ionis's 7-criterion binary checklist @freierCompoundsMethodsReducing2022, where each criterion assesses a functional domain (consciousness, motor response, reflexes) and the total score ranges from 0 (no signs) to 7 (all criteria failed); a threshold of ≤1 permits at most one failed criterion. These thresholds are deliberately conservative; for instance, ION582, a clinical-stage ASO currently in Phase 3 trials for Angelman syndrome, has a reported mFOB score of 2 and would be eliminated under our FOB $lt.eq$ 1 threshold despite having progressed through preclinical development. ION582 nonetheless ranks favourably on both potency and tolerability within the dataset's _UBE3A-ATS_-targeting ASOs (@fig_clinical), consistent with its selection as a clinical candidate and providing a sanity check that ASO Atlas 2.0 captures clinically relevant signal.
+
+*(iv) Fixed dosing conditions.* Neurotoxicity pass rates are computed at specific dose--latency combinations (mouse: 700 $mu$g ICV, 3 h; rat: 3000 $mu$g, 3 h), the standardised conditions under which FOB is assessed; compounds tested at other doses are excluded, reducing sample size at these stages.
+
+*(v) Cost estimates.* Per-ASO stage costs are representative estimates from CRO pricing quotes and expert consultation, not observed programme expenditure. The sensitivity analysis (@fig_cost_sensitivity) sweeps all costs $plus.minus$50% and confirms the headline cost-reduction conclusion is robust to moderate perturbation, but absolute dollar estimates should be interpreted as illustrative.
+
+*(vi) Cross-stage enrichment independence.* The cost model applies per-stage enrichment factors independently, implying that enriching the population at an upstream stage does not alter the EF achievable at downstream stages. This requires that filtering at one stage does not systematically shift the outcome distribution at subsequent stages. The cross-assay correlation matrix (@fig_concordance B) provides direct evidence for independence between in vitro and in vivo stages: Spearman correlations between efficacy metrics and toxicity endpoints are non-significant (max inhibition vs ALT: $rho$ = #str(R.concordance.inhib_vs_alt.rho), n = #str(R.concordance.inhib_vs_alt.n); max inhibition vs bFOB: $rho$ = #str(R.concordance.inhib_vs_bfob.rho), n = #str(R.concordance.inhib_vs_bfob.n); IC#sub[50] vs bFOB: $rho$ = #str(R.concordance.ic50_vs_bfob.rho), n = #str(R.concordance.ic50_vs_bfob.n)), with the exception of a weak IC#sub[50] vs ALT association ($rho$ = #str(R.concordance.ic50_vs_alt.rho), n = #str(R.concordance.ic50_vs_alt.n)), so enriching for in vitro efficacy leaves the toxicity distribution of the surviving pool largely unchanged. Independence between hepatic and neurotoxicity stages cannot be directly tested: only #str(R.concordance.hep_neuro_overlap_n) compounds have both hepatic and neurotoxicity measurements, too few to estimate the correlation reliably, though independence is expected given the distinct biological mechanisms. Within the toxicity stages, cross-species neurotoxicity concordance is strong ($rho$ = #str(R.cross_species_neurotox.FOB.spearman_rho), @fig_concordance B, E), meaning that enrichment at the mouse neurotoxicity stage would reduce the marginal value of the rat neurotoxicity stage; the cost model does not capture this interaction and therefore likely underestimates the combined savings from sequential same-endpoint stages. Cross-species hepatotoxicity concordance is weaker ($rho$ = #str(R.cross_species_hepatotox.ALT.spearman_rho)), so this effect is smaller for the hepatic stages.
+
+*(vii) Dosage as a confounding factor.* Because dosage varies across experiments and is included as a model input for both OligoAI and OligoGym, a model could achieve high EF by ranking lower-dose compounds first rather than learning genuine sequence-level signal. To control for this, enrichment factors at stages with variable dosage are computed with within-dosage stratification: compounds are ranked within each dosage group, the top-$K_g$ are selected per group ($K_g = "base rate"_g times n_g$, budget-matched within each stratum), and all selections are pooled before computing the overall EF, ensuring any enrichment reflects sequence-level prediction quality.
+
+= Benchmark <sec_benchmark>
+
+All models were evaluated using GroupKFold cross-validation with 5 folds, where groups were defined by USPTO patent ID with HELM-level deduplication (each unique HELM sequence is assigned to its earliest patent, so no ASO appears in both train and test).
+
+== Models
+
+*Hagedorn-Linear.* We replicated the @hagedornAcuteNeurotoxicityAntisense2022 linear model for predicting ASO neurotoxicity from sequence features, evaluated on mouse bFOB scores (700 $mu$g intracerebroventricular (ICV); neurotoxic bFOB $>$ 1 vs non-toxic bFOB $<=$ 1) across #comma(R.hagedorn_linear_neurotox.n) compounds and #comma(R.hagedorn_linear_neurotox.n_groups) target gene groups. The original 5-feature model uses G, A, T, and C nucleotide counts plus the G-free stretch from the 3' end; fixed coefficients from the original R code were applied directly (no retraining). Compounds with mean bFOB > 1 were labelled "neurotoxic"; those with mean bFOB ≤ 1 were labelled "non-toxic". As with all other models, enrichment factors were computed by ranking compounds by the continuous predicted score and selecting the top $K$, without thresholding.
+
+*OligoGym benchmark.* We benchmarked six model architectures from OligoGym on the six ASO Atlas 2.0 endpoints. Each model was trained in regression mode using OligoGym's default one-hot featurizer encoding base, sugar, and phosphate components @rotrattanadumrongOligoGymCuratedDatasets2025 and a single hyperparameter configuration per model. 5-fold GroupKFold cross-validation is grouped by patent with HELM-level deduplication so no ASO sequence appears in both train and test across any fold. The full benchmark ran on a single CPU in approximately 4 hours.
+
+*OligoAI.* We retrained our previous efficacy model @hillAccuratelyModellingRNase2025 on the ASO Atlas 2.0 in vitro tables under the same 5-fold patent GroupKFold with HELM-level dedup used for the OligoGym benchmark (training details in @secS_oligoai).
+
+== Results
+
+Neurotoxicity prediction proved substantially more tractable than hepatotoxicity across all model classes. For mouse bFOB, the best single-task models achieved Spearman $rho$ = #mstd(R.oligogym_benchmark.mouse_neuro.spearman), while hepatic ALT prediction remained challenging ($rho$ = #mstd(R.oligogym_benchmark.mouse_hepatic.spearman)). Gradient-boosted methods (CatBoost, XGBoost) and tree ensembles yielded the highest per-stage success rates in the pipeline cost model (@tbl_ef); hepatotoxicity prediction remains difficult for all model classes, consistent with species-specific sequence-toxicity mappings (see @fig_species_transfer).
+
+On held-out folds, OligoAI achieved Spearman $rho$ = #mstd(R.oligoai.efficacy.spearman) for efficacy and $rho$ = #mstd(R.oligoai.potency.spearman_log) for potency, yielding EF = #mstd(R.oligoai.efficacy.ef)$times$ and EF = #mstd(R.oligoai.potency.ef)$times$ respectively.
+
+#figure(
+  include "data/ef_table.typ",
+  caption: [Per-stage success rates and projected pipeline savings for each model. Each cell shows precision\@K: the fraction of model-selected compounds that pass the stage, evaluated at the budget-neutral operating point (K = base rate $times$ N). Savings is the projected cost reduction versus the no-screening baseline (#comma(R.pipeline.baseline_n_initial) ASOs, \$#str(calc.round(R.pipeline.baseline_total_cost / 1000000, digits: 2))M). Bold marks the best value per column; the combined row is bolded throughout. Dashes indicate endpoints not covered by that model. Spearman $rho$ for all models is reported in @tbl_spearman.],
+) <tbl_ef>
+
+#figure(
+  image("plots/fig_cost/fig_cost.svg", width: 100%),
+  caption: [Per-stage enrichment and cost contribution visualising the top strategies from @tbl_ef. *(A)* Per-stage EFs for OligoAI (inhibition), CatBoost (toxicity stages), and their combination. *(B)* Stacked-bar cost decomposition by pipeline stage.],
+) <fig_cost>
+
+@tbl_ef compares models on total pipeline cost. OligoAI achieved EF = #mstd(R.oligoai.efficacy.ef)$times$ at efficacy and EF = #mstd(R.oligoai.potency.ef)$times$ at potency under 5-fold patent GroupKFold (@secS_oligoai); the efficacy EF was higher than the 3.14$times$ we previously reported @hillAccuratelyModellingRNase2025, likely because the model is now trained on both inhibition and dose-response data. The OligoGym architectures trained on ASO Atlas 2.0 cover all six endpoints and compound their enrichment across the pipeline. Per-endpoint CatBoost regressors (one per in vivo stage) give the largest cost savings among the in vivo models in this benchmark, reducing projected cost to \$#str(calc.round(R.pipeline.oligoai_tox_total_cost / 1000000, digits: 2))M, a #str(R.pipeline.oligoai_tox_savings_pct)% reduction against baseline. Differences between OligoGym architectures are largely within fold-level standard deviations: the practical implication is that any of the gradient-boosted or neural baselines achieves comparable savings, and the choice of CatBoost is robust to within-architecture noise but not strongly preferred over the closest alternatives.
+
+Combining OligoAI (in vitro) with CatBoost (in vivo) yields a total projected cost reduction of #str(R.pipeline.combined_savings_pct)%, though the marginal gain over CatBoost alone is small: because in vitro stages account for only \~#R.pipeline.in_vitro_cost_pct% of baseline cost at \$#comma(R.pipeline.in_vitro_cost_lo)--#comma(R.pipeline.in_vitro_cost_hi) per ASO, even OligoAI's strong enrichment (EF = #mstd(R.oligoai.efficacy.ef)$times$) translates to modest dollar savings once the expensive in vivo stages dominate (@fig_cost B). This highlights a key insight from the cost-based framework: where a model enriches matters more than how well it enriches; modest improvements at expensive stages outweigh large improvements at cheap ones. Beyond cost, computational pre-screening also reduces animal usage: under the representative pipeline model, CatBoost cuts projected animals from #str(R.pipeline.baseline_animals) to #str(R.pipeline.oligoai_tox_animals) per development candidate, a #str(R.pipeline.animal_reduction_pct)% reduction (@fig_animal_reduction).
+
+= Discussion <sec_discussion>
+
+Existing ASO modelling efforts have focused predominantly on in vitro efficacy prediction, where the largest accuracy gains are achievable. Our cost-based evaluation reveals that this focus is misallocated. While OligoAI achieves substantially stronger per-stage enrichment than CatBoost (EF = #mstd(R.oligoai.efficacy.ef)$times$ vs #str(R.pipeline.oligoai_tox_ef_lo)--#str(R.pipeline.oligoai_tox_ef_hi)$times$), CatBoost delivers larger overall cost savings because in vivo stages dominate total programme expenditure. Standard accuracy benchmarks, which treat all endpoints equally, would rank these models in the opposite order, suggesting that current evaluation practice may systematically direct modelling effort away from the stages where it would have the greatest economic impact.
+
+The asymmetry in model performance between neurotoxicity and hepatotoxicity has a mechanistic basis. @orourkeAcuteNeuronalInhibition2026 recently showed that acute neuronal inhibition following CNS delivery is caused by transient high extracellular PS-ASO concentrations that block synaptic transmission via non-specific protein binding; the response peaks ~3 h post-dose, reverses within 24 h, and is dose-responsive. Critically, acute inhibition was abrogated in ASOs with lower phosphorothioate and guanine content, establishing a direct compositional determinant of neurotoxicity. This is consistent with the G-content correlation we observe (@fig_concordance D) and with the earlier finding that a simple linear model over sequence features predicts neurotoxicity @hagedornAcuteNeurotoxicityAntisense2022. Hepatotoxicity is also driven by non-specific protein binding of PS-ASOs @shenChemicalModificationPSASO2019, but the sequence-toxicity relationship is species-specific (@fig_species_transfer) and not reducible to base composition alone (@fig_concordance D shows no significant base-level signal for hepatic biomarkers). This mechanistic contrast explains why neurotoxicity prediction is substantially more tractable than hepatotoxicity across all model classes.
+
+Since the cost framework identifies hepatotoxicity prediction as the key bottleneck for further pipeline savings, improving it is the most direct path to impact. The models benchmarked here use only chemistry-derived sequence features and do not incorporate off-target hybridisation potential, which has been identified as a major contributor to ASO hepatotoxicity via RNase H-mediated cleavage of unintended transcripts @burelHepatotoxicityHighAffinity2016 @kamolaStrategiesVivoScreening2017. Multi-task architectures that jointly model in vitro and in vivo endpoints could also exploit the weak but nonzero cross-stage correlations observed in @fig_concordance B. Beyond modelling, expanding the hepatotoxicity training data to include additional species and dose levels would help disentangle sequence-intrinsic toxicity from protocol-dependent variation.
+
+These improvements have direct implications for individualised ASO therapy. Organisations such as n-Lorem must screen hundreds of candidates through the full preclinical pipeline for each patient @goyenvalleConsiderationsPreclinicalAssessment2023, and scaling this to the millions of patients with ultra-rare mutations requires substantially lower per-programme costs @crookeEstablishingCommercialSolution2026. The #str(R.pipeline.combined_savings_pct)% cost reduction and #str(R.pipeline.animal_reduction_pct)% animal reduction demonstrated here represent a first step, but the cost framework also clarifies where the ceiling is: the majority of remaining cost is concentrated in the hepatic and neurological safety stages, so closing the hepatotoxicity prediction gap identified above is particularly important for personalised programmes, where preclinical screening cost has been identified as a key bottleneck to broader deployment @crookeEstablishingCommercialSolution2026.
+
+The cross-species concordance analysis (@fig_concordance) provides evidence that ASO Atlas 2.0 reflects real pipeline survivorship: #R.concordance.rat_hep_overlap_pct% of rat hepatotoxicity and #R.concordance.rat_neuro_overlap_pct% of rat neurotoxicity compounds also appear in the mouse data, and at each gate the biomarker distributions of compounds that advance to the next stage are shifted relative to those that do not (@fig_concordance A), consistent with sequential filtering. This supports using observed marginal pass rates directly in the cost model.
+
+Several limitations beyond those of the pipeline cost model (detailed in the Assumptions section above) should be noted. ASO Atlas 2.0 is derived entirely from Ionis Pharmaceuticals patents and therefore reflects the design space, chemical modifications, and screening priorities of a single organisation; generalisability to other chemistries (e.g. LNA gapmers) or other companies' screening cascades is untested and would require independent validation. The cost-based evaluation framework itself is general to any sequential screening pipeline, but the specific cost estimates and stage ordering used here are representative rather than observed, and alternative pipeline configurations could alter the relative value of per-stage enrichment. Finally, the binary classification approach (high vs low toxicity) discards compounds with intermediate biomarker values and may oversimplify the continuous dose-response relationship between sequence features and toxicity.
+
+Taken together, ASO Atlas 2.0 and the accompanying cost-based framework provide a foundation for evaluating computational screening methods in terms of their practical impact on drug development. As predictive models improve, particularly for hepatotoxicity, the framework offers a direct way to quantify their value and guide resource allocation across the preclinical pipeline. This is especially relevant for individualised ASO therapy, where reducing the cost and time of per-patient preclinical screening is a prerequisite for scaling to the broader population of patients with ultra-rare mutations.
+
+= Acknowledgments and Disclosure of Funding
+
+This work was supported by a Wellcome Trust scholarship (218486/Z/19/Z) to Barney Hill.
+
+= Code and Data Availability
+
+All code, processed datasets, and trained model weights required to reproduce the results in this paper are available at #link("https://github.com/ASO-Atlas/aso-atlas-2.0")[github.com/ASO-Atlas/aso-atlas-2.0]. The dataset is hosted on Hugging Face at #link("https://huggingface.co/datasets/barneyhill/aso-atlas-2")[huggingface.co/datasets/barneyhill/aso-atlas-2] with Croissant 1.1 machine-readable metadata. The best-performing toxicity model (CatBoost, retrained on ASO Atlas 2.0) is deployed alongside OligoAI at #link("https://sitlabs.org/oligoai")[sitlabs.org/oligoai].

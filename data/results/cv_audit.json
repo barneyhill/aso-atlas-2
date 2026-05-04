@@ -1,0 +1,350 @@
+{
+  "in_vitro_inhibition": {
+    "dataset": "in_vitro_inhibition",
+    "n_total": 161432,
+    "n_unique_helm": 161432,
+    "n_groups": 472,
+    "folds": [
+      {
+        "fold": 1,
+        "n_train": 129145,
+        "n_test": 32287,
+        "n_train_helm": 129145,
+        "n_test_helm": 32287,
+        "n_shared_helm": 0,
+        "n_train_groups": 377,
+        "n_test_groups": 95
+      },
+      {
+        "fold": 2,
+        "n_train": 129145,
+        "n_test": 32287,
+        "n_train_helm": 129145,
+        "n_test_helm": 32287,
+        "n_shared_helm": 0,
+        "n_train_groups": 377,
+        "n_test_groups": 95
+      },
+      {
+        "fold": 3,
+        "n_train": 129146,
+        "n_test": 32286,
+        "n_train_helm": 129146,
+        "n_test_helm": 32286,
+        "n_shared_helm": 0,
+        "n_train_groups": 378,
+        "n_test_groups": 94
+      },
+      {
+        "fold": 4,
+        "n_train": 129146,
+        "n_test": 32286,
+        "n_train_helm": 129146,
+        "n_test_helm": 32286,
+        "n_shared_helm": 0,
+        "n_train_groups": 378,
+        "n_test_groups": 94
+      },
+      {
+        "fold": 5,
+        "n_train": 129146,
+        "n_test": 32286,
+        "n_train_helm": 129146,
+        "n_test_helm": 32286,
+        "n_shared_helm": 0,
+        "n_train_groups": 378,
+        "n_test_groups": 94
+      }
+    ]
+  },
+  "potency": {
+    "dataset": "potency",
+    "n_total": 7892,
+    "n_unique_helm": 7892,
+    "n_groups": 128,
+    "folds": [
+      {
+        "fold": 1,
+        "n_train": 6313,
+        "n_test": 1579,
+        "n_train_helm": 6313,
+        "n_test_helm": 1579,
+        "n_shared_helm": 0,
+        "n_train_groups": 102,
+        "n_test_groups": 26
+      },
+      {
+        "fold": 2,
+        "n_train": 6313,
+        "n_test": 1579,
+        "n_train_helm": 6313,
+        "n_test_helm": 1579,
+        "n_shared_helm": 0,
+        "n_train_groups": 102,
+        "n_test_groups": 26
+      },
+      {
+        "fold": 3,
+        "n_train": 6314,
+        "n_test": 1578,
+        "n_train_helm": 6314,
+        "n_test_helm": 1578,
+        "n_shared_helm": 0,
+        "n_train_groups": 103,
+        "n_test_groups": 25
+      },
+      {
+        "fold": 4,
+        "n_train": 6314,
+        "n_test": 1578,
+        "n_train_helm": 6314,
+        "n_test_helm": 1578,
+        "n_shared_helm": 0,
+        "n_train_groups": 102,
+        "n_test_groups": 26
+      },
+      {
+        "fold": 5,
+        "n_train": 6314,
+        "n_test": 1578,
+        "n_train_helm": 6314,
+        "n_test_helm": 1578,
+        "n_shared_helm": 0,
+        "n_train_groups": 103,
+        "n_test_groups": 25
+      }
+    ]
+  },
+  "mouse_hepatic": {
+    "dataset": "mouse_hepatic",
+    "n_total": 2701,
+    "n_unique_helm": 1778,
+    "n_groups": 69,
+    "folds": [
+      {
+        "fold": 1,
+        "n_train": 2160,
+        "n_test": 541,
+        "n_train_helm": 1407,
+        "n_test_helm": 371,
+        "n_shared_helm": 0,
+        "n_train_groups": 55,
+        "n_test_groups": 14
+      },
+      {
+        "fold": 2,
+        "n_train": 2161,
+        "n_test": 540,
+        "n_train_helm": 1456,
+        "n_test_helm": 322,
+        "n_shared_helm": 0,
+        "n_train_groups": 56,
+        "n_test_groups": 13
+      },
+      {
+        "fold": 3,
+        "n_train": 2161,
+        "n_test": 540,
+        "n_train_helm": 1488,
+        "n_test_helm": 290,
+        "n_shared_helm": 0,
+        "n_train_groups": 55,
+        "n_test_groups": 14
+      },
+      {
+        "fold": 4,
+        "n_train": 2161,
+        "n_test": 540,
+        "n_train_helm": 1404,
+        "n_test_helm": 374,
+        "n_shared_helm": 0,
+        "n_train_groups": 55,
+        "n_test_groups": 14
+      },
+      {
+        "fold": 5,
+        "n_train": 2161,
+        "n_test": 540,
+        "n_train_helm": 1357,
+        "n_test_helm": 421,
+        "n_shared_helm": 0,
+        "n_train_groups": 55,
+        "n_test_groups": 14
+      }
+    ]
+  },
+  "rat_hepatic": {
+    "dataset": "rat_hepatic",
+    "n_total": 714,
+    "n_unique_helm": 488,
+    "n_groups": 36,
+    "folds": [
+      {
+        "fold": 1,
+        "n_train": 571,
+        "n_test": 143,
+        "n_train_helm": 394,
+        "n_test_helm": 94,
+        "n_shared_helm": 0,
+        "n_train_groups": 30,
+        "n_test_groups": 6
+      },
+      {
+        "fold": 2,
+        "n_train": 571,
+        "n_test": 143,
+        "n_train_helm": 402,
+        "n_test_helm": 86,
+        "n_shared_helm": 0,
+        "n_train_groups": 28,
+        "n_test_groups": 8
+      },
+      {
+        "fold": 3,
+        "n_train": 572,
+        "n_test": 142,
+        "n_train_helm": 404,
+        "n_test_helm": 84,
+        "n_shared_helm": 0,
+        "n_train_groups": 29,
+        "n_test_groups": 7
+      },
+      {
+        "fold": 4,
+        "n_train": 572,
+        "n_test": 142,
+        "n_train_helm": 392,
+        "n_test_helm": 96,
+        "n_shared_helm": 0,
+        "n_train_groups": 29,
+        "n_test_groups": 7
+      },
+      {
+        "fold": 5,
+        "n_train": 570,
+        "n_test": 144,
+        "n_train_helm": 360,
+        "n_test_helm": 128,
+        "n_shared_helm": 0,
+        "n_train_groups": 28,
+        "n_test_groups": 8
+      }
+    ]
+  },
+  "mouse_neuro": {
+    "dataset": "mouse_neuro",
+    "n_total": 2696,
+    "n_unique_helm": 2696,
+    "n_groups": 23,
+    "folds": [
+      {
+        "fold": 1,
+        "n_train": 2158,
+        "n_test": 538,
+        "n_train_helm": 2158,
+        "n_test_helm": 538,
+        "n_shared_helm": 0,
+        "n_train_groups": 17,
+        "n_test_groups": 6
+      },
+      {
+        "fold": 2,
+        "n_train": 2155,
+        "n_test": 541,
+        "n_train_helm": 2155,
+        "n_test_helm": 541,
+        "n_shared_helm": 0,
+        "n_train_groups": 19,
+        "n_test_groups": 4
+      },
+      {
+        "fold": 3,
+        "n_train": 2157,
+        "n_test": 539,
+        "n_train_helm": 2157,
+        "n_test_helm": 539,
+        "n_shared_helm": 0,
+        "n_train_groups": 18,
+        "n_test_groups": 5
+      },
+      {
+        "fold": 4,
+        "n_train": 2156,
+        "n_test": 540,
+        "n_train_helm": 2156,
+        "n_test_helm": 540,
+        "n_shared_helm": 0,
+        "n_train_groups": 20,
+        "n_test_groups": 3
+      },
+      {
+        "fold": 5,
+        "n_train": 2158,
+        "n_test": 538,
+        "n_train_helm": 2158,
+        "n_test_helm": 538,
+        "n_shared_helm": 0,
+        "n_train_groups": 18,
+        "n_test_groups": 5
+      }
+    ]
+  },
+  "rat_neuro": {
+    "dataset": "rat_neuro",
+    "n_total": 1779,
+    "n_unique_helm": 1774,
+    "n_groups": 17,
+    "folds": [
+      {
+        "fold": 1,
+        "n_train": 1416,
+        "n_test": 363,
+        "n_train_helm": 1416,
+        "n_test_helm": 358,
+        "n_shared_helm": 0,
+        "n_train_groups": 14,
+        "n_test_groups": 3
+      },
+      {
+        "fold": 2,
+        "n_train": 1436,
+        "n_test": 343,
+        "n_train_helm": 1431,
+        "n_test_helm": 343,
+        "n_shared_helm": 0,
+        "n_train_groups": 13,
+        "n_test_groups": 4
+      },
+      {
+        "fold": 3,
+        "n_train": 1436,
+        "n_test": 343,
+        "n_train_helm": 1431,
+        "n_test_helm": 343,
+        "n_shared_helm": 0,
+        "n_train_groups": 13,
+        "n_test_groups": 4
+      },
+      {
+        "fold": 4,
+        "n_train": 1406,
+        "n_test": 373,
+        "n_train_helm": 1401,
+        "n_test_helm": 373,
+        "n_shared_helm": 0,
+        "n_train_groups": 14,
+        "n_test_groups": 3
+      },
+      {
+        "fold": 5,
+        "n_train": 1422,
+        "n_test": 357,
+        "n_train_helm": 1417,
+        "n_test_helm": 357,
+        "n_shared_helm": 0,
+        "n_train_groups": 14,
+        "n_test_groups": 3
+      }
+    ]
+  }
+}

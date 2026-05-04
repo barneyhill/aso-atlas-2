@@ -1,0 +1,44 @@
+{
+  "per_dose": {
+    "all": {
+      "spearman": 0.5748063632016771,
+      "r2": 0.2749200939553995,
+      "rmse": 23.690626904199053,
+      "n": 36002
+    },
+    "single_dose": {
+      "spearman": 0.5301991148469443,
+      "r2": 0.1918282138674512,
+      "rmse": 23.39945718546392,
+      "n": 23808
+    },
+    "multi_dose": {
+      "spearman": 0.6845080164453914,
+      "r2": 0.3607870589418253,
+      "rmse": 24.249042274097352,
+      "n": 12194
+    },
+    "n_tables_single_dose": 373,
+    "n_tables_multi_dose": 268
+  },
+  "per_group_spearman": {
+    "mean": 0.9353312324271921,
+    "n_groups": 2774
+  },
+  "ic50": {
+    "spearman_log": 0.5182548426416966,
+    "log_rmse": 0.5229955818695479,
+    "n_valid": 1484,
+    "n_candidates": 2780
+  },
+  "emax": {
+    "spearman": 0.028964646928327356,
+    "n_valid": 1484
+  },
+  "meta": {
+    "checkpoint": "/workspace/out/checkpoint.ckpt",
+    "data_csv": "/workspace/out/oligoai_fold4.withsplit.csv",
+    "split": "test",
+    "git_commit": "487e96177e8e2d736654de5b52b39a34401fd0a5"
+  }
+}

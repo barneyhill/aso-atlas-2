@@ -1,0 +1,68 @@
+{
+  "efficacy": {
+    "enrichment_factor": 4.0592,
+    "enrichment_factor_std": 1.1677860249206615,
+    "fold_efs": [
+      2.788,
+      5.319,
+      2.931,
+      5.035,
+      4.223
+    ],
+    "n_folds": 5,
+    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=base_rate per stage (budget-matched selection)"
+  },
+  "potency": {
+    "enrichment_factor": 1.5459999999999998,
+    "enrichment_factor_std": 0.26508111965962416,
+    "fold_efs": [
+      1.753,
+      1.849,
+      1.575,
+      1.264,
+      1.289
+    ],
+    "n_folds": 5,
+    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=base_rate per stage (budget-matched selection)"
+  },
+  "meta": {
+    "mode": "5fold_patent_split",
+    "per_fold": [
+      {
+        "path": "data/results/oligoai_fold0_predictions.parquet",
+        "efficacy_ef": 2.788,
+        "potency_ef": 1.753,
+        "n_efficacy": 25105,
+        "n_potency": 1161
+      },
+      {
+        "path": "data/results/oligoai_fold1_predictions.parquet",
+        "efficacy_ef": 5.319,
+        "potency_ef": 1.849,
+        "n_efficacy": 22979,
+        "n_potency": 1466
+      },
+      {
+        "path": "data/results/oligoai_fold2_predictions.parquet",
+        "efficacy_ef": 2.931,
+        "potency_ef": 1.575,
+        "n_efficacy": 22800,
+        "n_potency": 1461
+      },
+      {
+        "path": "data/results/oligoai_fold3_predictions.parquet",
+        "efficacy_ef": 5.035,
+        "potency_ef": 1.264,
+        "n_efficacy": 21619,
+        "n_potency": 1700
+      },
+      {
+        "path": "data/results/oligoai_fold4_predictions.parquet",
+        "efficacy_ef": 4.223,
+        "potency_ef": 1.289,
+        "n_efficacy": 23808,
+        "n_potency": 1277
+      }
+    ]
+  }
+}

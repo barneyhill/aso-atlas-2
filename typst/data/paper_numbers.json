@@ -1,0 +1,422 @@
+{
+  "in_vitro": {
+    "n_measurements": 174459,
+    "n_asos": 163802
+  },
+  "dose_response": {
+    "n_measurements": 99821,
+    "n_asos": 16834
+  },
+  "hepatic": {
+    "n_records": 4341,
+    "n_measurements": 15831,
+    "n_asos": 2051,
+    "n_biomarker_channels": 7
+  },
+  "neuro": {
+    "n_records": 4900,
+    "n_measurements": 4896,
+    "n_asos": 3316,
+    "n_mouse": 3025,
+    "n_rat": 1875,
+    "gene_coverage_pct": 97
+  },
+  "genes": {
+    "n_unique": 430,
+    "n_total_measurements": 282188,
+    "n_major": 40,
+    "n_minor": 390,
+    "major_pct": 75
+  },
+  "concordance": {
+    "rat_hep_overlap_pct": 90,
+    "rat_neuro_overlap_pct": 82,
+    "hep_neuro_overlap_n": 21,
+    "inhib_vs_alt": {
+      "rho": 0.0225,
+      "p": 0.423,
+      "n": 1269
+    },
+    "inhib_vs_bfob": {
+      "rho": 0.014,
+      "p": 0.67,
+      "n": 937
+    },
+    "ic50_vs_alt": {
+      "rho": -0.183,
+      "p": 1.18e-08,
+      "n": 954
+    },
+    "ic50_vs_bfob": {
+      "rho": -0.0985,
+      "p": 0.131,
+      "n": 236
+    },
+    "cross_endpoint_p_gt": 0.4,
+    "cross_endpoint_min_n": 937
+  },
+  "cross_species_hepatotox": {
+    "ALT": {
+      "n_shared": 449,
+      "spearman_rho": 0.299,
+      "spearman_p": 9.41e-11,
+      "concordance_rate": 0.67,
+      "concordance_n": 449
+    },
+    "AST": {
+      "n_shared": 435,
+      "spearman_rho": 0.272,
+      "spearman_p": 8.14e-09,
+      "concordance_rate": 0.959,
+      "concordance_n": 341
+    },
+    "TBIL": {
+      "n_shared": 374,
+      "spearman_rho": 0.244,
+      "spearman_p": 1.82e-06,
+      "concordance_rate": 0.964,
+      "concordance_n": 363
+    }
+  },
+  "hagedorn_linear_neurotox": {
+    "accuracy": 0.705,
+    "sensitivity": 0.734,
+    "specificity": 0.669,
+    "auc": 0.785,
+    "n": 2696,
+    "n_high": 1499,
+    "n_low": 1197,
+    "n_groups": 23,
+    "confusion": {
+      "tp": 1101,
+      "fp": 396,
+      "tn": 801,
+      "fn": 398
+    }
+  },
+  "cross_species_neurotox": {
+    "FOB": {
+      "n_shared": 1456,
+      "spearman_rho": 0.647,
+      "spearman_p": 1.66e-173,
+      "concordance_rate": 0.676,
+      "concordance_n": 1456
+    }
+  },
+  "pipeline": {
+    "baseline_n_initial": 974,
+    "baseline_total_cost": 2007000,
+    "stages": [
+      {
+        "name": "In vitro efficacy",
+        "p_k": 0.118,
+        "r_k": 500,
+        "N_k": 974,
+        "n_pass": 19346,
+        "n_total": 163802
+      },
+      {
+        "name": "In vitro potency",
+        "p_k": 0.314,
+        "r_k": 2000,
+        "N_k": 115,
+        "n_pass": 2535,
+        "n_total": 8064
+      },
+      {
+        "name": "Mouse liver toxicity",
+        "p_k": 0.514,
+        "r_k": 15000,
+        "N_k": 36,
+        "n_pass": 998,
+        "n_total": 1942
+      },
+      {
+        "name": "Mouse neuro tolerability",
+        "p_k": 0.445,
+        "r_k": 20000,
+        "N_k": 18,
+        "n_pass": 1207,
+        "n_total": 2712
+      },
+      {
+        "name": "Rat liver toxicity",
+        "p_k": 0.4,
+        "r_k": 25000,
+        "N_k": 8,
+        "n_pass": 203,
+        "n_total": 508
+      },
+      {
+        "name": "Rat neuro tolerability",
+        "p_k": 0.352,
+        "r_k": 30000,
+        "N_k": 3,
+        "n_pass": 628,
+        "n_total": 1783
+      },
+      {
+        "name": "Monkey liver toxicity",
+        "p_k": 1.0,
+        "r_k": 100000,
+        "N_k": 1,
+        "n_pass": 97,
+        "n_total": 97
+      }
+    ],
+    "conditional_rates": {
+      "rat_ALT": {
+        "conditional_rate": 0.449,
+        "marginal_rate": 0.403,
+        "n_overlap": 459,
+        "n_mouse_pass": 301,
+        "correlation_factor": 1.11
+      },
+      "rat_FOB": {
+        "conditional_rate": 0.509,
+        "marginal_rate": 0.335,
+        "n_overlap": 1464,
+        "n_mouse_pass": 858,
+        "correlation_factor": 1.52
+      }
+    },
+    "oligoai_n_initial": 157,
+    "oligoai_total_cost": 1518500.0,
+    "oligoai_savings_pct": 24.3,
+    "oligoai_tox_n_initial": 271,
+    "oligoai_tox_total_cost": 729500.0,
+    "oligoai_tox_savings_pct": 63.7,
+    "oligoai_tox_source_model": "CatBoost",
+    "combined_n_initial": 44,
+    "combined_total_cost": 594000.0,
+    "combined_savings_pct": 70.4,
+    "oligoai_tox_ef_lo": 1.26,
+    "oligoai_tox_ef_hi": 1.88,
+    "in_vitro_cost_pct": 35.7,
+    "in_vitro_cost_lo": 500,
+    "in_vitro_cost_hi": 2000,
+    "baseline_animals": 264,
+    "oligoai_tox_animals": 92,
+    "animal_reduction_pct": 65.2
+  },
+  "cost_sensitivity": {
+    "n_mc": 10000,
+    "delta": 0.5,
+    "median_savings_pct": 70.4,
+    "min_savings_pct": 62.7,
+    "p5_savings_pct": 66.4
+  },
+  "mouse_rat_alt": {
+    "spearman_rho": 0.259,
+    "p": 1.58e-05,
+    "n": 270,
+    "mouse_dose_mg_per_kg": 50.0,
+    "rat_dose_mg_per_kg": 50.0
+  },
+  "oligogym_benchmark": {
+    "mouse_hepatic": {
+      "best_model": "KNN",
+      "spearman": {
+        "mean": 0.444,
+        "std": 0.117,
+        "n_folds": 5
+      },
+      "r2": -0.794,
+      "rmse": 1610
+    },
+    "rat_hepatic": {
+      "best_model": "KNN",
+      "spearman": {
+        "mean": 0.243,
+        "std": 0.105,
+        "n_folds": 5
+      },
+      "r2": -0.392,
+      "rmse": 134
+    },
+    "mouse_neuro": {
+      "best_model": "CatBoost",
+      "spearman": {
+        "mean": 0.734,
+        "std": 0.0253,
+        "n_folds": 5
+      },
+      "r2": 0.501,
+      "rmse": 1.46
+    },
+    "rat_neuro": {
+      "best_model": "Linear",
+      "spearman": {
+        "mean": 0.619,
+        "std": 0.092,
+        "n_folds": 5
+      },
+      "r2": 0.365,
+      "rmse": 1.23
+    }
+  },
+  "oligoai": {
+    "efficacy": {
+      "spearman": {
+        "mean": 0.474,
+        "std": 0.0698,
+        "n_folds": 5
+      },
+      "r2": {
+        "mean": 0.0238,
+        "std": 0.177,
+        "n_folds": 5
+      },
+      "rmse": {
+        "mean": 26.7,
+        "std": 2.53,
+        "n_folds": 5
+      },
+      "n": 116311,
+      "n_tables": 1798,
+      "ef": {
+        "mean": 4.06,
+        "std": 1.17,
+        "n_folds": 5
+      }
+    },
+    "dose_response": {
+      "spearman": {
+        "mean": 0.633,
+        "std": 0.0514,
+        "n_folds": 5
+      },
+      "r2": {
+        "mean": 0.307,
+        "std": 0.103,
+        "n_folds": 5
+      },
+      "rmse": {
+        "mean": 24.9,
+        "std": 1.86,
+        "n_folds": 5
+      },
+      "n": 63715,
+      "n_tables": 1340
+    },
+    "potency": {
+      "spearman_log": {
+        "mean": 0.531,
+        "std": 0.0562,
+        "n_folds": 5
+      },
+      "log_rmse": {
+        "mean": 0.559,
+        "std": 0.0481,
+        "n_folds": 5
+      },
+      "n_valid": 7979,
+      "n_candidates": 13556,
+      "ef": {
+        "mean": 1.55,
+        "std": 0.265,
+        "n_folds": 5
+      }
+    },
+    "emax": {
+      "spearman": {
+        "mean": 0.0667,
+        "std": 0.0616,
+        "n_folds": 5
+      },
+      "n_valid": 7979
+    },
+    "per_group_spearman": {
+      "mean": {
+        "mean": 0.897,
+        "std": 0.048,
+        "n_folds": 5
+      },
+      "n_groups": 13538
+    },
+    "n_folds": 5,
+    "split": "patent-level 5-fold GroupKFold with HELM-level dedup (seed=42); reported as mean (std) over 5 fold(s)"
+  },
+  "base_biomarker": {
+    "A_mouse_alt": {
+      "rho": -0.23,
+      "significant": true,
+      "n": 2701
+    },
+    "C_mouse_alt": {
+      "rho": -0.0335,
+      "significant": false,
+      "n": 2701
+    },
+    "G_mouse_alt": {
+      "rho": 0.0654,
+      "significant": true,
+      "n": 2701
+    },
+    "T_mouse_alt": {
+      "rho": -0.0554,
+      "significant": true,
+      "n": 2701
+    },
+    "A_rat_alt": {
+      "rho": -0.22,
+      "significant": true,
+      "n": 714
+    },
+    "C_rat_alt": {
+      "rho": 0.236,
+      "significant": true,
+      "n": 714
+    },
+    "G_rat_alt": {
+      "rho": 0.066,
+      "significant": false,
+      "n": 714
+    },
+    "T_rat_alt": {
+      "rho": 0.0573,
+      "significant": false,
+      "n": 714
+    },
+    "A_mouse_bfob": {
+      "rho": -0.144,
+      "significant": true,
+      "n": 2696
+    },
+    "C_mouse_bfob": {
+      "rho": -0.262,
+      "significant": true,
+      "n": 2696
+    },
+    "G_mouse_bfob": {
+      "rho": 0.602,
+      "significant": true,
+      "n": 2696
+    },
+    "T_mouse_bfob": {
+      "rho": -0.15,
+      "significant": true,
+      "n": 2696
+    },
+    "A_rat_mfob": {
+      "rho": -0.13,
+      "significant": true,
+      "n": 1779
+    },
+    "C_rat_mfob": {
+      "rho": -0.184,
+      "significant": true,
+      "n": 1779
+    },
+    "G_rat_mfob": {
+      "rho": 0.543,
+      "significant": true,
+      "n": 1779
+    },
+    "T_rat_mfob": {
+      "rho": -0.119,
+      "significant": true,
+      "n": 1779
+    }
+  }
+}

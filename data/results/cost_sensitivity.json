@@ -1,0 +1,7 @@
+{
+  "n_mc": 10000,
+  "delta": 0.5,
+  "median_savings_pct": 70.4,
+  "min_savings_pct": 62.7,
+  "p5_savings_pct": 66.4
+}

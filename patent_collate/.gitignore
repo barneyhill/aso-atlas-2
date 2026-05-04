@@ -1,0 +1,22 @@
+# Runtime artifacts
+cache/
+logs/
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+.python-version
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
