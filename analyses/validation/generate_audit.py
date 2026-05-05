@@ -91,12 +91,56 @@ def helm_to_sequence(helm: str) -> tuple[str, int]:
     return seq, len(bases)
 
 
+def helm_shorthands(helm: str) -> tuple[str, str]:
+    """Return (sugar_shorthand, backbone_shorthand) from a HELM string."""
+    m = re.search(r"\{\{(.+?)\}\}", helm)
+    if not m:
+        return "", ""
+    monomers = m.group(1).split(".")
+
+    sugars = []
+    backbones = []
+    for i, mon in enumerate(monomers):
+        if mon.startswith("[moe]"):
+            sugars.append("moe")
+        elif mon.startswith("d(") or mon.startswith("d["):
+            sugars.append("d")
+        elif mon.startswith("[LR]"):
+            sugars.append("LR")
+        elif mon.startswith("[lna]"):
+            sugars.append("lna")
+        elif mon.startswith("[cet]"):
+            sugars.append("cet")
+        elif mon.startswith("m(") or mon.startswith("m["):
+            sugars.append("OMe")
+        else:
+            sugars.append("?")
+        if i < len(monomers) - 1:
+            backbones.append("s" if "[sp]" in mon else "o")
+
+    # run-length encode sugars
+    runs = []
+    cur, count = sugars[0], 1
+    for s in sugars[1:]:
+        if s == cur:
+            count += 1
+        else:
+            runs.append(f"{count}({cur})")
+            cur, count = s, 1
+    runs.append(f"{count}({cur})")
+    sugar_short = "-".join(runs)
+
+    return sugar_short, "".join(backbones)
+
+
 def sample_dataset(
     config: dict,
     rng: np.random.Generator,
     used_patents: set[str],
 ) -> list[dict]:
     df = pd.read_parquet(PROCESSED_DIR / config["file"])
+    if config["name"] == "hepatotoxicity":
+        df = df[df["ALT"].apply(lambda x: hasattr(x, "__len__") and len(x) > 0)]
     available = sorted(set(df["USPTO ID"].unique()) - used_patents)
 
     n = min(config["n_sample"], len(available))
@@ -133,9 +177,14 @@ def sample_dataset(
             seq, seq_len = helm_to_sequence(str(helm))
             audit_row["extracted_sequence"] = seq
             audit_row["seq_len"] = seq_len
+            sugar, backbone = helm_shorthands(str(helm))
+            audit_row["sugar_shorthand"] = sugar
+            audit_row["backbone_shorthand"] = backbone
         else:
             audit_row["extracted_sequence"] = ""
             audit_row["seq_len"] = ""
+            audit_row["sugar_shorthand"] = ""
+            audit_row["backbone_shorthand"] = ""
 
         for field in config["fields"]:
             val = row.get(field, "")

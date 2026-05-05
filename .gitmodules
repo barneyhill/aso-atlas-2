@@ -1,0 +1,3 @@
+[submodule "typst"]
+	path = typst
+	url = git@github.com:barneyhill/paper2.git

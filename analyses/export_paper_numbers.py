@@ -180,6 +180,7 @@ def main() -> None:
     )
 
     cross_assay_pairs = [
+        ("inhib_vs_ic50", iv_max, dr_ic50),
         ("inhib_vs_alt", iv_max, mouse_alt),
         ("inhib_vs_bfob", iv_max, mouse_fob),
         ("ic50_vs_alt", dr_ic50, mouse_alt),
