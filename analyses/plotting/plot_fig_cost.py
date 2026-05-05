@@ -219,7 +219,7 @@ def draw_animal_reduction(stages, baseline_row, tox_row):
     """Stacked bar chart comparing animal usage: baseline vs OligoAI-tox."""
     scenarios = [
         ("Baseline", baseline_row),
-        ("CatBoost", tox_row),
+        ("RF", tox_row),
     ]
 
     fig, ax = plt.subplots(figsize=(8, 6), dpi=300)
@@ -327,9 +327,9 @@ def main():
     if oligoai_row:
         scenarios.append(("OligoAI\n(in vitro)", oligoai_row))
     if tox_row:
-        scenarios.append(("CatBoost\n(in vivo)", tox_row))
+        scenarios.append(("RF\n(in vivo)", tox_row))
     if combined_row:
-        scenarios.append(("OligoAI +\nCatBoost", combined_row))
+        scenarios.append(("OligoAI +\nRF", combined_row))
 
     ef_source = combined_row or tox_row or {}
 

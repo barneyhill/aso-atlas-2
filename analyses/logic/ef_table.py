@@ -56,7 +56,7 @@ COLUMN_STAGES = [
 ]
 
 OLIGOGYM_MODEL_ORDER = ["Linear", "Random Forest", "XGBoost", "KNN", "CatBoost", "MLP"]
-OLIGOAI_TOX_MODEL = "CatBoost"
+OLIGOAI_TOX_MODEL = "Random Forest"
 
 DATASET_STRATA_KEY: dict[str, str] = {
     "in_vitro_inhibition": "dosage_nm",
@@ -90,11 +90,13 @@ def _concat_fold_preds(row: dict) -> tuple[np.ndarray, np.ndarray]:
     return np.asarray(yt, dtype=float), np.asarray(yp, dtype=float)
 
 
-def _per_fold_ef_and_prec(fold_metrics: list[dict], stage,
-                          strata_key: str | None = None) -> tuple[list[float], list[float]]:
+def per_fold_ef_and_prec(fold_metrics: list[dict], stage,
+                         strata_key: str | None = None,
+                         k: float | None = None) -> tuple[list[float], list[float]]:
     """Return (fold_efs, fold_precs) from per-fold y_true/y_pred.
 
     When ``strata_key`` is set, uses stratified within-dosage-group ranking.
+    When ``k`` is set, uses that fixed selection fraction instead of base rate.
     """
     efs, precs = [], []
     for fm in fold_metrics:
@@ -103,9 +105,9 @@ def _per_fold_ef_and_prec(fold_metrics: list[dict], stage,
         strata = fm.get("conditions", {}).get(strata_key) if strata_key else None
         if strata is not None:
             r = stratified_enrichment_at_top_k(
-                fm["y_true"], fm["y_pred"], stage, np.asarray(strata))
+                fm["y_true"], fm["y_pred"], stage, np.asarray(strata), k=k)
         else:
-            r = enrichment_at_top_k(fm["y_true"], fm["y_pred"], stage)
+            r = enrichment_at_top_k(fm["y_true"], fm["y_pred"], stage, k=k)
         ef = r.get("enrichment_factor")
         pr = r.get("selected_pass_rate")
         if ef is not None and ef == ef:
@@ -149,7 +151,7 @@ def oligogym_strategy_data(bench: dict) -> dict[str, dict[str, dict]]:
         else:
             ef = enrichment_at_top_k(y_true, y_pred, stage)
 
-        fold_efs, fold_precs = _per_fold_ef_and_prec(
+        fold_efs, fold_precs = per_fold_ef_and_prec(
             row.get("fold_metrics", []), stage, strata_key=strata_key)
         if fold_efs:
             arr = np.asarray(fold_efs, dtype=float)
@@ -444,7 +446,7 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
         gym_rows.append({**_row(model, data, proportions), "group": "oligogym"})
     rows.extend(gym_rows)
 
-    # --- CatBoost (in vivo only) + Combined ---
+    # --- Tox model (in vivo only) + Combined ---
     IN_VIVO_DATASETS = {"mouse_hepatic", "mouse_neuro", "rat_hepatic", "rat_neuro"}
     tox_data = gym_data.get(OLIGOAI_TOX_MODEL, {})
     tox_invivo = {ds: d for ds, d in tox_data.items() if ds in IN_VIVO_DATASETS}
@@ -452,7 +454,7 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
                      for ds, d in tox_data.items() if d.get("spearman") is not None and ds in IN_VIVO_DATASETS}
     if tox_invivo:
         rows.append({
-            **_row("CatBoost (in vivo)", tox_invivo, proportions, tox_invivo_sp),
+            **_row("RF (in vivo)", tox_invivo, proportions, tox_invivo_sp),
             "group": "tox_only",
             "oligoai_tox": True,
             "source_model": OLIGOAI_TOX_MODEL,
@@ -469,9 +471,9 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
         combined_sp = {ds: sp for ds, sp in oligoai_sp.items() if ds not in IN_VIVO_DATASETS}
         combined_sp.update(tox_invivo_sp)
         rows.append({
-            **_row("OligoAI + CatBoost (in vivo)", combined_en, proportions, combined_sp),
+            **_row("OligoAI + RF (in vivo)", combined_en, proportions, combined_sp),
             "group": "combined",
-            "typst_name": "OligoAI +\\ CatBoost\\ (in vivo)",
+            "typst_name": "OligoAI +\\ RF\\ (in vivo)",
             "source_model": OLIGOAI_TOX_MODEL,
         })
 

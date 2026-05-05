@@ -71,6 +71,18 @@ def _fit_group(doses: np.ndarray, inh: np.ndarray) -> tuple[float, float] | None
     return float(ic50), float(emax)
 
 _ROOT = Path(__file__).resolve().parents[3]
+_DATA_DIR = _ROOT / "data/oligostack/processed"
+
+
+def _electroporation_table_ids() -> set[str]:
+    """Return custom_id values whose dose-response rows are electroporation."""
+    import re
+    dr = pd.read_parquet(_DATA_DIR / "dose_response_processed.parquet")
+    electro_tables = dr[dr["transfection_method"] == "Electroporation"]
+    ids = set()
+    for (pat, tbl), _ in electro_tables.groupby(["USPTO ID", "Table Number"]):
+        ids.add(f"our-data/inhibition_tables/{pat}_table_{int(tbl):05d}.xml")
+    return ids
 # Per-fold predictions for the 5-fold patent-split runs. The naming matches
 # what oligoai_eval.py writes when invoked with --out oligoai_fold{i}.json
 # (it derives `<stem>_predictions.parquet` automatically). Missing folds
@@ -120,11 +132,13 @@ def _efficacy_ef(df: pd.DataFrame) -> dict:
     return ef
 
 
-def _potency_ef(df: pd.DataFrame) -> dict:
-    """EF at pipeline stage 1 using 4PL IC50 fits on multi-dose curves."""
+def _potency_ef(df: pd.DataFrame, electro_ids: set[str] | None = None) -> dict:
+    """EF at pipeline stage 1 using 4PL IC50 fits on electroporation multi-dose curves."""
+    if electro_ids is None:
+        electro_ids = _electroporation_table_ids()
     doses_per_table = df.groupby("custom_id")["dosage"].nunique()
     multi_ids = doses_per_table[doses_per_table > 1].index
-    multi = df[df["custom_id"].isin(multi_ids)]
+    multi = df[df["custom_id"].isin(multi_ids) & df["custom_id"].isin(electro_ids)]
 
     ic50_true: list[float] = []
     ic50_pred: list[float] = []
@@ -177,13 +191,17 @@ def _aggregate_5fold() -> dict | None:
     available = [p for p in PREDICTIONS_PATHS_5FOLD if p.exists()]
     if not available:
         return None
+    try:
+        electro_ids = _electroporation_table_ids()
+    except FileNotFoundError:
+        electro_ids = None
     eff_efs: list[float] = []
     pot_efs: list[float] = []
     per_fold = []
     for p in available:
         df = pd.read_parquet(p)
         eff = _efficacy_ef(df)
-        pot = _potency_ef(df)
+        pot = _potency_ef(df, electro_ids=electro_ids)
         eff_efs.append(float(eff["enrichment_factor"]))
         pot_efs.append(float(pot["enrichment_factor"]))
         per_fold.append({
