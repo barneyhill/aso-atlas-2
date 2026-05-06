@@ -7,11 +7,11 @@ needed for target candidates, and save results to data/results/.
 Pipeline Stages (Sequential):
 1. Inhibition >80%
 2. IC50 <500nM (electroporation)
-3. Mouse ALT <1.5×ULN (90 IU/L)
+3. Mouse ALT <1.5×ULN (105 IU/L)
 4. Mouse Neuro FOB <=1
 5. Rat ALT <1.5×ULN (58.5 IU/L)
 6. Rat Neuro FOB <=1
-7. Monkey ALT <100 IU/L
+7. NHP ALT <1.5×ULN (154.5 IU/L)
 """
 
 import json
@@ -82,7 +82,7 @@ PIPELINE_STAGES = [
                   threshold_value=ALT_ULN_MULT * RAT_ALT_ULN, threshold_op="<", transform="log10", xlabel="ALT (IU/L)", xlim_lo=1),
     PipelineStage("Rat neuro tolerability", "Rat neuro\ntolerability", "mFOB <=1", 30000, "#94C4A7",
                   threshold_value=1, threshold_op="<=", transform="integer", xlabel="mFOB Score", bins="integer", xlim_lo=-0.5),
-    PipelineStage("Monkey liver toxicity", "Monkey liver\ntoxicity", f"ALT <{ALT_ULN_MULT}×ULN", 100000, "#9B8AA6",
+    PipelineStage("NHP liver toxicity", "NHP liver\ntoxicity", f"ALT <{ALT_ULN_MULT}×ULN", 100000, "#9B8AA6",
                   threshold_value=ALT_ULN_MULT * MONKEY_ALT_ULN, threshold_op="<", transform="log10", xlabel="ALT (IU/L)", bins=12, xlim_lo=1),
 ]
 
@@ -214,72 +214,6 @@ def calculate_proportions(in_vitro_df, dose_response_df, hepatic_df, neuro_df):
     return proportions, sample_sizes, distributions
 
 
-def compute_conditional_rates(hepatic_df, neuro_df):
-    """P(pass rat | pass mouse) on overlap compounds for correlated stage pairs.
-
-    In the sequential pipeline, compounds reaching rat stages have already
-    passed mouse stages. Where mouse–rat outcomes are positively correlated,
-    the conditional pass rate exceeds the marginal, making the independence
-    assumption conservative.
-    """
-    out = {}
-
-    # --- Hepatic: mouse ALT (stage 2) → rat ALT (stage 4) ---
-    m_alt = compound_mean_biomarker(
-        hepatic_df[hepatic_df["species"] == "mouse"], "ALT",
-    )
-    r_alt = compound_mean_biomarker(
-        hepatic_df[hepatic_df["species"] == "rat"], "ALT",
-    )
-
-    ids = m_alt.index.intersection(r_alt.index)
-    if len(ids) > 0:
-        m_ok = m_alt.loc[ids] < PIPELINE_STAGES[2].threshold_value
-        r_ok = r_alt.loc[ids] < PIPELINE_STAGES[4].threshold_value
-        pm, pr = float(m_ok.mean()), float(r_ok.mean())
-        out["rat_ALT"] = {
-            "conditional_rate": float(r_ok[m_ok].mean()) if m_ok.sum() > 0 else float("nan"),
-            "marginal_rate_overlap": pr,
-            "n_overlap": len(ids),
-            "n_mouse_pass": int(m_ok.sum()),
-            "correlation_factor": round(float((m_ok & r_ok).mean()) / (pm * pr), 3) if pm * pr > 0 else float("nan"),
-            "stage_idx": 4,
-        }
-
-    # --- Neuro: mouse FOB (stage 3) → rat FOB (stage 5) ---
-    m_fob = compound_mean_biomarker(
-        neuro_df[
-            (neuro_df["species"] == "Mouse")
-            & (neuro_df["dosage_ug"] == 700)
-            & (neuro_df["latency_time_hours"] == 3)
-            & (neuro_df["administration_method"] == "ICV")
-        ], "FOB_score",
-    )
-    r_fob = compound_mean_biomarker(
-        neuro_df[
-            (neuro_df["species"] == "Rat")
-            & (neuro_df["dosage_ug"] == 3000)
-            & (neuro_df["latency_time_hours"] == 3)
-        ], "FOB_score",
-    )
-
-    ids = m_fob.index.intersection(r_fob.index)
-    if len(ids) > 0:
-        m_ok = m_fob.loc[ids] <= PIPELINE_STAGES[3].threshold_value
-        r_ok = r_fob.loc[ids] <= PIPELINE_STAGES[5].threshold_value
-        pm, pr = float(m_ok.mean()), float(r_ok.mean())
-        out["rat_FOB"] = {
-            "conditional_rate": float(r_ok[m_ok].mean()) if m_ok.sum() > 0 else float("nan"),
-            "marginal_rate_overlap": pr,
-            "n_overlap": len(ids),
-            "n_mouse_pass": int(m_ok.sum()),
-            "correlation_factor": round(float((m_ok & r_ok).mean()) / (pm * pr), 3) if pm * pr > 0 else float("nan"),
-            "stage_idx": 5,
-        }
-
-    return out
-
-
 def back_calculate(proportions):
     """Back-calculate initial ASOs needed for TARGET_CANDIDATES development candidates."""
     n_stages = len(PIPELINE_STAGES)
@@ -311,39 +245,30 @@ def back_calculate(proportions):
     }
 
 
-def compute_classifier_enrichment(preds_data: dict) -> dict:
+def compute_classifier_enrichment(preds_data: dict, selection_fraction: float = 0.10) -> dict:
     """Compute enrichment factors from Hagedorn classifier predictions.
 
-    For each endpoint, the selected pool is the top-K safest compounds
-    (lowest predicted P(high)), where ``K = base_rate`` for that stage — i.e.
-    we select as many ASOs as would pass without enrichment, concentrated to
-    the highest-predicted. This ties EF to realistic screening budgets: with
-    perfect prediction, every selected ASO passes (max EF = 1/base_rate).
-
-    Returns dict mapping task name → {enrichment_factor, base_rate, selected_pass_rate, n}.
+    Selects the top ``selection_fraction`` safest compounds (lowest predicted
+    P(high)) and computes EF = selected_pass_rate / base_rate.
     """
     enrichment = {}
     for task, data in preds_data.items():
         predictions = np.array(data["predictions"])
-        labels = np.array(data["labels"])  # 1 = high toxicity, 0 = low toxicity
+        labels = np.array(data["labels"])
 
-        # Base rate: fraction that are actually low toxicity (pass)
         base_pass_rate = float((labels == 0).mean())
 
-        # Selected: top-K safest compounds by predicted P(high), K = base_rate.
         n = len(labels)
         if not (base_pass_rate > 0):
             continue
-        k = max(1, int(np.floor(base_pass_rate * n)))
+        k = max(1, int(np.floor(selection_fraction * n)))
         selected_idx = np.argsort(predictions, kind="mergesort")[:k]
         selected_mask = np.zeros(n, dtype=bool)
         selected_mask[selected_idx] = True
         if selected_mask.sum() == 0:
             continue
 
-        # Among selected, fraction that actually pass (are truly low toxicity)
         selected_pass_rate = float((labels[selected_mask] == 0).mean())
-
         ef = selected_pass_rate / base_pass_rate
 
         enrichment[task] = {
@@ -353,8 +278,7 @@ def compute_classifier_enrichment(preds_data: dict) -> dict:
             "n": int(len(labels)),
             "n_selected": int(selected_mask.sum()),
             "selection_policy": "top_k_safest",
-            "selection_fraction": round(base_pass_rate, 4),
-            "k_mode": "base_rate",
+            "selection_fraction": round(selection_fraction, 4),
         }
 
     return enrichment
@@ -419,6 +343,68 @@ def back_calculate_enriched(proportions, enrichment, stage_map):
     }
 
 
+def compute_savings_with_uncertainty(
+    prec_by_stage: dict[int, float | None],
+    prec_std_by_stage: dict[int, float | None],
+    proportions: list[float],
+    baseline_cost: float,
+) -> tuple[float, float | None]:
+    """Compute savings (%) and propagated uncertainty from per-stage precisions.
+
+    Returns (savings_pct, savings_std_pct). savings_std_pct is None when
+    no per-stage uncertainties are available.
+    """
+    n_stages = len(PIPELINE_STAGES)
+    stage_costs = [s.cost_per_aso for s in PIPELINE_STAGES]
+
+    def _cost_from_precs(precs: dict[int, float | None]) -> float:
+        eff = list(proportions)
+        for idx, prec in precs.items():
+            if prec is not None and np.isfinite(prec) and proportions[idx] > 0:
+                ef = max(prec / proportions[idx], 1.0)
+                eff[idx] = min(proportions[idx] * ef, 1.0)
+        asos = [0] * (n_stages + 1)
+        asos[-1] = TARGET_CANDIDATES
+        for i in range(n_stages - 1, -1, -1):
+            if eff[i] > 0 and math.isfinite(asos[i + 1]):
+                asos[i] = math.ceil(asos[i + 1] / eff[i])
+            else:
+                asos[i] = float("inf")
+        return sum(asos[i] * stage_costs[i] for i in range(n_stages)
+                   if math.isfinite(asos[i]))
+
+    cost_mean = _cost_from_precs(prec_by_stage)
+    savings = (1 - cost_mean / baseline_cost) * 100 if np.isfinite(cost_mean) else 0.0
+
+    has_std = any(v is not None and v > 0 for v in prec_std_by_stage.values())
+    if not has_std:
+        return savings, None
+
+    # Propagate: compute savings at (prec + std) and (prec - std)
+    prec_hi = {}
+    prec_lo = {}
+    for idx in prec_by_stage:
+        p = prec_by_stage[idx]
+        s = prec_std_by_stage.get(idx)
+        if p is None:
+            prec_hi[idx] = None
+            prec_lo[idx] = None
+        elif s is not None:
+            prec_hi[idx] = p + s
+            prec_lo[idx] = max(p - s, 0.0)
+        else:
+            prec_hi[idx] = p
+            prec_lo[idx] = p
+
+    cost_hi = _cost_from_precs(prec_lo)  # lower precision → higher cost
+    cost_lo = _cost_from_precs(prec_hi)  # higher precision → lower cost
+    savings_hi = (1 - cost_lo / baseline_cost) * 100 if np.isfinite(cost_lo) else 0.0
+    savings_lo = (1 - cost_hi / baseline_cost) * 100 if np.isfinite(cost_hi) else 0.0
+    savings_std = abs(savings_hi - savings_lo) / 2.0
+
+    return savings, savings_std
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -443,17 +429,7 @@ def main():
         n_pass, n_total = sample_sizes[i]
         print(f"  Stage {i+1} ({PIPELINE_STAGES[i].name}): {n_pass:,}/{n_total:,} = {proportions[i]:.1%}")
 
-    # Compute conditional rates as metadata (not applied to proportions).
-    # Rat-tested compounds in the dataset already reflect pipeline survivorship
-    # (93% hepatic / 82% neuro were also tested in mouse), so the observed
-    # marginal rates approximate the conditional population.
-    cond_rates = compute_conditional_rates(hepatic_df, neuro_df)
-    for key, data in cond_rates.items():
-        idx = data["stage_idx"]
-        print(f"  {PIPELINE_STAGES[idx].name}: marginal={proportions[idx]:.1%}, "
-              f"conditional={data['conditional_rate']:.1%} (CF={data['correlation_factor']}, n={data['n_overlap']})")
-
-    # Baseline back-calculation (using marginal rates)
+    # Baseline back-calculation
     baseline = back_calculate(proportions)
     print(f"Baseline: {baseline['n_initial']:,} initial ASOs, ${baseline['total_cost']/1e6:.1f}M total")
 
@@ -461,7 +437,6 @@ def main():
     # in ef_table.json, built by analyses.logic.ef_table)
     results = {
         "proportions": proportions,
-        "conditional_rates": cond_rates,
         "sample_sizes": sample_sizes,
         "distributions": distributions,
         "baseline": baseline,

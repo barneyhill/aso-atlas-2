@@ -1,26 +1,26 @@
 {
   "efficacy": {
-    "enrichment_factor": 4.0592,
-    "enrichment_factor_std": 1.1677860249206615,
+    "enrichment_factor": 2.4932,
+    "enrichment_factor_std": 0.3954929835028682,
     "fold_efs": [
-      2.788,
-      5.319,
-      2.931,
-      5.035,
-      4.223
+      1.956,
+      2.74,
+      2.197,
+      2.877,
+      2.696
     ],
     "n_folds": 5,
     "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=base_rate per stage (budget-matched selection)"
   },
   "potency": {
-    "enrichment_factor": 1.6494,
-    "enrichment_factor_std": 0.36326615586921945,
+    "enrichment_factor": 1.8237999999999999,
+    "enrichment_factor_std": 0.18161552797049038,
     "fold_efs": [
-      1.621,
-      1.817,
-      2.176,
-      1.317,
-      1.316
+      1.748,
+      1.915,
+      2.082,
+      1.77,
+      1.604
     ],
     "n_folds": 5,
     "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=base_rate per stage (budget-matched selection)"
@@ -30,36 +30,36 @@
     "per_fold": [
       {
         "path": "data/results/oligoai_fold0_predictions.parquet",
-        "efficacy_ef": 2.788,
-        "potency_ef": 1.621,
+        "efficacy_ef": 1.956,
+        "potency_ef": 1.748,
         "n_efficacy": 25105,
         "n_potency": 910
       },
       {
         "path": "data/results/oligoai_fold1_predictions.parquet",
-        "efficacy_ef": 5.319,
-        "potency_ef": 1.817,
+        "efficacy_ef": 2.74,
+        "potency_ef": 1.915,
         "n_efficacy": 22979,
         "n_potency": 1111
       },
       {
         "path": "data/results/oligoai_fold2_predictions.parquet",
-        "efficacy_ef": 2.931,
-        "potency_ef": 2.176,
+        "efficacy_ef": 2.197,
+        "potency_ef": 2.082,
         "n_efficacy": 22800,
         "n_potency": 824
       },
       {
         "path": "data/results/oligoai_fold3_predictions.parquet",
-        "efficacy_ef": 5.035,
-        "potency_ef": 1.317,
+        "efficacy_ef": 2.877,
+        "potency_ef": 1.77,
         "n_efficacy": 21619,
         "n_potency": 1093
       },
       {
         "path": "data/results/oligoai_fold4_predictions.parquet",
-        "efficacy_ef": 4.223,
-        "potency_ef": 1.316,
+        "efficacy_ef": 2.696,
+        "potency_ef": 1.604,
         "n_efficacy": 23808,
         "n_potency": 876
       }

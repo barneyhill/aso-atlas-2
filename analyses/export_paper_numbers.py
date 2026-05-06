@@ -186,6 +186,7 @@ def main() -> None:
         ("ic50_vs_alt", dr_ic50, mouse_alt),
         ("ic50_vs_bfob", dr_ic50, mouse_fob),
     ]
+    N_CROSS_ASSAY_TESTS = 15  # 6×6 upper triangle
     for tag, s1, s2 in cross_assay_pairs:
         shared = s1.dropna().index.intersection(s2.dropna().index)
         if len(shared) >= 10:
@@ -193,6 +194,7 @@ def main() -> None:
             concordance[tag] = {
                 "rho": sf(float(rho)),
                 "p": sf(float(p)),
+                "p_bonf": sf(min(float(p) * N_CROSS_ASSAY_TESTS, 1.0)),
                 "n": int(len(shared)),
             }
 
@@ -210,6 +212,7 @@ def main() -> None:
     if hepatotox_path.exists():
         hep_data = json.loads(hepatotox_path.read_text())
 
+        N_CROSS_SPECIES_TESTS = 4  # ALT, AST, TBIL, FOB
         if "cross_species" in hep_data:
             cs = hep_data["cross_species"]
             numbers["cross_species_hepatotox"] = {
@@ -217,6 +220,7 @@ def main() -> None:
                     "n_shared": v["n_shared"],
                     "spearman_rho": sf(v["spearman_rho"]),
                     "spearman_p": sf(v["spearman_p"]),
+                    "spearman_p_bonf": sf(min(v["spearman_p"] * N_CROSS_SPECIES_TESTS, 1.0)),
                     "concordance_rate": sf(v["concordance_rate"]),
                     "concordance_n": v["concordance_n"],
                 }
@@ -256,6 +260,7 @@ def main() -> None:
                     "n_shared": v["n_shared"],
                     "spearman_rho": sf(v["spearman_rho"]),
                     "spearman_p": sf(v["spearman_p"]),
+                    "spearman_p_bonf": sf(min(v["spearman_p"] * N_CROSS_SPECIES_TESTS, 1.0)),
                     "concordance_rate": sf(v["concordance_rate"]),
                     "concordance_n": v["concordance_n"],
                 }
@@ -291,20 +296,6 @@ def main() -> None:
             "stages": stages_list,
         }
 
-        # Conditional pass rates (cross-species correlation adjustment)
-        cond = pipeline_data.get("conditional_rates", {})
-        if cond:
-            cond_numbers = {}
-            for key, data in cond.items():
-                cond_numbers[key] = {
-                    "conditional_rate": sf(data["conditional_rate"]),
-                    "marginal_rate": sf(data["marginal_rate_overlap"]),
-                    "n_overlap": data["n_overlap"],
-                    "n_mouse_pass": data["n_mouse_pass"],
-                    "correlation_factor": sf(data["correlation_factor"]),
-                }
-            pipeline_numbers["conditional_rates"] = cond_numbers
-
         # OligoAI-tox and combined costs: canonical source is ef_table.json
         ef_table_path = RESULTS_DIR / "ef_table.json"
         if ef_table_path.exists():
@@ -313,16 +304,18 @@ def main() -> None:
                 if row.get("oligoai_tox"):
                     pipeline_numbers["oligoai_tox_n_initial"] = row["n_initial"]
                     pipeline_numbers["oligoai_tox_total_cost"] = row["total_cost"]
-                    pipeline_numbers["oligoai_tox_savings_pct"] = row["delta_pct"]
+                    pipeline_numbers["oligoai_tox_savings_pct"] = sf(row["delta_pct"])
+                    pipeline_numbers["oligoai_tox_savings_std"] = sf(row["delta_std_pct"]) if row.get("delta_std_pct") else None
                     pipeline_numbers["oligoai_tox_source_model"] = row.get("source_model", "")
                 if row.get("group") == "combined":
                     pipeline_numbers["combined_n_initial"] = row["n_initial"]
                     pipeline_numbers["combined_total_cost"] = row["total_cost"]
-                    pipeline_numbers["combined_savings_pct"] = row["delta_pct"]
+                    pipeline_numbers["combined_savings_pct"] = sf(row["delta_pct"])
+                    pipeline_numbers["combined_savings_std"] = sf(row["delta_std_pct"]) if row.get("delta_std_pct") else None
                 if row.get("name") == "OligoAI":
                     pipeline_numbers["oligoai_n_initial"] = row["n_initial"]
                     pipeline_numbers["oligoai_total_cost"] = row["total_cost"]
-                    pipeline_numbers["oligoai_savings_pct"] = row["delta_pct"]
+                    pipeline_numbers["oligoai_savings_pct"] = sf(row["delta_pct"])
 
             # OligoAI-tox EF range across in vivo stages
             for row in ef_rows:
@@ -493,11 +486,39 @@ def main() -> None:
     if bb_path.exists():
         bb = json.loads(bb_path.read_text())
         numbers["base_biomarker"] = {
-            k: {**v, "rho": sf(v["rho"]) if v["rho"] is not None else None}
+            k: {
+                "rho": sf(v["rho"]) if v["rho"] is not None else None,
+                "p_bonf": sf(v["p_bonf"]) if v.get("p_bonf") is not None else None,
+                "significant": v["significant"],
+                "n": v["n"],
+            }
             for k, v in bb.items()
         }
     else:
         warnings.warn(f"{bb_path} not found — run `just plots` first")
+
+    # ── Mouse within-biomarker correlations (fig_concordance C) ──
+    if hepatotox_path.exists():
+        hep_data = json.loads(hepatotox_path.read_text())
+        if "mouse_biomarker_correlations" in hep_data:
+            mc = hep_data["mouse_biomarker_correlations"]
+            bm_names = mc["biomarkers"]
+            rho_mat = mc["rho"]
+            p_mat = mc["p_values"]
+            n_mat = mc["n_pairs"]
+            n_bm = len(bm_names)
+            n_pairs = n_bm * (n_bm - 1) // 2  # Bonferroni factor
+            mouse_bm = {}
+            for i in range(n_bm):
+                for j in range(i + 1, n_bm):
+                    key = f"{bm_names[i]}_{bm_names[j]}"
+                    raw_p = p_mat[i][j]
+                    mouse_bm[key] = {
+                        "rho": sf(rho_mat[i][j]),
+                        "p_bonf": sf(min(raw_p * n_pairs, 1.0)),
+                        "n": n_mat[i][j],
+                    }
+            numbers["mouse_biomarker"] = mouse_bm
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(numbers, indent=2) + "\n")

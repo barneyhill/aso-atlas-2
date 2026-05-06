@@ -8,24 +8,6 @@
     0.35221536735838477,
     1.0
   ],
-  "conditional_rates": {
-    "rat_ALT": {
-      "conditional_rate": 0.4485049833887043,
-      "marginal_rate_overlap": 0.40305010893246185,
-      "n_overlap": 459,
-      "n_mouse_pass": 301,
-      "correlation_factor": 1.113,
-      "stage_idx": 4
-    },
-    "rat_FOB": {
-      "conditional_rate": 0.5093240093240093,
-      "marginal_rate_overlap": 0.33469945355191255,
-      "n_overlap": 1464,
-      "n_mouse_pass": 858,
-      "correlation_factor": 1.522,
-      "stage_idx": 5
-    }
-  },
   "sample_sizes": [
     [
       19346,
@@ -179102,8 +179084,8 @@
       "xlim_lo": -0.5
     },
     {
-      "name": "Monkey liver toxicity",
-      "short_name": "Monkey liver\ntoxicity",
+      "name": "NHP liver toxicity",
+      "short_name": "NHP liver\ntoxicity",
       "threshold": "ALT <1.5\u00d7ULN",
       "cost_per_aso": 100000,
       "color": "#9B8AA6",

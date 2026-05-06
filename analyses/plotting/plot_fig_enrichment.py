@@ -26,7 +26,7 @@ from analyses.logic.enrichment import (
     stratified_enrichment_at_top_k,
 )
 from analyses.logic.ef_table import DATASET_STRATA_KEY, OLIGOAI_TOX_MODEL, per_fold_ef_and_prec
-from analyses.logic.pipeline import PIPELINE_STAGES
+from analyses.logic.pipeline import PIPELINE_STAGES, compute_savings_with_uncertainty
 
 matplotlib.use("Agg")
 
@@ -165,19 +165,39 @@ def compute_tox_sweeps(bench: dict) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     return out
 
 
-# ── Base rates ───────────────────────────────────────────────────────────────
+# ── Savings sweep ────────────────────────────────────────────────────────────
 
-def get_base_rates(pipe: dict) -> dict[str, float]:
-    """Get the base rate (pass fraction) per stage from pipeline results."""
+PREC_STAGE_MAP = {0: "efficacy", 1: "potency", **{v: k for k, v in STAGE_MAP.items()}}
+
+
+def compute_savings_sweep(
+    oligoai_sweeps: dict, tox_sweeps: dict, pipe: dict,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Combined savings at each K with propagated uncertainty."""
+    baseline_cost = pipe["baseline"]["total_cost"]
     proportions = pipe["proportions"]
-    return {
-        "efficacy": proportions[0],
-        "potency": proportions[1],
-        "mouse_hepatic": proportions[2],
-        "mouse_neuro": proportions[3],
-        "rat_hepatic": proportions[4],
-        "rat_neuro": proportions[5],
-    }
+    all_sweeps = {**oligoai_sweeps, **tox_sweeps}
+
+    savings_mean, savings_hi, savings_lo = [], [], []
+    for ki in range(len(FRACTIONS)):
+        precs: dict[int, float | None] = {}
+        prec_stds: dict[int, float | None] = {}
+        for stage_idx, panel_key in PREC_STAGE_MAP.items():
+            if panel_key in all_sweeps:
+                mean_arr, std_arr = all_sweeps[panel_key]
+                precs[stage_idx] = float(mean_arr[ki])
+                prec_stds[stage_idx] = float(std_arr[ki])
+            else:
+                precs[stage_idx] = None
+                prec_stds[stage_idx] = None
+
+        sav, sav_std = compute_savings_with_uncertainty(
+            precs, prec_stds, proportions, baseline_cost)
+        savings_mean.append(sav)
+        savings_hi.append(sav + (sav_std or 0))
+        savings_lo.append(sav - (sav_std or 0))
+
+    return np.array(savings_mean), np.array(savings_hi), np.array(savings_lo)
 
 
 # ── Plot ─────────────────────────────────────────────────────────────────────
@@ -186,22 +206,25 @@ def main():
     if not BENCH_PATH.exists() or not PIPE_PATH.exists():
         raise FileNotFoundError("Missing result files. Run `just analysis` and `just oligogym` first.")
 
+    from analyses.logic.enrichment import SELECTION_FRACTION
+
     bench = json.loads(BENCH_PATH.read_text())
     pipe = json.loads(PIPE_PATH.read_text())
-    base_rates = get_base_rates(pipe)
 
     print("Computing OligoAI sweeps...")
     oligoai_sweeps = compute_oligoai_sweeps()
     print("Computing in vivo sweeps...")
     tox_sweeps = compute_tox_sweeps(bench)
+    print("Computing savings sweep...")
+    savings_mean, savings_hi, savings_lo = compute_savings_sweep(oligoai_sweeps, tox_sweeps, pipe)
 
     panels = ["efficacy", "potency", "mouse_hepatic", "mouse_neuro", "rat_hepatic", "rat_neuro"]
     all_sweeps = {**oligoai_sweeps, **tox_sweeps}
 
-    fig, axes = plt.subplots(2, 3, figsize=(12, 7.5), dpi=300)
-    panel_axes = [axes[0, 0], axes[0, 1], axes[0, 2],
-                  axes[1, 0], axes[1, 1], axes[1, 2]]
-    letters = "ABCDEF"
+    fig, axes = plt.subplots(2, 4, figsize=(16, 7.5), dpi=300)
+    panel_axes = [axes[0, 0], axes[0, 1], axes[0, 2], axes[0, 3],
+                  axes[1, 0], axes[1, 1], axes[1, 2], axes[1, 3]]
+    letters = "ABCDEFG"
 
     x_pct = FRACTIONS * 100
 
@@ -218,10 +241,8 @@ def main():
         else:
             ax.text(0.5, 0.5, "No data", transform=ax.transAxes, ha="center", va="center")
 
-        br = base_rates.get(panel)
-        if br is not None:
-            ax.axvline(br * 100, color="#444444", linestyle="--", linewidth=1, alpha=0.7)
-            ax.axhline(br * 100, color="#999999", linestyle=":", linewidth=0.8, alpha=0.5)
+        ax.axvline(SELECTION_FRACTION * 100, color="#444444", linestyle="--",
+                   linewidth=1, alpha=0.7)
 
         ax.set_title(f"{letters[i]}. {label}", fontsize=10, fontweight="bold", loc="left")
         ax.set_xlabel("Selection fraction (%)")
@@ -229,6 +250,21 @@ def main():
         ax.set_xlim(100, 0)
         ax.set_ylim(0, 105)
         ax.grid(alpha=0.2)
+
+    # Panel G: combined savings
+    ax_sav = panel_axes[6]
+    ax_sav.plot(x_pct, savings_mean, linewidth=2, color="#264653")
+    ax_sav.fill_between(x_pct, savings_lo, savings_hi, alpha=0.25, color="#264653")
+    ax_sav.axvline(SELECTION_FRACTION * 100, color="#444444", linestyle="--",
+                   linewidth=1, alpha=0.7)
+    ax_sav.axhline(0, color="#999999", linestyle=":", linewidth=0.8)
+    ax_sav.set_title("G. Combined savings", fontsize=10, fontweight="bold", loc="left")
+    ax_sav.set_xlabel("Selection fraction (%)")
+    ax_sav.set_ylabel("Cost savings (%)")
+    ax_sav.set_xlim(100, 0)
+    ax_sav.grid(alpha=0.2)
+
+    panel_axes[7].set_visible(False)
 
     fig.tight_layout()
 

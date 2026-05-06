@@ -27,7 +27,7 @@ from analyses.logic.pipeline import (
     OLIGOAI_ENRICHMENT,
     PIPELINE_STAGES,
     back_calculate_enriched,
-    compute_classifier_enrichment,
+    compute_savings_with_uncertainty,
 )
 
 def _sf(x, n=3):
@@ -56,7 +56,7 @@ COLUMN_STAGES = [
 ]
 
 OLIGOGYM_MODEL_ORDER = ["Linear", "Random Forest", "XGBoost", "KNN", "CatBoost", "MLP"]
-OLIGOAI_TOX_MODEL = "Random Forest"
+OLIGOAI_TOX_MODEL = "XGBoost"
 
 DATASET_STRATA_KEY: dict[str, str] = {
     "in_vitro_inhibition": "dosage_nm",
@@ -206,94 +206,74 @@ def load_oligoai_spearmans() -> dict[str, dict]:
     return out
 
 
-def _groupkfold_classifier_ef(preds_data: dict, n_splits: int = 5
-                              ) -> tuple[list[float], list[float]]:
-    """Return (fold_efs, fold_precs) from GroupKFold on classifier preds."""
-    if "groups" not in preds_data:
-        return [], []
+def hagedorn_linear_enrichment(neuro: dict, n_splits: int = 5) -> dict[str, dict]:
+    """Compute Hagedorn-Linear enrichment using the same continuous EF as OligoGym.
+
+    The Hagedorn score is negated (higher score = safer = lower FOB) so that
+    enrichment_at_top_k selects the lowest predicted-FOB compounds, consistent
+    with the FOB ≤ 1 threshold direction.
+    """
+    from scipy.stats import spearmanr
     from sklearn.model_selection import GroupKFold
 
-    preds = np.asarray(preds_data["predictions"], dtype=float)
-    labels = np.asarray(preds_data["labels"], dtype=int)
-    groups = np.asarray(preds_data["groups"])
-    if len(np.unique(groups)) < n_splits:
-        return [], []
-
-    efs: list[float] = []
-    precs: list[float] = []
-    gkf = GroupKFold(n_splits=n_splits)
-    for _, test_idx in gkf.split(preds, labels, groups):
-        if len(test_idx) < 5:
-            continue
-        ef = compute_classifier_enrichment({"_": {"predictions": preds[test_idx].tolist(),
-                                                   "labels": labels[test_idx].tolist()}})
-        if "_" in ef:
-            efs.append(ef["_"]["enrichment_factor"])
-            pr = ef["_"].get("selected_pass_rate")
-            if pr is not None:
-                precs.append(pr)
-    return efs, precs
-
-
-def hagedorn_linear_enrichment(neuro: dict, n_splits: int = 5) -> dict[str, dict]:
-    from scipy.stats import spearmanr
-    mouse_preds = neuro.get("predictions", {}).get("hagedorn_score")
-    rat_preds = neuro.get("rat_predictions", {}).get("rat_hagedorn_score")
-    tasks = {}
-    if mouse_preds is not None:
-        tasks["FOB_mouse"] = mouse_preds
-    if rat_preds is not None:
-        tasks["FOB_rat"] = rat_preds
-    if not tasks:
-        return {}
-    enrichment = compute_classifier_enrichment(tasks)
+    src_map = {
+        "mouse_neuro": neuro.get("predictions", {}).get("hagedorn_score"),
+        "rat_neuro": neuro.get("rat_predictions", {}).get("rat_hagedorn_score"),
+    }
 
     out: dict[str, dict] = {}
-    src_map = {"FOB_mouse": ("mouse_neuro", mouse_preds), "FOB_rat": ("rat_neuro", rat_preds)}
-    for key, (ds, raw) in src_map.items():
-        if key not in enrichment:
+    for ds, raw in src_map.items():
+        if raw is None or "fob_values" not in raw or "scores" not in raw:
             continue
-        entry = dict(enrichment[key])
-        fold_efs, fold_precs = _groupkfold_classifier_ef(raw, n_splits=n_splits)
-        if len(fold_efs) > 1:
-            arr = np.asarray(fold_efs, dtype=float)
-            entry["fold_efs"] = fold_efs
-            entry["ef_mean"] = float(arr.mean())
-            entry["ef_std"] = float(arr.std(ddof=1))
-        if len(fold_precs) > 1:
-            arr_p = np.asarray(fold_precs, dtype=float)
-            entry["fold_precs"] = fold_precs
-            entry["prec_mean"] = float(arr_p.mean())
-            entry["prec_std"] = float(arr_p.std(ddof=1))
+        fob = np.asarray(raw["fob_values"], dtype=float)
+        scores = np.asarray(raw["scores"], dtype=float)
+        grp = np.asarray(raw.get("groups", []))
 
-        fob = raw.get("fob_values") if raw else None
-        grp = raw.get("groups") if raw else None
-        if fob is not None and grp is not None:
-            scores = np.asarray(raw["scores"], dtype=float)
-            fob_arr = np.asarray(fob, dtype=float)
-            grp_arr = np.asarray(grp)
-            # Higher Hagedorn score = safer = lower FOB, so negate for
-            # consistent sign (higher pred = higher outcome)
-            rho_full, _ = spearmanr(-scores, fob_arr)
-            entry["spearman"] = _sf(float(rho_full))
+        # Negate scores: higher Hagedorn = safer = lower FOB
+        neg_scores = -scores
+        stage = stage_for_dataset(ds)
 
-            from sklearn.model_selection import GroupKFold
-            n_grp = len(np.unique(grp_arr[~np.array([g is None for g in grp_arr])]))
-            actual_splits = min(n_splits, n_grp)
-            if actual_splits >= 2:
-                gkf = GroupKFold(n_splits=actual_splits)
-                fold_rhos = []
-                for _, test_idx in gkf.split(scores, fob_arr, grp_arr):
-                    if len(test_idx) >= 10:
-                        r, _ = spearmanr(-scores[test_idx], fob_arr[test_idx])
-                        if r == r:
-                            fold_rhos.append(r)
-                if len(fold_rhos) > 1:
-                    arr_r = np.asarray(fold_rhos, dtype=float)
-                    entry["spearman"] = _sf(float(arr_r.mean()))
-                    entry["spearman_std"] = _sf(float(arr_r.std(ddof=1)))
+        # Pooled EF
+        ef = enrichment_at_top_k(fob, neg_scores, stage)
 
-        out[ds] = entry
+        # Per-fold EF and Spearman via GroupKFold
+        valid_grp = grp[~np.array([g is None for g in grp])] if len(grp) > 0 else grp
+        n_grp = len(np.unique(valid_grp)) if len(valid_grp) > 0 else 0
+        actual_splits = min(n_splits, n_grp)
+
+        if actual_splits >= 2 and len(grp) == len(fob):
+            gkf = GroupKFold(n_splits=actual_splits)
+            fold_efs, fold_precs, fold_rhos = [], [], []
+            for _, test_idx in gkf.split(fob, fob, grp):
+                if len(test_idx) < 10:
+                    continue
+                r_ef = enrichment_at_top_k(fob[test_idx], neg_scores[test_idx], stage)
+                e = r_ef.get("enrichment_factor")
+                p = r_ef.get("selected_pass_rate")
+                if e is not None and e == e:
+                    fold_efs.append(e)
+                if p is not None and p == p:
+                    fold_precs.append(p)
+                rho, _ = spearmanr(neg_scores[test_idx], fob[test_idx])
+                if rho == rho:
+                    fold_rhos.append(rho)
+
+            if len(fold_efs) > 1:
+                arr = np.asarray(fold_efs, dtype=float)
+                ef["fold_efs"] = fold_efs
+                ef["ef_mean"] = float(arr.mean())
+                ef["ef_std"] = float(arr.std(ddof=1))
+            if len(fold_precs) > 1:
+                arr_p = np.asarray(fold_precs, dtype=float)
+                ef["fold_precs"] = fold_precs
+                ef["prec_mean"] = float(arr_p.mean())
+                ef["prec_std"] = float(arr_p.std(ddof=1))
+            if len(fold_rhos) > 1:
+                arr_r = np.asarray(fold_rhos, dtype=float)
+                ef["spearman"] = _sf(float(arr_r.mean()))
+                ef["spearman_std"] = _sf(float(arr_r.std(ddof=1)))
+
+        out[ds] = ef
     return out
 
 
@@ -305,6 +285,7 @@ def _row(
     name: str,
     enrichment: dict[str, dict],
     proportions: list[float],
+    baseline_cost: float,
     spearman_data: dict[str, dict] | None = None,
 ) -> dict:
     """Compose a single strategy row."""
@@ -346,6 +327,9 @@ def _row(
                 rhos[idx] = sp["spearman"]
                 rho_stds[idx] = sp.get("spearman_std")
 
+    savings, savings_std = compute_savings_with_uncertainty(
+        precs, prec_stds, proportions, baseline_cost)
+
     return {
         "name": name,
         "ef_by_stage": efs,
@@ -356,6 +340,8 @@ def _row(
         "rho_std_by_stage": rho_stds,
         "n_initial": result["n_initial"],
         "total_cost": result["total_cost"],
+        "savings_pct": savings,
+        "savings_std_pct": savings_std,
         "costs_per_stage": result["costs_per_stage"],
         "asos_at_stage": result["asos_at_stage"],
         "proportions": result["proportions"],
@@ -430,12 +416,12 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
         if "potency" in OLIGOAI_ENRICHMENT:
             oligoai_en["potency"] = dict(OLIGOAI_ENRICHMENT["potency"])
         _add_oligoai_precision(oligoai_en, base_rates)
-        rows.append({**_row("OligoAI", oligoai_en, proportions, oligoai_sp), "group": "external"})
+        rows.append({**_row("OligoAI", oligoai_en, proportions, baseline_cost, oligoai_sp), "group": "external"})
 
     # --- Hagedorn-Linear ---
     hl_en = hagedorn_linear_enrichment(neuro)
     if hl_en:
-        rows.append({**_row("Hagedorn-Linear", hl_en, proportions), "group": "hagedorn"})
+        rows.append({**_row("Hagedorn-Linear", hl_en, proportions, baseline_cost), "group": "hagedorn"})
 
     # --- OligoGym architectures ---
     gym_rows = []
@@ -443,7 +429,7 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
         data = gym_data.get(model, {})
         if not data:
             continue
-        gym_rows.append({**_row(model, data, proportions), "group": "oligogym"})
+        gym_rows.append({**_row(model, data, proportions, baseline_cost), "group": "oligogym"})
     rows.extend(gym_rows)
 
     # --- Tox model (in vivo only) + Combined ---
@@ -454,7 +440,7 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
                      for ds, d in tox_data.items() if d.get("spearman") is not None and ds in IN_VIVO_DATASETS}
     if tox_invivo:
         rows.append({
-            **_row("RF (in vivo)", tox_invivo, proportions, tox_invivo_sp),
+            **_row("XGBoost (in vivo)", tox_invivo, proportions, baseline_cost, tox_invivo_sp),
             "group": "tox_only",
             "oligoai_tox": True,
             "source_model": OLIGOAI_TOX_MODEL,
@@ -471,14 +457,15 @@ def build_rows(bench: dict, neuro: dict, baseline: dict) -> list[dict]:
         combined_sp = {ds: sp for ds, sp in oligoai_sp.items() if ds not in IN_VIVO_DATASETS}
         combined_sp.update(tox_invivo_sp)
         rows.append({
-            **_row("OligoAI + RF (in vivo)", combined_en, proportions, combined_sp),
+            **_row("OligoAI + XGBoost (in vivo)", combined_en, proportions, baseline_cost, combined_sp),
             "group": "combined",
-            "typst_name": "OligoAI +\\ RF\\ (in vivo)",
+            "typst_name": "OligoAI +\\ XGBoost\\ (in vivo)",
             "source_model": OLIGOAI_TOX_MODEL,
         })
 
     for r in rows:
-        r["delta_pct"] = _sf(100.0 * (baseline_cost - r["total_cost"]) / baseline_cost)
+        r["delta_pct"] = r.get("savings_pct", _sf(100.0 * (baseline_cost - r["total_cost"]) / baseline_cost))
+        r["delta_std_pct"] = r.get("savings_std_pct")
 
     return rows
 
@@ -576,7 +563,7 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
         "  table.hline(stroke: 0.8pt),",
         "  table.header(",
         "    table.cell(rowspan: 4)[*Model*],",
-        "    table.cell(colspan: 6)[*Precision\\@K*],",
+        "    table.cell(colspan: 6)[*Precision*],",
         "    table.cell(rowspan: 4)[*Savings*],",
         "    table.hline(start: 1, end: 7, stroke: 0.4pt),",
         "    table.cell(colspan: 2)[*In vitro*],",
@@ -595,8 +582,7 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
     non_combined = [r for r in rows if r.get("group") != "combined" and not r.get("is_baseline")]
     best_prec = _best_per_column(rows, "prec_by_stage")
     best_savings_pct = max(
-        round(100.0 * (baseline_cost - r["total_cost"]) / baseline_cost, 1)
-        for r in non_combined
+        r.get("savings_pct", 0.0) for r in non_combined
     ) if non_combined else 0
 
     for i, r in enumerate(rows):
@@ -613,9 +599,13 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
         if is_baseline:
             cells.append("  [0.0%]")
         else:
-            cost_txt = _fmt_savings(r["total_cost"], baseline_cost)
-            savings_pct = round(100.0 * (baseline_cost - r["total_cost"]) / baseline_cost, 1)
-            if is_combined or savings_pct >= best_savings_pct:
+            sav = r.get("savings_pct", 0.0)
+            sav_std = r.get("savings_std_pct")
+            if sav_std is not None:
+                cost_txt = f"{sav:.1f}±{sav_std:.1f}%"
+            else:
+                cost_txt = f"{sav:.1f}%"
+            if is_combined or sav >= best_savings_pct:
                 cost_txt = f"*{cost_txt}*"
             cells.append(f"  [{cost_txt}]")
 
@@ -709,6 +699,9 @@ def main():
             "asos_at_stage": [int(a) if isinstance(a, (int, float)) and a != float("inf") else a for a in r["asos_at_stage"]],
             "proportions": [float(p) for p in r["proportions"]],
             "delta_pct": r["delta_pct"],
+            "delta_std_pct": r.get("delta_std_pct"),
+            "savings_pct": r.get("savings_pct"),
+            "savings_std_pct": r.get("savings_std_pct"),
             "oligoai_tox": bool(r.get("oligoai_tox", False)),
             "is_baseline": bool(r.get("is_baseline", False)),
             **({"source_model": r["source_model"]} if "source_model" in r else {}),

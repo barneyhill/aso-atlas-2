@@ -5,11 +5,11 @@ base composition, and cross-species concordance.
 (A) Selection bias KDEs: biomarker distributions for compounds that do vs
     don't advance to the next pipeline stage (4 transitions).
 (B) Cross-assay Spearman ρ (4×4): pairwise correlations between per-compound
-    metrics across pipeline stages (BH-corrected).
+    metrics across pipeline stages (Bonferroni-corrected).
 (C) Cross-biomarker Spearman ρ: mouse hepatotoxicity biomarker correlations
     (Bonferroni-corrected).
 (D) Base × biomarker Spearman ρ (4×4): nucleotide base composition vs
-    toxicity biomarkers (BH-corrected).
+    toxicity biomarkers (Bonferroni-corrected).
 (E) Cross-species bFOB concordance: mouse vs rat FOB score heatmap.
 
 Reads: data/results/{hepatotox,neurotox}.json
@@ -190,8 +190,6 @@ def draw_cross_assay_corr(ax, metrics):
     metrics: dict from _load_compound_metrics() with keys
       iv_max, dr_ic50, mouse_alt, mouse_fob, rat_alt, rat_fob.
     """
-    from statsmodels.stats.multitest import multipletests
-
     labels = ["Max inhib.", "IC₅₀", "Mouse ALT", "Mouse bFOB",
               "Rat ALT", "Rat mFOB"]
     series = [metrics["iv_max"], metrics["dr_ic50"],
@@ -215,15 +213,12 @@ def draw_cross_assay_corr(ax, metrics):
             rho_matrix[i, j] = rho_matrix[j, i] = float(rho)
             pval_matrix[i, j] = pval_matrix[j, i] = float(p)
 
-    # BH correction on upper-triangle p-values
+    # Bonferroni correction on upper-triangle p-values
     tri_idx = np.triu_indices(n, k=1)
     flat_p = pval_matrix[tri_idx]
-    valid_mask = ~np.isnan(flat_p)
-    reject_flat = np.zeros_like(flat_p, dtype=bool)
-    if valid_mask.any():
-        reject_flat[valid_mask], _, _, _ = multipletests(
-            flat_p[valid_mask], alpha=0.05, method="fdr_bh",
-        )
+    n_tests = int(np.sum(~np.isnan(flat_p)))
+    alpha = 0.05 / n_tests if n_tests > 0 else 0.05
+    reject_flat = np.array([(not np.isnan(p)) and p < alpha for p in flat_p])
     sig_matrix = np.eye(n, dtype=bool)  # diagonal always "significant"
     for k, (i, j) in enumerate(zip(*tri_idx)):
         if reject_flat[k]:
@@ -366,7 +361,6 @@ BASES = ["A", "C", "G", "T"]
 def compute_base_biomarker_corr():
     """Compute base-composition × biomarker Spearman correlations and save to JSON."""
     from analyses.utils.helm import Helm
-    from statsmodels.stats.multitest import multipletests
 
     _data_dir = _root / "data/oligostack/processed"
 
@@ -424,21 +418,22 @@ def compute_base_biomarker_corr():
             n_matrix[i, j] = int(valid.sum())
 
     flat_p = pval_matrix.ravel()
-    valid_mask = ~np.isnan(flat_p)
-    reject = np.zeros_like(flat_p, dtype=bool)
-    if valid_mask.any():
-        reject[valid_mask], _, _, _ = multipletests(
-            flat_p[valid_mask], alpha=0.05, method="fdr_bh",
-        )
-    sig_matrix = reject.reshape(pval_matrix.shape)
+    n_tests = int(np.sum(~np.isnan(flat_p)))
+    alpha = 0.05 / n_tests if n_tests > 0 else 0.05
+    sig_matrix = np.array(
+        [(not np.isnan(p)) and p < alpha for p in flat_p]
+    ).reshape(pval_matrix.shape)
 
     results = {}
     for j, ctx_key in enumerate(context_keys):
         for i, base in enumerate(bases):
             key = f"{base}_{ctx_key}"
             rho = float(rho_matrix[i, j])
+            raw_p = float(pval_matrix[i, j])
             results[key] = {
                 "rho": round(rho, 4) if not np.isnan(rho) else None,
+                "p": raw_p if not np.isnan(raw_p) else None,
+                "p_bonf": min(raw_p * n_tests, 1.0) if not np.isnan(raw_p) else None,
                 "significant": bool(sig_matrix[i, j]),
                 "n": int(n_matrix[i, j]),
             }

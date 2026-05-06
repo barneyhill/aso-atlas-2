@@ -3,7 +3,7 @@ Figure 3: Demonstration — enrichment factors and cost savings.
 
 Panel A — Enrichment factor per endpoint (horizontal bars).
            Collapsed to 5 logical endpoints (efficacy, potency,
-           hepatotox, neurotox, monkey) rather than 7 per-species stages.
+           hepatotox, neurotox, NHP) rather than 7 per-species stages.
 Panel B — Relative cost by scenario (stacked bars, same style as Fig 2C).
 
 Also generates fig_animal_reduction (appendix): stacked bar comparing
@@ -61,7 +61,7 @@ ENDPOINTS = [
         "no_model_text": None,
     },
     {
-        "name": "Monkey hepatotoxicity",
+        "name": "NHP hepatotoxicity",
         "stage_indices": [6],
         "color": "#9B8AA6",
         "no_model_text": "insufficient data",
@@ -219,7 +219,7 @@ def draw_animal_reduction(stages, baseline_row, tox_row):
     """Stacked bar chart comparing animal usage: baseline vs OligoAI-tox."""
     scenarios = [
         ("Baseline", baseline_row),
-        ("RF", tox_row),
+        ("XGBoost", tox_row),
     ]
 
     fig, ax = plt.subplots(figsize=(8, 6), dpi=300)
@@ -327,9 +327,9 @@ def main():
     if oligoai_row:
         scenarios.append(("OligoAI\n(in vitro)", oligoai_row))
     if tox_row:
-        scenarios.append(("RF\n(in vivo)", tox_row))
+        scenarios.append(("XGBoost\n(in vivo)", tox_row))
     if combined_row:
-        scenarios.append(("OligoAI +\nRF", combined_row))
+        scenarios.append(("OligoAI +\nXGBoost", combined_row))
 
     ef_source = combined_row or tox_row or {}
 

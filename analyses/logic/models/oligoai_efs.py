@@ -4,10 +4,10 @@ Reads ``data/results/oligoai_fold{0..4}_predictions.parquet`` (written by
 ``analyses.logic.models.oligoai_eval`` from each RunPod fold run) and produces
 ``data/results/oligoai_efs.json``:
 
-- **Efficacy EF**: top-25% selection by predicted inhibition on single-dose
+- **Efficacy EF**: top-20% selection by predicted inhibition on single-dose
   screening rows (pure ASO ranking; the model's dose feature is effectively
   constant within each screen). Maps to pipeline stage 0 (inhibition > 80%).
-- **Potency EF**: top-25% selection by predicted IC50 on multi-dose
+- **Potency EF**: top-20% selection by predicted IC50 on multi-dose
   dose-response curves. Each (helm, cell, target) curve is fitted twice with
   the same 4PL used by oligoai_eval (observed and predicted). Maps to pipeline
   stage 1 (IC50 < 500 nM).
@@ -97,11 +97,11 @@ OUT_PATH = _ROOT / "data/results/oligoai_efs.json"
 
 _SOURCE_NOTE = (
     "5-fold GroupKFold patent split with HELM-level dedup (seed=42); "
-    "K=base_rate per stage (budget-matched selection)"
+    "K=0.20 (top-20% selection)"
 )
 _SOURCE_NOTE_SINGLE = (
     "fold 0 of patent-level 5-fold GroupKFold with HELM-level dedup "
-    "(seed=42); K=base_rate per stage (budget-matched selection); "
+    "(seed=42); K=0.20 (top-20% selection); "
     "folds 1-4 not yet trained — launch `just oligoai-launch-folds` for parity"
 )
 

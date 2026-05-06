@@ -1,81 +1,113 @@
 {
   "A_mouse_alt": {
     "rho": -0.2304,
+    "p": 7.2421298216052994e-34,
+    "p_bonf": 1.1587407714568479e-32,
     "significant": true,
     "n": 2701
   },
   "C_mouse_alt": {
     "rho": -0.0335,
+    "p": 0.0814615927583118,
+    "p_bonf": 1.0,
     "significant": false,
     "n": 2701
   },
   "G_mouse_alt": {
     "rho": 0.0654,
+    "p": 0.00067694341205594,
+    "p_bonf": 0.01083109459289504,
     "significant": true,
     "n": 2701
   },
   "T_mouse_alt": {
     "rho": -0.0554,
-    "significant": true,
+    "p": 0.003979981487915183,
+    "p_bonf": 0.06367970380664292,
+    "significant": false,
     "n": 2701
   },
   "A_rat_alt": {
     "rho": -0.2202,
+    "p": 2.738323475025002e-09,
+    "p_bonf": 4.381317560040003e-08,
     "significant": true,
     "n": 714
   },
   "C_rat_alt": {
     "rho": 0.2359,
+    "p": 1.737497928026786e-10,
+    "p_bonf": 2.7799966848428575e-09,
     "significant": true,
     "n": 714
   },
   "G_rat_alt": {
     "rho": 0.066,
+    "p": 0.07780557353055441,
+    "p_bonf": 1.0,
     "significant": false,
     "n": 714
   },
   "T_rat_alt": {
     "rho": 0.0573,
+    "p": 0.12613212226392612,
+    "p_bonf": 1.0,
     "significant": false,
     "n": 714
   },
   "A_mouse_bfob": {
     "rho": -0.1438,
+    "p": 6.278859103709529e-14,
+    "p_bonf": 1.0046174565935247e-12,
     "significant": true,
     "n": 2696
   },
   "C_mouse_bfob": {
     "rho": -0.2617,
+    "p": 1.8601600563554462e-43,
+    "p_bonf": 2.976256090168714e-42,
     "significant": true,
     "n": 2696
   },
   "G_mouse_bfob": {
     "rho": 0.6019,
+    "p": 1.706159307419576e-265,
+    "p_bonf": 2.729854891871322e-264,
     "significant": true,
     "n": 2696
   },
   "T_mouse_bfob": {
     "rho": -0.1496,
+    "p": 5.842456181417604e-15,
+    "p_bonf": 9.347929890268167e-14,
     "significant": true,
     "n": 2696
   },
   "A_rat_mfob": {
     "rho": -0.1304,
+    "p": 3.4242874646619695e-08,
+    "p_bonf": 5.478859943459151e-07,
     "significant": true,
     "n": 1779
   },
   "C_rat_mfob": {
     "rho": -0.1845,
+    "p": 4.386000319499278e-15,
+    "p_bonf": 7.017600511198845e-14,
     "significant": true,
     "n": 1779
   },
   "G_rat_mfob": {
     "rho": 0.5427,
+    "p": 8.04155104922956e-137,
+    "p_bonf": 1.2866481678767296e-135,
     "significant": true,
     "n": 1779
   },
   "T_rat_mfob": {
     "rho": -0.1189,
+    "p": 4.950670542564878e-07,
+    "p_bonf": 7.921072868103804e-06,
     "significant": true,
     "n": 1779
   }

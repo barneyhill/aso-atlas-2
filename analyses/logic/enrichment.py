@@ -1,12 +1,9 @@
-"""Enrichment factor (EF) computation under base-rate-matched selection.
+"""Enrichment factor (EF) computation under top-20% selection.
 
 Selection rule (single definition used everywhere in this project):
 - Rank compounds by predicted score.
-- Select the top-K, where ``K = base_rate`` of the stage (unless a caller
-  overrides with a fixed K for sensitivity sweeps). This is the "budget-matched"
-  selection: we pick as many ASOs as would pass the stage without enrichment.
-- ``EF = P(pass | selected) / P(pass overall)``. With perfect prediction,
-  every selected compound passes, so ``max EF = 1 / base_rate``.
+- Select the top 20% (``SELECTION_FRACTION``).
+- ``EF = P(pass | selected) / P(pass overall)``.
 
 For stages where pass = low value (ALT, IC50, FOB), selection picks the
 *lowest* predictions; for stages where pass = high value (inhibition),
@@ -19,6 +16,8 @@ from __future__ import annotations
 import numpy as np
 
 from analyses.logic.pipeline import PIPELINE_STAGES, PipelineStage
+
+SELECTION_FRACTION = 0.20
 
 
 def _passes(y_true: np.ndarray, stage: PipelineStage) -> np.ndarray:
@@ -47,12 +46,7 @@ def enrichment_at_top_k(
     - For "pass when low" stages (ALT, IC50, FOB) we rank ascending and take the
       lowest predictions; for "pass when high" stages (inhibition) we rank
       descending. Threshold direction is derived from ``stage.threshold_op``.
-    - If ``k is None`` (default), K is set to the stage's *base rate* — i.e. we
-      select as many ASOs as would pass without enrichment, concentrating them
-      to the highest-predicted. This ties EF to realistic screening budgets
-      (the selection size equals the expected-positive cohort size). Pass
-      ``k=0.25`` or similar to override with a fixed fraction (used for
-      sensitivity sweeps).
+    - Default K = ``SELECTION_FRACTION`` (20%). Pass a float to override.
     """
     y_true = np.asarray(y_true, dtype=float)
     y_pred = np.asarray(y_pred, dtype=float)
@@ -66,14 +60,12 @@ def enrichment_at_top_k(
     passes = _passes(y_true, stage)
     base_rate = float(passes.mean())
 
-    # Default K = base_rate when unspecified.
-    k_eff = base_rate if k is None else float(k)
+    k_eff = SELECTION_FRACTION if k is None else float(k)
     if not np.isfinite(k_eff) or k_eff <= 0:
         return {"enrichment_factor": float("nan"), "n": int(n),
                 "base_rate": round(base_rate, 4)}
 
     n_sel = max(1, int(np.floor(k_eff * n)))
-    # "Lower = safer" for stages where pass condition is < or <=
     ascending = stage.threshold_op in ("<", "<=")
     order = np.argsort(y_pred, kind="mergesort")
     selected = order[:n_sel] if ascending else order[-n_sel:]
@@ -89,7 +81,6 @@ def enrichment_at_top_k(
         "n_selected": int(n_sel),
         "selection_policy": "top_k_lowest" if ascending else "top_k_highest",
         "selection_fraction": round(k_eff, 4),
-        "k_mode": "base_rate" if k is None else "fixed",
     }
 
 
@@ -119,9 +110,8 @@ def stratified_enrichment_at_top_k(
     """EF with within-stratum ranking to control for experimental confounders.
 
     Within each unique value of ``strata`` (e.g. dosage group), compounds are
-    ranked by ``y_pred`` and the top-K_g are selected where
-    ``K_g = base_rate_g × n_g`` (budget-matched per stratum). All per-stratum
-    selections are pooled, then:
+    ranked by ``y_pred`` and the top ``SELECTION_FRACTION`` are selected per
+    stratum. All per-stratum selections are pooled, then:
 
         EF = pooled_selected_pass_rate / overall_base_rate
 
@@ -144,6 +134,7 @@ def stratified_enrichment_at_top_k(
         return {"enrichment_factor": float("nan"), "n": int(n),
                 "base_rate": round(base_rate, 4)}
 
+    k_eff = SELECTION_FRACTION if k is None else float(k)
     ascending = stage.threshold_op in ("<", "<=")
     selected_mask = np.zeros(n, dtype=bool)
     n_strata_used = 0
@@ -156,12 +147,7 @@ def stratified_enrichment_at_top_k(
             n_dropped += n_g
             continue
         n_strata_used += 1
-        g_passes = passes[g_idx]
-        g_base = float(g_passes.mean())
-        k_g = g_base if k is None else float(k)
-        if not (k_g > 0):
-            continue
-        n_sel_g = max(1, int(np.floor(k_g * n_g)))
+        n_sel_g = max(1, int(np.floor(k_eff * n_g)))
         g_order = np.argsort(y_pred[g_idx], kind="mergesort")
         g_selected = g_order[:n_sel_g] if ascending else g_order[-n_sel_g:]
         selected_mask[g_idx[g_selected]] = True
@@ -184,7 +170,7 @@ def stratified_enrichment_at_top_k(
         "n_dropped": n_dropped,
         "selection_policy": ("stratified_top_k_lowest" if ascending
                              else "stratified_top_k_highest"),
-        "k_mode": "base_rate" if k is None else "fixed",
+        "selection_fraction": round(k_eff, 4),
     }
 
 
