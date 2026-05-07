@@ -94,7 +94,7 @@ def draw_sankey_tapered(flows, node_positions, node_heights, node_labels, node_c
         ax.add_patch(rect)
         label = node_labels[node_idx]
         ax.text(x, y + height/2 + 0.05, label,
-                ha='center', va='bottom', fontsize=12, zorder=11)
+                ha='center', va='bottom', fontsize=12.6, zorder=11)
 
     return ax
 
@@ -202,7 +202,7 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
             x = label_dist * np.cos(mid_rad)
             y = label_dist * np.sin(mid_rad)
             ax.text(x, y, f'Other\ngenes\n(N={other_count})',
-                    ha='center', va='center', fontsize=10, color='black')
+                    ha='center', va='center', fontsize=10.5, color='black')
         else:
             label_gap = 0.05
             label_dist = radius + label_gap
@@ -213,15 +213,15 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
             rotation = (mid_angle + 180) if on_left else mid_angle
             ax.text(x, y, gene, ha=ha, va='center',
                     rotation=rotation, rotation_mode='anchor',
-                    fontsize=10, fontweight='bold')
+                    fontsize=10.5, fontweight='bold')
 
     # Donut hole
     ax.add_patch(Circle((0, 0), inner_radius, facecolor='white', edgecolor='white'))
 
     ax.text(0, 0.08, f'{total_meas:,}',
-            ha='center', va='center', fontsize=22, fontweight='bold')
+            ha='center', va='center', fontsize=23.1, fontweight='bold')
     ax.text(0, -0.1, f'measurements across\n{n_genes:,} target genes',
-            ha='center', va='center', fontsize=12)
+            ha='center', va='center', fontsize=12.6)
 
     ax.set_xlim(-1.45, 1.45)
     ax.set_ylim(-1.15, 1.75)
@@ -341,10 +341,29 @@ def main():
     fig.text(bb_c.x0, label_y, "B", fontsize=16, fontweight="bold", va="bottom")
     fig.text(bb_b.x0, label_y, "C", fontsize=16, fontweight="bold", va="bottom")
 
-    sankey_gene_path = _root / "typst/plots/fig_atlas" / "sankey_gene_circle.svg"
+    out_dir = _root / "typst/plots/fig_atlas"
+    sankey_gene_path = out_dir / "sankey_gene_circle.svg"
     fig.savefig(sankey_gene_path, format="svg", bbox_inches='tight')
     fig.savefig(sankey_gene_path.with_suffix(".png"), format="png", dpi=300, bbox_inches='tight')
     print(f"Saved {sankey_gene_path}")
+    plt.close(fig)
+
+    # Standalone panels (no letter labels) for manual fig_atlas.svg assembly
+    fig_b, ax_b = plt.subplots(figsize=(9, 8), dpi=300)
+    draw_sankey_tapered(flows, node_positions, node_heights, node_labels,
+                        node_colors, flow_colors, invisible_flows, ax=ax_b)
+    panel_b_path = out_dir / "fig_atlas_B.svg"
+    fig_b.savefig(panel_b_path, format="svg", bbox_inches='tight')
+    print(f"Saved {panel_b_path}")
+    plt.close(fig_b)
+
+    fig_c, ax_c = plt.subplots(figsize=(7, 8), dpi=300)
+    draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
+                     biomarker_cols, has_measurement, ax=ax_c)
+    panel_c_path = out_dir / "fig_atlas_C.svg"
+    fig_c.savefig(panel_c_path, format="svg", bbox_inches='tight')
+    print(f"Saved {panel_c_path}")
+    plt.close(fig_c)
 
 
 if __name__ == "__main__":

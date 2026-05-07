@@ -66,7 +66,7 @@ def draw_pipeline_attrition(results, stages, ax, x_positions=None):
         filter_text = stages[i]["threshold"]
         prop_text = f"{props[i] * 100:.0f}% ASOs\nhave\n{filter_text}"
         ax.text((x1 + x2) / 2, y_center, prop_text,
-                ha="center", va="center", fontsize=11, color="#404040")
+                ha="center", va="center", fontsize=12.1, color="#404040")
 
     # Stage boxes
     for i in range(n_stages + 1):
@@ -89,13 +89,13 @@ def draw_pipeline_attrition(results, stages, ax, x_positions=None):
         n_label = f"{asos[i]:,}" if asos[i] != 1 else "1"
         aso_label = "ASOs" if asos[i] != 1 else "ASO"
         ax.text(x, y_center + 0.005, n_label, ha="center", va="bottom",
-                fontsize=11, fontweight="bold", color="white", zorder=11)
+                fontsize=12.1, fontweight="bold", color="white", zorder=11)
         ax.text(x, y_center - 0.005, aso_label, ha="center", va="top",
                 fontsize=7.5, fontweight="bold", color="white", zorder=11)
 
         if i < n_stages:
             ax.text(x, y_center + h / 2 + 0.095, label_name,
-                    ha="center", va="center", fontsize=11, fontweight="bold", color="#202020")
+                    ha="center", va="center", fontsize=12.1, fontweight="bold", color="#202020")
             c = costs[i]
             cost_total = f"{c / 1e6:.1f}M" if c >= 1e6 else f"{c / 1e3:.0f}K"
             cpa = stages[i]["cost_per_aso"]
@@ -106,7 +106,7 @@ def draw_pipeline_attrition(results, stages, ax, x_positions=None):
         else:
             prev_h = box_heights[i - 1]
             ax.text(x, y_center + prev_h / 2 + 0.095, label_name,
-                    ha="center", va="center", fontsize=11, fontweight="bold", color="#202020")
+                    ha="center", va="center", fontsize=12.1, fontweight="bold", color="#202020")
 
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -206,7 +206,7 @@ def draw_stage_distributions(distributions, sample_sizes, stages, axes):
         title_name = stage["short_name"].replace("\n", " ")
         threshold_text = stage["threshold"]
         ax.set_title("")
-        ax.text(0.5, 1.20, title_name, fontsize=11, fontweight="bold",
+        ax.text(0.5, 1.20, title_name, fontsize=12.1, fontweight="bold",
                 ha="center", va="bottom", transform=ax.transAxes)
         prefix = f"({prop:.0f}% of ASOs have "
         ta_prefix = TextArea(prefix, textprops=dict(fontsize=9, color="black"))
@@ -306,11 +306,11 @@ def main():
         arrow.set_transform(fig.transFigure)
         fig.add_artist(arrow)
 
-    # Panel labels
+    # Panel labels — aligned in x; B sits just above the tallest funnel stage label
     a_label_y = 0.73 + pa_h * 0.20 + 0.03
+    b_label_y = funnel_bot + funnel_h_size * (y_center_funnel + box_h.max() / 2 + 0.12)
     fig.text(0.005, a_label_y, "A", fontsize=16, fontweight="bold", va="bottom")
-    ax_funnel.text(-0.04, 1.0, "B", fontsize=16, fontweight="bold", va="top",
-                   transform=ax_funnel.transAxes)
+    fig.text(0.005, b_label_y, "B", fontsize=16, fontweight="bold", va="bottom")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig_pipeline.svg"
