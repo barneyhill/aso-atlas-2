@@ -309,8 +309,8 @@ def main():
     # Panel labels — aligned in x; B sits just above the tallest funnel stage label
     a_label_y = 0.73 + pa_h * 0.20 + 0.03
     b_label_y = funnel_bot + funnel_h_size * (y_center_funnel + box_h.max() / 2 + 0.12)
-    fig.text(0.005, a_label_y, "A", fontsize=16, fontweight="bold", va="bottom")
-    fig.text(0.005, b_label_y, "B", fontsize=16, fontweight="bold", va="bottom")
+    fig.text(0.005, a_label_y, "A", fontsize=24, fontweight="bold", va="bottom")
+    fig.text(0.005, b_label_y, "B", fontsize=24, fontweight="bold", va="bottom")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig_pipeline.svg"

@@ -149,6 +149,19 @@ def main() -> None:
         "genes": _gene_stats(invitro, dose_response, hepatic, neuro, BIOMARKER_COLS),
     }
 
+    # ── Cross-category compound overlap (≥2 of the 4 assay categories) ──
+    category_sets = [
+        set(df["Compound ID"].dropna().unique()) for df in all_dfs
+    ]
+    all_ids = set().union(*category_sets)
+    membership = {cid: sum(cid in s for s in category_sets) for cid in all_ids}
+    n_multi = sum(1 for v in membership.values() if v >= 2)
+    numbers["category_overlap"] = {
+        "n_total_asos": len(all_ids),
+        "n_in_multi": int(n_multi),
+        "pct_in_multi": sf(100 * n_multi / len(all_ids)) if all_ids else 0,
+    }
+
     # ── Concordance / cross-endpoint statistics ──
     concordance: dict = {}
 

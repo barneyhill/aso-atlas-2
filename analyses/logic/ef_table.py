@@ -594,7 +594,8 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
         for idx, _ in COLUMN_STAGES:
             prec = r["prec_by_stage"][idx]
             prec_std = r["prec_std_by_stage"].get(idx) if not is_baseline else None
-            bold = not is_baseline and (is_combined or (prec is not None and idx in best_prec and prec == best_prec[idx]))
+            bold = (not is_baseline and not is_combined and prec is not None
+                    and idx in best_prec and prec == best_prec[idx])
             cells.append("  " + _fmt_prec_cell(prec, prec_std, bold))
         if is_baseline:
             cells.append("  [0.0%]")
@@ -605,7 +606,7 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
                 cost_txt = f"{sav:.1f}±{sav_std:.1f}%"
             else:
                 cost_txt = f"{sav:.1f}%"
-            if is_combined or sav >= best_savings_pct:
+            if is_combined:
                 cost_txt = f"*{cost_txt}*"
             cells.append(f"  [{cost_txt}]")
 

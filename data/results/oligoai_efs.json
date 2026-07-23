@@ -10,7 +10,7 @@
       2.696
     ],
     "n_folds": 5,
-    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=base_rate per stage (budget-matched selection)"
+    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection)"
   },
   "potency": {
     "enrichment_factor": 1.8237999999999999,
@@ -23,7 +23,7 @@
       1.604
     ],
     "n_folds": 5,
-    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=base_rate per stage (budget-matched selection)"
+    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection)"
   },
   "meta": {
     "mode": "5fold_patent_split",
