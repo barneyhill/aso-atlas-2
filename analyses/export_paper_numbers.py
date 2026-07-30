@@ -16,6 +16,8 @@ from analyses.utils.compounds import (
 )
 
 DATA_DIR = Path("data/oligostack/processed")
+RELEASE_DIR = Path("aso-atlas-2-release")
+RELEASE_MANIFEST = RELEASE_DIR / "release_manifest.json"
 OUT_PATH = Path("typst/data/paper_numbers.json")
 
 RESULTS_DIR = Path("data/results")
@@ -86,11 +88,30 @@ def _gene_stats(invitro, dose_response, hepatic, neuro, biomarker_cols) -> dict:
         .sort_values(ascending=False)
     )
 
-    total_all = gene_meas.sum()
+    # pandas groupby excludes null target_RNA values. Count them explicitly so
+    # the donut's "Other" wedge represents every processed readout.
+    cat_total = {
+        "in_vitro": int(len(invitro)),
+        "dose_response": int(len(dose_response)),
+        "hepatic": int(hep["_meas"].sum()),
+        "neuro": int(neu["_meas"].sum()),
+    }
+    cat_named = {
+        "in_vitro": int(iv_counts.sum()),
+        "dose_response": int(dr_counts.sum()),
+        "hepatic": int(hep_counts.sum()),
+        "neuro": int(neuro_counts.sum()),
+    }
+    null_by_category = {k: cat_total[k] - cat_named[k] for k in cat_total}
+    n_all = sum(cat_total.values())
+    n_null = sum(null_by_category.values())
+    dominant = max(null_by_category, key=null_by_category.get)
+
     cumulative_angle = 0
     cutoff_idx = len(gene_meas)
+    named_total = int(gene_meas.sum())
     for i, count in enumerate(gene_meas.values):
-        wedge_angle = 360 * count / total_all
+        wedge_angle = 360 * count / named_total
         mid_angle = cumulative_angle + wedge_angle / 2
         if (mid_angle % 360) > 270:
             cutoff_idx = i
@@ -101,63 +122,93 @@ def _gene_stats(invitro, dose_response, hepatic, neuro, biomarker_cols) -> dict:
 
     return {
         "n_unique": int(len(gene_meas)),
-        "n_total_measurements": int(total_all),
+        "n_total_measurements": n_all,
+        "n_measurements_all": n_all,
+        "n_measurements_named": named_total,
+        "n_measurements_null_gene": n_null,      # measurements lacking a target-gene annotation
+        "null_gene_by_category": null_by_category,
+        "null_gene_dominant_category": dominant,
+        "null_gene_dominant_n": null_by_category[dominant],
         "n_major": int(len(major)),
         "n_minor": int(len(minor)),
-        "major_pct": round(100 * major.sum() / total_all),
+        "n_other_measurements": int(minor.sum()) + n_null,
+        "major_pct": round(100 * major.sum() / n_all),
     }
 
 
 def main() -> None:
+    # The neurips-rebuttal release preserves the complete processed assay corpus. Rows
+    # without resolved HELM remain public and are excluded from chemistry-aware
+    # model counts. Cross-category linkage retains the submitted source
+    # Compound ID definition and therefore includes unresolved rows.
     invitro = pd.read_parquet(DATA_DIR / "in_vitro_inhibition_processed.parquet")
     dose_response = pd.read_parquet(DATA_DIR / "dose_response_processed.parquet")
     hepatic = pd.read_parquet(DATA_DIR / "hepatictoxicity_processed.parquet")
     neuro = pd.read_parquet(DATA_DIR / "neurotoxicity_processed.parquet")
 
-    all_dfs = [invitro, dose_response, hepatic, neuro]
+    release_invitro = pd.read_parquet(RELEASE_DIR / "in_vitro_inhibition.parquet")
+    release_dose_response = pd.read_parquet(RELEASE_DIR / "dose_response.parquet")
+    release_hepatic = pd.read_parquet(RELEASE_DIR / "hepatotoxicity.parquet")
+    release_neuro = pd.read_parquet(RELEASE_DIR / "neurotoxicity.parquet")
+    release_dfs = [
+        release_invitro, release_dose_response, release_hepatic, release_neuro,
+    ]
+    release_manifest = json.loads(RELEASE_MANIFEST.read_text())
+    release_configs = release_manifest["configs"]
+    release_totals = release_manifest["totals"]
 
     numbers = {
         "in_vitro": {
-            "n_measurements": len(invitro),
-            "n_asos": int(invitro["Compound ID"].nunique()),
+            "n_measurements": release_configs["in_vitro_inhibition"]["assay_readouts"],
+            "n_asos": release_configs["in_vitro_inhibition"]["compounds"],
         },
         "dose_response": {
-            "n_measurements": len(dose_response),
-            "n_asos": int(dose_response["Compound ID"].nunique()),
+            "n_measurements": release_configs["dose_response"]["assay_readouts"],
+            "n_asos": release_configs["dose_response"]["compounds"],
         },
         "hepatic": {
-            "n_records": len(hepatic),
-            "n_measurements": int(
-                hepatic[BIOMARKER_COLS].apply(
-                    lambda row: sum(has_measurement(row[c]) for c in BIOMARKER_COLS),
-                    axis=1,
-                ).sum()
-            ),
-            "n_asos": int(hepatic["Compound ID"].nunique()),
+            "n_records": release_configs["hepatotoxicity"]["rows"],
+            "n_measurements": release_configs["hepatotoxicity"]["assay_readouts"],
+            "n_asos": release_configs["hepatotoxicity"]["compounds"],
             "n_biomarker_channels": sum(
-                1 for col in BIOMARKER_COLS if hepatic[col].notna().any()
+                1 for col in BIOMARKER_COLS if release_hepatic[col].notna().any()
             ),
         },
         "neuro": {
-            "n_records": len(neuro),
-            "n_measurements": int(neuro["FOB_score"].apply(has_measurement).sum()),
-            "n_asos": int(neuro["Compound ID"].nunique()),
-            "n_mouse": int((neuro["species"] == "Mouse").sum()),
-            "n_rat": int((neuro["species"] == "Rat").sum()),
-            "gene_coverage_pct": int(100 * neuro["target_RNA"].notna().mean()),
+            "n_records": release_configs["neurotoxicity"]["rows"],
+            "n_measurements": release_configs["neurotoxicity"]["assay_readouts"],
+            "n_asos": release_configs["neurotoxicity"]["compounds"],
+            "n_mouse": int((release_neuro["species"] == "Mouse").sum()),
+            "n_rat": int((release_neuro["species"] == "Rat").sum()),
+            "gene_coverage_pct": int(100 * release_neuro["target_RNA"].notna().mean()),
         },
-        "genes": _gene_stats(invitro, dose_response, hepatic, neuro, BIOMARKER_COLS),
+        "genes": _gene_stats(
+            release_invitro,
+            release_dose_response,
+            release_hepatic,
+            release_neuro,
+            BIOMARKER_COLS,
+        ),
+        "release": {
+            "version": release_manifest["version"],
+            "n_readouts": release_totals["released_assay_readouts"],
+            "n_compounds": release_totals["compounds"],
+            "n_patents": release_totals["patents"],
+            "n_named_target_genes": release_totals["named_target_genes"],
+            "model_eligible_readouts": release_totals["model_eligible_assay_readouts"],
+            "unresolved_helm_readouts": release_totals["unresolved_helm_readouts"],
+        },
     }
 
-    # ── Cross-category compound overlap (≥2 of the 4 assay categories) ──
-    category_sets = [
-        set(df["Compound ID"].dropna().unique()) for df in all_dfs
-    ]
+    # ── Cross-category source-ID overlap (≥2 of the 4 assay categories) ──
+    # This is the identity unit used for the submitted 15,339 / 168,537 result.
+    category_sets = [set(df["Compound ID"].dropna().unique()) for df in release_dfs]
     all_ids = set().union(*category_sets)
     membership = {cid: sum(cid in s for s in category_sets) for cid in all_ids}
     n_multi = sum(1 for v in membership.values() if v >= 2)
     numbers["category_overlap"] = {
-        "n_total_asos": len(all_ids),
+        "identity_key": "Compound ID",
+        "n_total_source_ids": len(all_ids),
         "n_in_multi": int(n_multi),
         "pct_in_multi": sf(100 * n_multi / len(all_ids)) if all_ids else 0,
     }
@@ -375,6 +426,65 @@ def main() -> None:
     cs_path = RESULTS_DIR / "cost_sensitivity.json"
     if cs_path.exists():
         numbers["cost_sensitivity"] = _round_floats(json.loads(cs_path.read_text()))
+
+    # ── Focused AC uncertainty analysis (corrected expected-count pipeline) ──
+    try:
+        from analyses.logic.models.ac_uncertainty import compute as _ac_uncertainty_compute
+        numbers["ac_uncertainty"] = _ac_uncertainty_compute()
+    except Exception as e:
+        warnings.warn(f"ac_uncertainty skipped: {e}")
+
+    # ── Threshold-sensitivity sweep (rebuttal S3: tornado + ION582 lenient gate) ──
+    try:
+        from analyses.logic.models.threshold_sweep import compute as _thr_compute
+        numbers["threshold_sweep"] = _thr_compute()
+    except Exception as e:
+        warnings.warn(f"threshold_sweep skipped: {e}")
+
+    # ── EF-composition bias + plateau (rebuttal S1) ──
+    try:
+        from analyses.logic.models.s1_ef_composition_bias import compute as _s1_compute
+        numbers["s1"] = _s1_compute()
+    except Exception as e:
+        warnings.warn(f"s1 skipped: {e}")
+    try:
+        from analyses.logic.models.s1_plateau import compute as _s1p_compute
+        _s1p = _s1p_compute()
+        _s1p.pop("sweep", None)  # keep the sweep grid out of paper_numbers (large)
+        numbers["s1_plateau"] = _s1p
+    except Exception as e:
+        warnings.warn(f"s1_plateau skipped: {e}")
+
+    # ── Gold-standard extraction audit (rebuttal A1: precision AND recall) ──
+    audit_path = RESULTS_DIR / "gold_standard_audit.json"
+    if audit_path.exists():
+        a = json.loads(audit_path.read_text())
+        ext = [f for f in a["secondary_fields"] if f["kind"] == "extraction"]
+        nor = [f for f in a["secondary_fields"] if f["kind"] == "normalisation"]
+
+        def _pool(fs, key):
+            k, n = sum(f[key]["k"] for f in fs), sum(f[key]["n"] for f in fs)
+            return {"k": k, "n": n, "pct": round(100 * k / n, 2) if n else 0.0}
+
+        numbers["audit"] = _round_floats({
+            "corpus": a["corpus"],
+            "recall": {k: v for k, v in a["recall"].items() if k != "note"},
+            "precision": {k: v for k, v in a["precision"].items()
+                          if k != "discordance_examples"},
+            "fields": {"extraction_raw": _pool(ext, "raw"),
+                       "extraction_vocab": _pool(ext, "after_vocabulary"),
+                       "normalisation_raw": _pool(nor, "raw"),
+                       "normalisation_vocab": _pool(nor, "after_vocabulary")},
+            "chemistry": a["chemistry_normalisation"],
+            "coverage": {k: v for k, v in a["coverage"].items()
+                         if k not in ("lowest_coverage_partial_tables",
+                                      "dropped_dose_arm_examples")},
+            "stratified_recall": {s["by"]: s["levels"] for s in a["stratified_recall"]},
+            "error_taxonomy": a["error_taxonomy"],
+        })
+    else:
+        warnings.warn(f"{audit_path} not found — run "
+                      "`uv run python analyses/validation/gold_standard_audit.py`")
 
     # ── Mouse vs Rat ALT concordance (dose-matched) ──
     mra_path = RESULTS_DIR / "mouse_rat_alt.json"

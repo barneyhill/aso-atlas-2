@@ -108,18 +108,22 @@ def _load_oligoai_enrichment() -> dict:
             "source": efs["efficacy"].get("source", ""),
         },
     }
+    for key in ("base_rate", "selected_pass_rate", "fold_efs", "fold_precs", "fold_base_rates"):
+        if key in efs["efficacy"]:
+            out["inhibition"][key] = efs["efficacy"][key]
     if "fold_efs" in efs["efficacy"]:
-        out["inhibition"]["fold_efs"] = efs["efficacy"]["fold_efs"]
-        out["inhibition"]["ef_mean"] = efs["efficacy"]["enrichment_factor"]
+        out["inhibition"]["ef_mean"] = float(np.mean(efs["efficacy"]["fold_efs"]))
         out["inhibition"]["ef_std"] = efs["efficacy"].get("enrichment_factor_std")
     if "potency" in efs and np.isfinite(efs["potency"].get("enrichment_factor", float("nan"))):
         out["potency"] = {
             "enrichment_factor": efs["potency"]["enrichment_factor"],
             "source": efs["potency"].get("source", ""),
         }
+        for key in ("base_rate", "selected_pass_rate", "fold_efs", "fold_precs", "fold_base_rates"):
+            if key in efs["potency"]:
+                out["potency"][key] = efs["potency"][key]
         if "fold_efs" in efs["potency"]:
-            out["potency"]["fold_efs"] = efs["potency"]["fold_efs"]
-            out["potency"]["ef_mean"] = efs["potency"]["enrichment_factor"]
+            out["potency"]["ef_mean"] = float(np.mean(efs["potency"]["fold_efs"]))
             out["potency"]["ef_std"] = efs["potency"].get("enrichment_factor_std")
     return out
 

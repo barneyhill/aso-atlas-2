@@ -3,7 +3,7 @@ license: cc-by-4.0
 language:
   - en
 pretty_name: ASO Atlas 2.0
-version: neurips-rebuttal
+version: <<VERSION>>
 size_categories:
   - 100K<n<1M
 task_categories:
@@ -17,73 +17,48 @@ tags:
   - toxicity
   - benchmarking
 configs:
-  - config_name: in_vitro_inhibition
-    description: Single-dose in vitro mRNA inhibition measurements
-    data_files:
-      - split: full
-        path: in_vitro_inhibition.parquet
-  - config_name: dose_response
-    description: Multi-dose in vitro inhibition measurements for dose-response curve fitting
-    data_files:
-      - split: full
-        path: dose_response.parquet
-  - config_name: hepatotoxicity
-    description: In vivo hepatic toxicity biomarker measurements (ALT, AST, ALB, BUN, CREA, TBIL, PC ratio)
-    data_files:
-      - split: full
-        path: hepatotoxicity.parquet
-  - config_name: neurotoxicity
-    description: In vivo neurotoxicity functional observation battery (FOB) scores
-    data_files:
-      - split: full
-        path: neurotoxicity.parquet
+<<CONFIGS_YAML>>
 ---
 
 # ASO Atlas 2.0
 
 A benchmark dataset for evaluating antisense oligonucleotide (ASO) prediction across the preclinical pipeline.
 
-**Snapshot `neurips-rebuttal`.** The dataset revision, release-build code and Croissant metadata
-are pinned by the tag `neurips-rebuttal`; the submitted manuscript remains pinned to its
+**Snapshot `<<VERSION>>`.** The dataset revision, release-build code and Croissant metadata
+are pinned by the tag `<<RELEASE_TAG>>`; the submitted manuscript remains pinned to its
 submission commit:
 
 | Artifact | Pinned at |
 |---|---|
-| Dataset revision (this repo) | `neurips-rebuttal` |
-| Code | [`https://github.com/barneyhill/aso-atlas-2`](https://github.com/barneyhill/aso-atlas-2/tree/neurips-rebuttal), tag `neurips-rebuttal` |
-| Manuscript source | commit `ff973af` (`neurips-submission`) |
-| NeurIPS Croissant metadata | [`croissant.json`](croissant.json), Croissant 1.1 core + RAI, pinned to `neurips-rebuttal` |
+| Dataset revision (this repo) | `<<RELEASE_TAG>>` |
+| Code | [`<<CODE_REPO>>`](<<CODE_REPO>>/tree/<<RELEASE_TAG>>), tag `<<RELEASE_TAG>>` |
+| Manuscript source | commit `<<MANUSCRIPT_COMMIT>>` (`<<MANUSCRIPT_REF>>`) |
+| NeurIPS Croissant metadata | [`croissant.json`](croissant.json), Croissant 1.1 core + RAI, pinned to `<<RELEASE_TAG>>` |
 
 Every count on this card is generated from `release_manifest.json`; none is maintained by hand.
 
 ## Dataset Summary
 
-ASO Atlas 2.0 contains 295,007 assay readouts targeting 430 named
-genes and contributed by 606 USPTO patent filings. Of these,
-290,841 readouts have a resolved HELM annotation and span
-165,782 unique HELM compounds; 4,166 readouts retain the
+ASO Atlas 2.0 contains <<TOTAL_READOUTS>> assay readouts targeting <<TOTAL_GENES>> named
+genes and contributed by <<TOTAL_PATENTS>> USPTO patent filings. Of these,
+<<MODEL_READOUTS>> readouts have a resolved HELM annotation and span
+<<TOTAL_COMPOUNDS>> unique HELM compounds; <<UNRESOLVED_READOUTS>> readouts retain the
 reported assay outcome but lack resolvable chemistry.
 
 A readout is one non-null assay value. In vitro and neurotoxicity observations carry one
 readout; a hepatotoxicity observation can carry up to seven biomarker readouts.
-A named target gene is one unique non-null target_RNA after resolving transcript identifiers to gene symbols with the same genomic annotation mapping used by the submitted manuscript.
-A unique HELM compound is one unique non-null HELM Annotation. Rows without a resolvable HELM remain in the assay corpus but are excluded from unique-HELM-compound and model-benchmark counts.
-Cross-category linkage retains the submitted source-identifier unit: a distinct Compound ID reported in at least two of the four assay categories. By this definition, 15,339 of 168,537 source Compound IDs (9.1%) are linked.
-model_eligible is true exactly when HELM Annotation is non-null. These rows form the chemistry-aware modelling subset; false rows remain valid assay readouts for corpus and phenotype-frequency analyses.
+<<GENE_DEFINITION>>
+<<COMPOUND_DEFINITION>>
+<<LINKAGE_DEFINITION>>
+<<MODEL_ELIGIBILITY_DEFINITION>>
 
 ### Paper-count reconciliation
 
-The submitted manuscript and tagged `neurips-rebuttal` snapshot both contain 295,007 processed readouts. Of these, 4,166 lack a resolvable HELM annotation and are retained with `model_eligible=false`; the remaining 290,841 readouts form the chemistry-aware modelling subset. The manuscript's 1,125 count refers to table-bearing source documents entering extraction; 606 USPTO filings contribute data to the complete release and 596 contribute to its HELM-resolved subset.
+<<PAPER_XREF>>
 
 The dataset spans four preclinical assay types that mirror the sequential screening pipeline used in ASO drug development:
 
-| Config | Readouts | Model-eligible readouts | Unique HELM compounds | Named target genes |
-|--------|---------:|------------------------:|----------------------:|-------------------:|
-| `in_vitro_inhibition` | 174,459 | 173,286 | 161,434 | 389 |
-| `dose_response` | 99,821 | 97,236 | 16,375 | 130 |
-| `hepatotoxicity` | 15,831 | 15,427 | 1,881 | 42 |
-| `neurotoxicity` | 4,896 | 4,892 | 3,312 | 15 |
-| **Total** | **295,007** | **290,841** | **165,782** | **430** |
+<<SUMMARY_TABLE>>
 
 ## Paper benchmark folds
 
@@ -242,7 +217,7 @@ or generalisation to chemistries and organisations absent from the source patent
 - **No independent validation**: All measurements originate from patent applicants' own experiments. Cross-laboratory reproducibility is unknown.
 - **Extraction errors**: LLM-based extraction may introduce errors. A validation audit is included in the accompanying code repository.
 - **Heterogeneous protocols**: Assay conditions (cell lines, doses, timepoints) vary across patents and are not standardised.
-- **Unresolved chemistry**: 4,166 assay readouts lack a resolvable HELM annotation and cannot be used directly in chemistry-aware models.
+- **Unresolved chemistry**: <<UNRESOLVED_READOUTS>> assay readouts lack a resolvable HELM annotation and cannot be used directly in chemistry-aware models.
 
 ### Ethical considerations
 

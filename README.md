@@ -6,18 +6,31 @@ Submitted to NeurIPS 2026.
 
 ## Dataset
 
-ASO Atlas 2.0 is the largest public multi-endpoint ASO preclinical dataset, extracted from Ionis Pharmaceuticals' USPTO patent filings and annotated with HELM chemical-structure strings. It spans 430 target genes and four assay categories:
+ASO Atlas 2.0 is the largest public multi-endpoint ASO preclinical dataset, extracted from Ionis Pharmaceuticals' USPTO patent filings. The complete release spans 430 target genes and four assay categories; rows with resolved chemistry are annotated with HELM strings:
 
-| Assay | Measurements | Unique ASOs |
+| Assay | Readouts | Unique HELM compounds |
 |---|--:|--:|
-| In vitro inhibition | 174,459 | 163,802 |
-| Dose-response (IC50) | 99,821 | 16,834 |
-| Hepatotoxicity (7 biomarkers) | 15,831 | 2,051 |
-| Neurotoxicity (FOB scores) | 4,896 | 3,316 |
+| In vitro inhibition | 174,459 | 161,434 |
+| Dose-response (IC50) | 99,821 | 16,375 |
+| Hepatotoxicity (7 biomarkers) | 15,831 | 1,881 |
+| Neurotoxicity (FOB scores) | 4,896 | 3,312 |
+
+The extraction pipeline began with 1,125 table-bearing source documents. The downloadable
+`neurips-rebuttal` snapshot contains records contributed by 606 patents. Across the four assay
+categories, 15,339 of 168,537 distinct source `Compound ID` values (9.1%) occur in at
+least two categories. This source-ID linkage statistic is separate from the 165,782
+unique resolved HELM structures reported above.
 
 The dataset is hosted on Hugging Face: [huggingface.co/datasets/barneyhill/aso-atlas-2](https://huggingface.co/datasets/barneyhill/aso-atlas-2)
 
-The best-performing models (OligoAI + CatBoost toxicity) are deployed at [sitlabs.org/oligoai](https://sitlabs.org/oligoai).
+The manuscript and tagged `neurips-rebuttal` download both contain all 295,007 processed
+readouts across 430 named target genes. Of these, 290,841 readouts
+have resolved HELM chemistry and are marked `model_eligible=true`; 4,166 retain their
+assay outcomes with unresolved chemistry. Exact endpoint-specific paper folds are included
+for the model-eligible subset. See the versioned dataset card and DOI
+[10.57967/hf/8687](https://doi.org/10.57967/hf/8687).
+
+The models used in the primary analysis (OligoAI + XGBoost toxicity) are deployed at [sitlabs.org/oligoai](https://sitlabs.org/oligoai).
 
 ## Repository structure
 
@@ -76,31 +89,45 @@ tests/                            # Correctness tests (pytest)
 ### Setup
 
 ```bash
-uv sync
+uv sync --frozen
 ```
 
-### Build everything
+The committed `.python-version` and `uv.lock` pin the interpreter and complete Python
+environment used for the release.
+
+### Reproduce from the released processed snapshot
 
 ```bash
-just build    # clean → models → pipeline → export → plots → compile (~2 min)
+just reproduce
 ```
 
-This runs the full pipeline end-to-end and compiles the manuscript to `typst/main.pdf`.
+This reruns the lightweight fitted baselines and cost model, exports the paper ledger,
+regenerates the figures, and compiles `typst/main.pdf`. It starts from the versioned
+processed parquets and frozen heavyweight benchmark outputs included in the code release;
+it does not require an OpenAI key or the raw LLM-extraction intermediates.
+
+To rebuild the processed parquets from local raw extraction outputs instead, run
+`just build`. Those large intermediates are not part of the Hugging Face data product;
+the extraction workflow that creates them from USPTO XML is documented under
+`patent_collate/`.
 
 ### Individual steps
 
 | Command | What it does | Time |
 |---|---|---|
-| `just analysis` | Clean data + fit Hagedorn models + run pipeline | ~80s |
+| `just reproduce` | Reproduce the paper from versioned processed data/results | ~2 min |
+| `just build` | Full rebuild from locally available raw extraction outputs | depends on inputs |
+| `just analysis` | Clean raw data + fit Hagedorn models + run pipeline | ~80s |
 | `just export` | Export paper numbers to JSON | <5s |
 | `just plots` | Generate all figures | ~30s |
 | `just compile` | Compile manuscript (`typst/main.typ`) | ~1s |
 | `just test` | Run test suite | <10s |
+| `just aso-atlas-2-release` | Rebuild and audit the exact HF/Croissant bundle | ~5s |
 | `just oligogym` | Run OligoGym benchmark (CPU-heavy) | ~2-4h |
 
 ### Key pipeline stages
 
-1. **`just analysis`** processes raw patent CSVs into cleaned parquets, fits the Hagedorn hepatotoxicity and neurotoxicity replication models, and runs the pipeline cost model.
+1. **`just analysis`** processes locally available raw patent CSVs into cleaned parquets, fits the Hagedorn hepatotoxicity and neurotoxicity replication models, and runs the pipeline cost model.
 2. **`just export`** reads JSON results and writes `paper_numbers.json`, which the manuscript reads so that no numbers are hardcoded.
 3. **`just plots`** generates all figures as SVGs into `typst/plots/`.
 4. **`just compile`** compiles the Typst manuscript to PDF.
@@ -111,7 +138,10 @@ This runs the full pipeline end-to-end and compiles the manuscript to `typst/mai
 just test
 ```
 
-Covers HELM parsing, enrichment factor computation, OligoAI evaluation, and consistency of exported paper numbers.
+The versioned release contract checks dataset counts, paper reconciliation, split leakage,
+the explicit Hugging Face allowlist, file hashes, and the NeurIPS Croissant core and RAI
+fields. Additional validation-audit tests are packaged with the corresponding code-release
+evidence rather than the Hugging Face dataset.
 
 ## License
 

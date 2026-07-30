@@ -1,0 +1,170 @@
+{
+  "K": 0.2,
+  "pairs": {
+    "neuro": {
+      "idx": [
+        3,
+        5
+      ],
+      "n_mouse": 2712,
+      "n_rat": 1783,
+      "n_shared": 1464,
+      "spearman_rho": 0.648,
+      "n_mouse_pass": 858,
+      "frac_rat_tested_failing_mouse_gate": 0.414,
+      "q_rat_marginal_in_shared": 0.335,
+      "q_rat_given_mouse_pass": 0.509,
+      "baseline_uplift": 1.522,
+      "model_precision_marginal": 0.749,
+      "model_precision_conditional": 0.857,
+      "model_precision_gate_matched": 0.89,
+      "n_gate_matched": 363,
+      "model_uplift": 1.188,
+      "model_uplift_hagedorn_proxy": 1.154,
+      "model_source": "XGBoost",
+      "display_name": "Mouse \u2192 rat neuro",
+      "conditional_to_marginal_ef_ratio": 0.781
+    },
+    "hepatic": {
+      "idx": [
+        2,
+        4
+      ],
+      "n_mouse": 1942,
+      "n_rat": 508,
+      "n_shared": 459,
+      "spearman_rho": 0.295,
+      "n_mouse_pass": 301,
+      "frac_rat_tested_failing_mouse_gate": 0.344,
+      "q_rat_marginal_in_shared": 0.403,
+      "q_rat_given_mouse_pass": 0.449,
+      "baseline_uplift": 1.113,
+      "model_precision_marginal": 0.469,
+      "model_precision_conditional": null,
+      "model_precision_gate_matched": 0.571,
+      "n_gate_matched": 69,
+      "model_uplift": 1.217,
+      "model_source": "XGBoost",
+      "display_name": "Mouse \u2192 rat hepatic",
+      "conditional_to_marginal_ef_ratio": 1.093
+    },
+    "efficacy_potency": {
+      "idx": [
+        0,
+        1
+      ],
+      "n_mouse": 163802,
+      "n_rat": 8064,
+      "n_shared": 7158,
+      "spearman_rho": -0.235,
+      "n_mouse_pass": 3421,
+      "frac_rat_tested_failing_mouse_gate": 0.522,
+      "q_rat_marginal_in_shared": 0.317,
+      "q_rat_given_mouse_pass": 0.386,
+      "baseline_uplift": 1.218,
+      "model_precision_marginal": 0.552,
+      "model_precision_conditional": null,
+      "model_precision_gate_matched": 0.736,
+      "n_gate_matched": 1075,
+      "model_uplift": 1.334,
+      "display_name": "Efficacy \u2192 potency",
+      "conditional_to_marginal_ef_ratio": 1.095
+    }
+  },
+  "published_base_rates": {
+    "2": 0.5139,
+    "3": 0.4451,
+    "4": 0.3996,
+    "5": 0.3522
+  },
+  "conditioned_base_rates": {
+    "2": 0.5139,
+    "3": 0.4451,
+    "4": 0.4448,
+    "5": 0.5361
+  },
+  "savings_by_cell": {
+    "neuro_only": {
+      "ceiling": {
+        "marginal_marginal": 70.8,
+        "marginal_conditional": 70.8,
+        "conditional_marginal": 62.7,
+        "conditional_conditional": 62.7
+      },
+      "expected": {
+        "marginal_marginal": 77.4,
+        "marginal_conditional": 80.0,
+        "conditional_marginal": 66.5,
+        "conditional_conditional": 70.5
+      }
+    },
+    "symmetric": {
+      "ceiling": {
+        "marginal_marginal": 70.8,
+        "marginal_conditional": 71.6,
+        "conditional_marginal": 60.1,
+        "conditional_conditional": 61.3
+      },
+      "expected": {
+        "marginal_marginal": 77.4,
+        "marginal_conditional": 80.5,
+        "conditional_marginal": 64.4,
+        "conditional_conditional": 69.2
+      }
+    },
+    "tox_pairs": {
+      "ceiling": {
+        "marginal_marginal": 70.8,
+        "marginal_conditional": 70.8,
+        "conditional_marginal": 57.0,
+        "conditional_conditional": 57.0
+      },
+      "expected": {
+        "marginal_marginal": 77.4,
+        "marginal_conditional": 82.3,
+        "conditional_marginal": 65.4,
+        "conditional_conditional": 71.2
+      }
+    },
+    "all_pairs": {
+      "ceiling": {
+        "marginal_marginal": 70.8,
+        "marginal_conditional": 71.6,
+        "conditional_marginal": 54.1,
+        "conditional_conditional": 55.4
+      },
+      "expected": {
+        "marginal_marginal": 77.4,
+        "marginal_conditional": 82.6,
+        "conditional_marginal": 63.2,
+        "conditional_conditional": 70.0
+      }
+    }
+  },
+  "ordering_check": {
+    "ceiling": {
+      "published_base_rates": {
+        "in_vitro_only": 22.5,
+        "in_vivo_only": 65.7,
+        "combined": 70.8
+      },
+      "conditioned_base_rates": {
+        "in_vitro_only": 17.0,
+        "in_vivo_only": 48.7,
+        "combined": 54.1
+      }
+    },
+    "expected": {
+      "published_base_rates": {
+        "in_vitro_only": 22.1,
+        "in_vivo_only": 74.0,
+        "combined": 77.4
+      },
+      "conditioned_base_rates": {
+        "in_vitro_only": 16.1,
+        "in_vivo_only": 59.4,
+        "combined": 63.2
+      }
+    }
+  }
+}

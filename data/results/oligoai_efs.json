@@ -1,6 +1,10 @@
 {
   "efficacy": {
-    "enrichment_factor": 2.4932,
+    "enrichment_factor": 2.441,
+    "selected_pass_rate": 0.2396,
+    "base_rate": 0.0982,
+    "n": 116268,
+    "n_selected": 23236,
     "enrichment_factor_std": 0.3954929835028682,
     "fold_efs": [
       1.956,
@@ -9,11 +13,29 @@
       2.877,
       2.696
     ],
+    "fold_precs": [
+      0.1948,
+      0.193,
+      0.3432,
+      0.2409,
+      0.2188
+    ],
+    "fold_base_rates": [
+      0.0996,
+      0.0705,
+      0.1562,
+      0.0837,
+      0.0811
+    ],
     "n_folds": 5,
-    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection)"
+    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection); primary point estimate pooled across OOF predictions"
   },
   "potency": {
-    "enrichment_factor": 1.8237999999999999,
+    "enrichment_factor": 1.797,
+    "selected_pass_rate": 0.5612,
+    "base_rate": 0.3122,
+    "n": 4820,
+    "n_selected": 964,
     "enrichment_factor_std": 0.18161552797049038,
     "fold_efs": [
       1.748,
@@ -22,8 +44,22 @@
       1.77,
       1.604
     ],
+    "fold_precs": [
+      0.4341,
+      0.455,
+      0.3841,
+      0.7706,
+      0.7086
+    ],
+    "fold_base_rates": [
+      0.2484,
+      0.2376,
+      0.1845,
+      0.4355,
+      0.4418
+    ],
     "n_folds": 5,
-    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection)"
+    "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection); primary point estimate pooled across OOF predictions"
   },
   "meta": {
     "mode": "5fold_patent_split",
@@ -31,35 +67,55 @@
       {
         "path": "data/results/oligoai_fold0_predictions.parquet",
         "efficacy_ef": 1.956,
+        "efficacy_precision": 0.1948,
+        "efficacy_base_rate": 0.0996,
         "potency_ef": 1.748,
+        "potency_precision": 0.4341,
+        "potency_base_rate": 0.2484,
         "n_efficacy": 25105,
         "n_potency": 910
       },
       {
         "path": "data/results/oligoai_fold1_predictions.parquet",
         "efficacy_ef": 2.74,
+        "efficacy_precision": 0.193,
+        "efficacy_base_rate": 0.0705,
         "potency_ef": 1.915,
+        "potency_precision": 0.455,
+        "potency_base_rate": 0.2376,
         "n_efficacy": 22979,
         "n_potency": 1111
       },
       {
         "path": "data/results/oligoai_fold2_predictions.parquet",
         "efficacy_ef": 2.197,
+        "efficacy_precision": 0.3432,
+        "efficacy_base_rate": 0.1562,
         "potency_ef": 2.082,
+        "potency_precision": 0.3841,
+        "potency_base_rate": 0.1845,
         "n_efficacy": 22800,
         "n_potency": 824
       },
       {
         "path": "data/results/oligoai_fold3_predictions.parquet",
         "efficacy_ef": 2.877,
+        "efficacy_precision": 0.2409,
+        "efficacy_base_rate": 0.0837,
         "potency_ef": 1.77,
+        "potency_precision": 0.7706,
+        "potency_base_rate": 0.4355,
         "n_efficacy": 21619,
         "n_potency": 1093
       },
       {
         "path": "data/results/oligoai_fold4_predictions.parquet",
         "efficacy_ef": 2.696,
+        "efficacy_precision": 0.2188,
+        "efficacy_base_rate": 0.0811,
         "potency_ef": 1.604,
+        "potency_precision": 0.7086,
+        "potency_base_rate": 0.4418,
         "n_efficacy": 23808,
         "n_potency": 876
       }

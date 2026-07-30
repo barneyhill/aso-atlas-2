@@ -1,0 +1,347 @@
+{
+  "canonical_savings_pct": 71.0,
+  "plateau_q_lo": 0.5,
+  "plateau_q_hi": 0.99,
+  "references": {
+    "XGBoost cost-model input": {
+      "q": 0.749,
+      "savings_pct": 71.0,
+      "on_plateau": true
+    },
+    "marginal (paper assumption)": {
+      "q": 0.789,
+      "savings_pct": 71.0,
+      "on_plateau": true
+    },
+    "conditional (UEDf mechanism)": {
+      "q": 0.857,
+      "savings_pct": 71.0,
+      "on_plateau": true
+    },
+    "XGBoost CI floor": {
+      "q": 0.586,
+      "savings_pct": 71.0,
+      "on_plateau": true
+    }
+  },
+  "no_ceiling": {
+    "q_marginal": 0.789,
+    "q_conditional": 0.857,
+    "savings_marginal_pct": 78.3,
+    "savings_conditional_pct": 79.6,
+    "delta_pt": 1.27,
+    "delta_by_target": {
+      "1": 1.27,
+      "10": 1.27,
+      "100": 1.27,
+      "1000": 1.27
+    }
+  },
+  "sweep": [
+    {
+      "q": 0.4,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.41,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.42,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.43,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.44,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.45,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.46,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.47,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.48,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.49,
+      "asos_rat_neuro": 3,
+      "savings_pct": 58.4
+    },
+    {
+      "q": 0.5,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.51,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.52,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.53,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.54,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.55,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.56,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.57,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.58,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.59,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.6,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.61,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.62,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.63,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.64,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.65,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.66,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.67,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.68,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.69,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.7,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.71,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.72,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.73,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.74,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.75,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.76,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.77,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.78,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.79,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.8,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.81,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.82,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.83,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.84,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.85,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.86,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.87,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.88,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.89,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.9,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.91,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.92,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.93,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.94,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.95,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.96,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.97,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.98,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 0.99,
+      "asos_rat_neuro": 2,
+      "savings_pct": 71.0
+    },
+    {
+      "q": 1.0,
+      "asos_rat_neuro": 1,
+      "savings_pct": 79.2
+    }
+  ]
+}

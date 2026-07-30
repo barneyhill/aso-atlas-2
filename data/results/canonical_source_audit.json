@@ -1,0 +1,946 @@
+{
+  "method": {
+    "scope": "retained production table-level canonical_link decisions, fixed before reading Atlas rows",
+    "linkage": "canonical table + endpoint + channel + compound + occurrence multiplicity",
+    "outcome_and_context": "outcome, dose and assay context are evaluated only after one-to-one linkage",
+    "precision_denominator": "all Atlas readouts in the frozen canonical tables",
+    "recall_denominator": "all 22,000 verified Gold readouts"
+  },
+  "versions": {
+    "release_version": "2.0.0",
+    "release_commit": null
+  },
+  "table_mapping": {
+    "verified_measurement_tables": 311,
+    "by_production_dedup_category": {
+      "exact_byte_duplicate": 36,
+      "false_similarity_duplicate": 1,
+      "formatting_failed": 1,
+      "self_canonical": 273
+    },
+    "by_relationship": {
+      "absent": 2,
+      "equivalent": 309
+    },
+    "mapping_sha256": "aaab566a2a5a725ef7e284f5a186816508d768c5e44b2615290dce3aa49f403c"
+  },
+  "stratification": {
+    "scope": "labels derived from verified Gold rows and original USPTO XML",
+    "source_tables_labelled": 311,
+    "tables_requiring_percent_control_conversion": 164,
+    "tables_requiring_dose_unit_conversion": 0,
+    "dose_unit_conversion_note": "No audited table states an input dose in uM or mM; dose-unit conversion accuracy is therefore not estimable in this four-patent corpus.",
+    "chemistry_compounds_labelled": 4677,
+    "chemistry_compounds_total": 10758
+  },
+  "validation_role": "primary unified production-canonical source audit",
+  "scope_frozen_before_atlas_comparison": true,
+  "primary_status": "complete",
+  "scored_relationships": [
+    "absent",
+    "equivalent",
+    "partial"
+  ],
+  "gold_readouts_scored": 22000,
+  "scoped_atlas_readouts": 9064,
+  "true_positive": 8993,
+  "false_negative": 13007,
+  "false_positive": 71,
+  "precision_pct": 98.74,
+  "recall_pct": 40.68,
+  "precision_ci95": {
+    "low_pct": 98.49,
+    "high_pct": 98.95
+  },
+  "recall_ci95": {
+    "low_pct": 40.03,
+    "high_pct": 41.33
+  },
+  "fully_correct_measurements": 8950,
+  "fully_correct_measurement_precision_pct": 98.74,
+  "fully_correct_measurement_recall_pct": 40.68,
+  "all_fields_correct_measurements": 7650,
+  "all_fields_correct_precision_pct": 84.4,
+  "all_fields_correct_recall_pct": 34.77,
+  "identity_precision_pct": 99.22,
+  "identity_recall_pct": 40.88,
+  "value_correct_given_identity_match": 8950,
+  "value_incorrect_given_identity_match": 43,
+  "value_accuracy_given_identity_match_pct": 99.52,
+  "context_correct_given_identity_match": 7650,
+  "context_incorrect_given_identity_match": 1343,
+  "context_accuracy_given_identity_match_pct": 85.07,
+  "identity_unresolved_gold_counted_as_fn": 0,
+  "identity_unresolved_atlas_counted_as_fp": 0,
+  "validation_unresolved_gold_excluded": 0,
+  "validation_unresolved_gold_tables": 0,
+  "atlas_readouts_excluded_pending_source_validation": 0,
+  "by_relationship": {
+    "absent": {
+      "gold_readouts": 238,
+      "scoped_atlas_readouts": 0,
+      "true_positive": 0,
+      "false_negative": 238,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": null,
+      "recall_pct": 0.0,
+      "precision_ci95": null,
+      "recall_ci95": {
+        "low_pct": 0.0,
+        "high_pct": 1.59
+      },
+      "fully_correct_measurements": 0,
+      "fully_correct_measurement_precision_pct": null,
+      "fully_correct_measurement_recall_pct": 0.0,
+      "all_fields_correct_measurements": 0,
+      "all_fields_correct_precision_pct": null,
+      "all_fields_correct_recall_pct": 0.0,
+      "identity_precision_pct": null,
+      "identity_recall_pct": 0.0,
+      "context_accuracy_given_identity_match_pct": null,
+      "value_accuracy_given_identity_match_pct": null
+    },
+    "equivalent": {
+      "gold_readouts": 21762,
+      "scoped_atlas_readouts": 9064,
+      "true_positive": 8993,
+      "false_negative": 12769,
+      "false_positive": 71,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 98.74,
+      "recall_pct": 41.13,
+      "precision_ci95": {
+        "low_pct": 98.49,
+        "high_pct": 98.95
+      },
+      "recall_ci95": {
+        "low_pct": 40.47,
+        "high_pct": 41.78
+      },
+      "fully_correct_measurements": 8950,
+      "fully_correct_measurement_precision_pct": 98.74,
+      "fully_correct_measurement_recall_pct": 41.13,
+      "all_fields_correct_measurements": 7650,
+      "all_fields_correct_precision_pct": 84.4,
+      "all_fields_correct_recall_pct": 35.15,
+      "identity_precision_pct": 99.22,
+      "identity_recall_pct": 41.32,
+      "context_accuracy_given_identity_match_pct": 85.07,
+      "value_accuracy_given_identity_match_pct": 99.52
+    }
+  },
+  "by_validation_stage": {
+    "production_exact_byte_duplicate": {
+      "gold_readouts": 1963,
+      "scoped_atlas_readouts": 1868,
+      "true_positive": 1850,
+      "false_negative": 113,
+      "false_positive": 18,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 98.98,
+      "recall_pct": 94.19,
+      "precision_ci95": {
+        "low_pct": 98.42,
+        "high_pct": 99.35
+      },
+      "recall_ci95": {
+        "low_pct": 93.07,
+        "high_pct": 95.14
+      },
+      "fully_correct_measurements": 1849,
+      "fully_correct_measurement_precision_pct": 98.98,
+      "fully_correct_measurement_recall_pct": 94.19,
+      "all_fields_correct_measurements": 1561,
+      "all_fields_correct_precision_pct": 83.57,
+      "all_fields_correct_recall_pct": 79.52,
+      "identity_precision_pct": 99.04,
+      "identity_recall_pct": 94.24,
+      "context_accuracy_given_identity_match_pct": 84.38,
+      "value_accuracy_given_identity_match_pct": 99.95
+    },
+    "production_false_similarity_duplicate": {
+      "gold_readouts": 1,
+      "scoped_atlas_readouts": 0,
+      "true_positive": 0,
+      "false_negative": 1,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": null,
+      "recall_pct": 0.0,
+      "precision_ci95": null,
+      "recall_ci95": {
+        "low_pct": 0.0,
+        "high_pct": 79.35
+      },
+      "fully_correct_measurements": 0,
+      "fully_correct_measurement_precision_pct": null,
+      "fully_correct_measurement_recall_pct": 0.0,
+      "all_fields_correct_measurements": 0,
+      "all_fields_correct_precision_pct": null,
+      "all_fields_correct_recall_pct": 0.0,
+      "identity_precision_pct": null,
+      "identity_recall_pct": 0.0,
+      "context_accuracy_given_identity_match_pct": null,
+      "value_accuracy_given_identity_match_pct": null
+    },
+    "production_formatting_failed": {
+      "gold_readouts": 237,
+      "scoped_atlas_readouts": 0,
+      "true_positive": 0,
+      "false_negative": 237,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": null,
+      "recall_pct": 0.0,
+      "precision_ci95": null,
+      "recall_ci95": {
+        "low_pct": 0.0,
+        "high_pct": 1.6
+      },
+      "fully_correct_measurements": 0,
+      "fully_correct_measurement_precision_pct": null,
+      "fully_correct_measurement_recall_pct": 0.0,
+      "all_fields_correct_measurements": 0,
+      "all_fields_correct_precision_pct": null,
+      "all_fields_correct_recall_pct": 0.0,
+      "identity_precision_pct": null,
+      "identity_recall_pct": 0.0,
+      "context_accuracy_given_identity_match_pct": null,
+      "value_accuracy_given_identity_match_pct": null
+    },
+    "production_self_canonical": {
+      "gold_readouts": 19799,
+      "scoped_atlas_readouts": 7196,
+      "true_positive": 7143,
+      "false_negative": 12656,
+      "false_positive": 53,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 98.68,
+      "recall_pct": 35.87,
+      "precision_ci95": {
+        "low_pct": 98.39,
+        "high_pct": 98.92
+      },
+      "recall_ci95": {
+        "low_pct": 35.2,
+        "high_pct": 36.54
+      },
+      "fully_correct_measurements": 7101,
+      "fully_correct_measurement_precision_pct": 98.68,
+      "fully_correct_measurement_recall_pct": 35.87,
+      "all_fields_correct_measurements": 6089,
+      "all_fields_correct_precision_pct": 84.62,
+      "all_fields_correct_recall_pct": 30.75,
+      "identity_precision_pct": 99.26,
+      "identity_recall_pct": 36.08,
+      "context_accuracy_given_identity_match_pct": 85.24,
+      "value_accuracy_given_identity_match_pct": 99.41
+    }
+  },
+  "by_endpoint": {
+    "hepatotox": {
+      "gold_readouts": 1226,
+      "scoped_atlas_readouts": 937,
+      "true_positive": 884,
+      "false_negative": 342,
+      "false_positive": 53,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 89.86,
+      "recall_pct": 68.68,
+      "precision_ci95": {
+        "low_pct": 87.76,
+        "high_pct": 91.63
+      },
+      "recall_ci95": {
+        "low_pct": 66.03,
+        "high_pct": 71.21
+      },
+      "fully_correct_measurements": 842,
+      "fully_correct_measurement_precision_pct": 89.86,
+      "fully_correct_measurement_recall_pct": 68.68,
+      "all_fields_correct_measurements": 0,
+      "all_fields_correct_precision_pct": 0.0,
+      "all_fields_correct_recall_pct": 0.0,
+      "identity_precision_pct": 94.34,
+      "identity_recall_pct": 72.1,
+      "context_accuracy_given_identity_match_pct": 0.0,
+      "value_accuracy_given_identity_match_pct": 95.25
+    },
+    "inhibition": {
+      "gold_readouts": 20104,
+      "scoped_atlas_readouts": 7479,
+      "true_positive": 7461,
+      "false_negative": 12643,
+      "false_positive": 18,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.75,
+      "recall_pct": 37.11,
+      "precision_ci95": {
+        "low_pct": 99.6,
+        "high_pct": 99.84
+      },
+      "recall_ci95": {
+        "low_pct": 36.44,
+        "high_pct": 37.78
+      },
+      "fully_correct_measurements": 7460,
+      "fully_correct_measurement_precision_pct": 99.75,
+      "fully_correct_measurement_recall_pct": 37.11,
+      "all_fields_correct_measurements": 7180,
+      "all_fields_correct_precision_pct": 96.0,
+      "all_fields_correct_recall_pct": 35.71,
+      "identity_precision_pct": 99.76,
+      "identity_recall_pct": 37.11,
+      "context_accuracy_given_identity_match_pct": 96.23,
+      "value_accuracy_given_identity_match_pct": 99.99
+    },
+    "neurotox": {
+      "gold_readouts": 670,
+      "scoped_atlas_readouts": 648,
+      "true_positive": 648,
+      "false_negative": 22,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 100.0,
+      "recall_pct": 96.72,
+      "precision_ci95": {
+        "low_pct": 99.41,
+        "high_pct": 100.0
+      },
+      "recall_ci95": {
+        "low_pct": 95.08,
+        "high_pct": 97.82
+      },
+      "fully_correct_measurements": 648,
+      "fully_correct_measurement_precision_pct": 100.0,
+      "fully_correct_measurement_recall_pct": 96.72,
+      "all_fields_correct_measurements": 470,
+      "all_fields_correct_precision_pct": 72.53,
+      "all_fields_correct_recall_pct": 70.15,
+      "identity_precision_pct": 100.0,
+      "identity_recall_pct": 96.72,
+      "context_accuracy_given_identity_match_pct": 72.53,
+      "value_accuracy_given_identity_match_pct": 100.0
+    }
+  },
+  "by_family": {
+    "AGT_PCT_US2016_56068": {
+      "gold_readouts": 4414,
+      "scoped_atlas_readouts": 1865,
+      "true_positive": 1820,
+      "false_negative": 2594,
+      "false_positive": 45,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 95.34,
+      "recall_pct": 40.28,
+      "precision_ci95": {
+        "low_pct": 94.28,
+        "high_pct": 96.2
+      },
+      "recall_ci95": {
+        "low_pct": 38.84,
+        "high_pct": 41.74
+      },
+      "fully_correct_measurements": 1778,
+      "fully_correct_measurement_precision_pct": 95.34,
+      "fully_correct_measurement_recall_pct": 40.28,
+      "all_fields_correct_measurements": 1398,
+      "all_fields_correct_precision_pct": 74.96,
+      "all_fields_correct_recall_pct": 31.67,
+      "identity_precision_pct": 97.59,
+      "identity_recall_pct": 41.23,
+      "context_accuracy_given_identity_match_pct": 76.81,
+      "value_accuracy_given_identity_match_pct": 97.69
+    },
+    "C9ORF72_PCT_US2014_60194": {
+      "gold_readouts": 4207,
+      "scoped_atlas_readouts": 1069,
+      "true_positive": 1069,
+      "false_negative": 3138,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 100.0,
+      "recall_pct": 25.41,
+      "precision_ci95": {
+        "low_pct": 99.64,
+        "high_pct": 100.0
+      },
+      "recall_ci95": {
+        "low_pct": 24.12,
+        "high_pct": 26.75
+      },
+      "fully_correct_measurements": 1069,
+      "fully_correct_measurement_precision_pct": 100.0,
+      "fully_correct_measurement_recall_pct": 25.41,
+      "all_fields_correct_measurements": 742,
+      "all_fields_correct_precision_pct": 69.41,
+      "all_fields_correct_recall_pct": 17.64,
+      "identity_precision_pct": 100.0,
+      "identity_recall_pct": 25.41,
+      "context_accuracy_given_identity_match_pct": 69.41,
+      "value_accuracy_given_identity_match_pct": 100.0
+    },
+    "IRF4_PCT_US2019_020201": {
+      "gold_readouts": 8711,
+      "scoped_atlas_readouts": 4654,
+      "true_positive": 4628,
+      "false_negative": 4083,
+      "false_positive": 26,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.42,
+      "recall_pct": 53.12,
+      "precision_ci95": {
+        "low_pct": 99.16,
+        "high_pct": 99.6
+      },
+      "recall_ci95": {
+        "low_pct": 52.07,
+        "high_pct": 54.16
+      },
+      "fully_correct_measurements": 4627,
+      "fully_correct_measurement_precision_pct": 99.42,
+      "fully_correct_measurement_recall_pct": 53.12,
+      "all_fields_correct_measurements": 4034,
+      "all_fields_correct_precision_pct": 86.68,
+      "all_fields_correct_recall_pct": 46.31,
+      "identity_precision_pct": 99.44,
+      "identity_recall_pct": 53.13,
+      "context_accuracy_given_identity_match_pct": 87.17,
+      "value_accuracy_given_identity_match_pct": 99.98
+    },
+    "SCN2A_PCT_US2021_44887": {
+      "gold_readouts": 4668,
+      "scoped_atlas_readouts": 1476,
+      "true_positive": 1476,
+      "false_negative": 3192,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 100.0,
+      "recall_pct": 31.62,
+      "precision_ci95": {
+        "low_pct": 99.74,
+        "high_pct": 100.0
+      },
+      "recall_ci95": {
+        "low_pct": 30.3,
+        "high_pct": 32.97
+      },
+      "fully_correct_measurements": 1476,
+      "fully_correct_measurement_precision_pct": 100.0,
+      "fully_correct_measurement_recall_pct": 31.62,
+      "all_fields_correct_measurements": 1476,
+      "all_fields_correct_precision_pct": 100.0,
+      "all_fields_correct_recall_pct": 31.62,
+      "identity_precision_pct": 100.0,
+      "identity_recall_pct": 31.62,
+      "context_accuracy_given_identity_match_pct": 100.0,
+      "value_accuracy_given_identity_match_pct": 100.0
+    }
+  },
+  "by_table_format": {
+    "dose-series": {
+      "gold_readouts": 7890,
+      "scoped_atlas_readouts": 4706,
+      "true_positive": 4688,
+      "false_negative": 3202,
+      "false_positive": 18,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 98.7,
+      "recall_pct": 58.87,
+      "precision_ci95": {
+        "low_pct": 98.34,
+        "high_pct": 98.99
+      },
+      "recall_ci95": {
+        "low_pct": 57.78,
+        "high_pct": 59.95
+      },
+      "fully_correct_measurements": 4645,
+      "fully_correct_measurement_precision_pct": 98.7,
+      "fully_correct_measurement_recall_pct": 58.87,
+      "all_fields_correct_measurements": 4444,
+      "all_fields_correct_precision_pct": 94.43,
+      "all_fields_correct_recall_pct": 56.32,
+      "identity_precision_pct": 99.62,
+      "identity_recall_pct": 59.42,
+      "context_accuracy_given_identity_match_pct": 94.8,
+      "value_accuracy_given_identity_match_pct": 99.08
+    },
+    "single-dose": {
+      "gold_readouts": 14110,
+      "scoped_atlas_readouts": 4358,
+      "true_positive": 4305,
+      "false_negative": 9805,
+      "false_positive": 53,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 98.78,
+      "recall_pct": 30.51,
+      "precision_ci95": {
+        "low_pct": 98.41,
+        "high_pct": 99.07
+      },
+      "recall_ci95": {
+        "low_pct": 29.76,
+        "high_pct": 31.28
+      },
+      "fully_correct_measurements": 4305,
+      "fully_correct_measurement_precision_pct": 98.78,
+      "fully_correct_measurement_recall_pct": 30.51,
+      "all_fields_correct_measurements": 3206,
+      "all_fields_correct_precision_pct": 73.57,
+      "all_fields_correct_recall_pct": 22.72,
+      "identity_precision_pct": 98.78,
+      "identity_recall_pct": 30.51,
+      "context_accuracy_given_identity_match_pct": 74.47,
+      "value_accuracy_given_identity_match_pct": 100.0
+    }
+  },
+  "by_table_layout": {
+    "multi-column melt": {
+      "gold_readouts": 1840,
+      "scoped_atlas_readouts": 1546,
+      "true_positive": 1493,
+      "false_negative": 347,
+      "false_positive": 53,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 93.86,
+      "recall_pct": 78.86,
+      "precision_ci95": {
+        "low_pct": 92.55,
+        "high_pct": 94.95
+      },
+      "recall_ci95": {
+        "low_pct": 76.93,
+        "high_pct": 80.66
+      },
+      "fully_correct_measurements": 1451,
+      "fully_correct_measurement_precision_pct": 93.86,
+      "fully_correct_measurement_recall_pct": 78.86,
+      "all_fields_correct_measurements": 470,
+      "all_fields_correct_precision_pct": 30.4,
+      "all_fields_correct_recall_pct": 25.54,
+      "identity_precision_pct": 96.57,
+      "identity_recall_pct": 81.14,
+      "context_accuracy_given_identity_match_pct": 31.48,
+      "value_accuracy_given_identity_match_pct": 97.19
+    },
+    "single measurement column": {
+      "gold_readouts": 20160,
+      "scoped_atlas_readouts": 7518,
+      "true_positive": 7500,
+      "false_negative": 12660,
+      "false_positive": 18,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.75,
+      "recall_pct": 37.2,
+      "precision_ci95": {
+        "low_pct": 99.61,
+        "high_pct": 99.84
+      },
+      "recall_ci95": {
+        "low_pct": 36.53,
+        "high_pct": 37.87
+      },
+      "fully_correct_measurements": 7499,
+      "fully_correct_measurement_precision_pct": 99.75,
+      "fully_correct_measurement_recall_pct": 37.2,
+      "all_fields_correct_measurements": 7180,
+      "all_fields_correct_precision_pct": 95.5,
+      "all_fields_correct_recall_pct": 35.62,
+      "identity_precision_pct": 99.76,
+      "identity_recall_pct": 37.2,
+      "context_accuracy_given_identity_match_pct": 95.73,
+      "value_accuracy_given_identity_match_pct": 99.99
+    }
+  },
+  "by_unit_conversion": {
+    "% control \u2192 % inhibition": {
+      "gold_readouts": 11126,
+      "scoped_atlas_readouts": 5043,
+      "true_positive": 5025,
+      "false_negative": 6101,
+      "false_positive": 18,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.62,
+      "recall_pct": 45.16,
+      "precision_ci95": {
+        "low_pct": 99.41,
+        "high_pct": 99.76
+      },
+      "recall_ci95": {
+        "low_pct": 44.23,
+        "high_pct": 46.08
+      },
+      "fully_correct_measurements": 5024,
+      "fully_correct_measurement_precision_pct": 99.62,
+      "fully_correct_measurement_recall_pct": 45.16,
+      "all_fields_correct_measurements": 5012,
+      "all_fields_correct_precision_pct": 99.39,
+      "all_fields_correct_recall_pct": 45.05,
+      "identity_precision_pct": 99.64,
+      "identity_recall_pct": 45.16,
+      "context_accuracy_given_identity_match_pct": 99.74,
+      "value_accuracy_given_identity_match_pct": 99.98
+    },
+    "no outcome conversion": {
+      "gold_readouts": 8978,
+      "scoped_atlas_readouts": 2436,
+      "true_positive": 2436,
+      "false_negative": 6542,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 100.0,
+      "recall_pct": 27.13,
+      "precision_ci95": {
+        "low_pct": 99.84,
+        "high_pct": 100.0
+      },
+      "recall_ci95": {
+        "low_pct": 26.22,
+        "high_pct": 28.06
+      },
+      "fully_correct_measurements": 2436,
+      "fully_correct_measurement_precision_pct": 100.0,
+      "fully_correct_measurement_recall_pct": 27.13,
+      "all_fields_correct_measurements": 2168,
+      "all_fields_correct_precision_pct": 89.0,
+      "all_fields_correct_recall_pct": 24.15,
+      "identity_precision_pct": 100.0,
+      "identity_recall_pct": 27.13,
+      "context_accuracy_given_identity_match_pct": 89.0,
+      "value_accuracy_given_identity_match_pct": 100.0
+    },
+    "not applicable (toxicity endpoint)": {
+      "gold_readouts": 1896,
+      "scoped_atlas_readouts": 1585,
+      "true_positive": 1532,
+      "false_negative": 364,
+      "false_positive": 53,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 94.01,
+      "recall_pct": 78.59,
+      "precision_ci95": {
+        "low_pct": 92.73,
+        "high_pct": 95.07
+      },
+      "recall_ci95": {
+        "low_pct": 76.68,
+        "high_pct": 80.37
+      },
+      "fully_correct_measurements": 1490,
+      "fully_correct_measurement_precision_pct": 94.01,
+      "fully_correct_measurement_recall_pct": 78.59,
+      "all_fields_correct_measurements": 470,
+      "all_fields_correct_precision_pct": 29.65,
+      "all_fields_correct_recall_pct": 24.79,
+      "identity_precision_pct": 96.66,
+      "identity_recall_pct": 80.8,
+      "context_accuracy_given_identity_match_pct": 30.68,
+      "value_accuracy_given_identity_match_pct": 97.26
+    }
+  },
+  "by_chemistry_class": {
+    "5-10-5 MOE gapmer": {
+      "gold_readouts": 2700,
+      "scoped_atlas_readouts": 1324,
+      "true_positive": 1289,
+      "false_negative": 1411,
+      "false_positive": 35,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 97.36,
+      "recall_pct": 47.74,
+      "precision_ci95": {
+        "low_pct": 96.35,
+        "high_pct": 98.09
+      },
+      "recall_ci95": {
+        "low_pct": 45.86,
+        "high_pct": 49.63
+      },
+      "fully_correct_measurements": 1289,
+      "fully_correct_measurement_precision_pct": 97.36,
+      "fully_correct_measurement_recall_pct": 47.74,
+      "all_fields_correct_measurements": 1131,
+      "all_fields_correct_precision_pct": 85.42,
+      "all_fields_correct_recall_pct": 41.89,
+      "identity_precision_pct": 97.36,
+      "identity_recall_pct": 47.74,
+      "context_accuracy_given_identity_match_pct": 87.74,
+      "value_accuracy_given_identity_match_pct": 100.0
+    },
+    "MOE gapmer (other wing)": {
+      "gold_readouts": 1555,
+      "scoped_atlas_readouts": 393,
+      "true_positive": 383,
+      "false_negative": 1172,
+      "false_positive": 10,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 97.46,
+      "recall_pct": 24.63,
+      "precision_ci95": {
+        "low_pct": 95.38,
+        "high_pct": 98.61
+      },
+      "recall_ci95": {
+        "low_pct": 22.55,
+        "high_pct": 26.83
+      },
+      "fully_correct_measurements": 383,
+      "fully_correct_measurement_precision_pct": 97.46,
+      "fully_correct_measurement_recall_pct": 24.63,
+      "all_fields_correct_measurements": 328,
+      "all_fields_correct_precision_pct": 83.46,
+      "all_fields_correct_recall_pct": 21.09,
+      "identity_precision_pct": 97.46,
+      "identity_recall_pct": 24.63,
+      "context_accuracy_given_identity_match_pct": 85.64,
+      "value_accuracy_given_identity_match_pct": 100.0
+    },
+    "cEt gapmer": {
+      "gold_readouts": 963,
+      "scoped_atlas_readouts": 723,
+      "true_positive": 723,
+      "false_negative": 240,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 97.93,
+      "recall_pct": 73.52,
+      "precision_ci95": {
+        "low_pct": 96.61,
+        "high_pct": 98.74
+      },
+      "recall_ci95": {
+        "low_pct": 70.64,
+        "high_pct": 76.21
+      },
+      "fully_correct_measurements": 708,
+      "fully_correct_measurement_precision_pct": 97.93,
+      "fully_correct_measurement_recall_pct": 73.52,
+      "all_fields_correct_measurements": 474,
+      "all_fields_correct_precision_pct": 65.56,
+      "all_fields_correct_recall_pct": 49.22,
+      "identity_precision_pct": 100.0,
+      "identity_recall_pct": 75.08,
+      "context_accuracy_given_identity_match_pct": 65.56,
+      "value_accuracy_given_identity_match_pct": 97.93
+    },
+    "mixed MOE/cEt": {
+      "gold_readouts": 4424,
+      "scoped_atlas_readouts": 1517,
+      "true_positive": 1507,
+      "false_negative": 2917,
+      "false_positive": 10,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.14,
+      "recall_pct": 34.0,
+      "precision_ci95": {
+        "low_pct": 98.54,
+        "high_pct": 99.5
+      },
+      "recall_ci95": {
+        "low_pct": 32.61,
+        "high_pct": 35.41
+      },
+      "fully_correct_measurements": 1504,
+      "fully_correct_measurement_precision_pct": 99.14,
+      "fully_correct_measurement_recall_pct": 34.0,
+      "all_fields_correct_measurements": 1173,
+      "all_fields_correct_precision_pct": 77.32,
+      "all_fields_correct_recall_pct": 26.51,
+      "identity_precision_pct": 99.34,
+      "identity_recall_pct": 34.06,
+      "context_accuracy_given_identity_match_pct": 77.84,
+      "value_accuracy_given_identity_match_pct": 99.8
+    },
+    "unknown / not stated": {
+      "gold_readouts": 12358,
+      "scoped_atlas_readouts": 5107,
+      "true_positive": 5091,
+      "false_negative": 7267,
+      "false_positive": 16,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.2,
+      "recall_pct": 40.99,
+      "precision_ci95": {
+        "low_pct": 98.91,
+        "high_pct": 99.41
+      },
+      "recall_ci95": {
+        "low_pct": 40.13,
+        "high_pct": 41.86
+      },
+      "fully_correct_measurements": 5066,
+      "fully_correct_measurement_precision_pct": 99.2,
+      "fully_correct_measurement_recall_pct": 40.99,
+      "all_fields_correct_measurements": 4544,
+      "all_fields_correct_precision_pct": 88.98,
+      "all_fields_correct_recall_pct": 36.77,
+      "identity_precision_pct": 99.69,
+      "identity_recall_pct": 41.2,
+      "context_accuracy_given_identity_match_pct": 89.26,
+      "value_accuracy_given_identity_match_pct": 99.51
+    }
+  },
+  "by_assay_readout": {
+    "ALT": {
+      "gold_readouts": 308,
+      "scoped_atlas_readouts": 244,
+      "true_positive": 233,
+      "false_negative": 75,
+      "false_positive": 11,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 90.98,
+      "recall_pct": 72.08,
+      "precision_ci95": {
+        "low_pct": 86.73,
+        "high_pct": 93.97
+      },
+      "recall_ci95": {
+        "low_pct": 66.82,
+        "high_pct": 76.79
+      },
+      "fully_correct_measurements": 222,
+      "fully_correct_measurement_precision_pct": 90.98,
+      "fully_correct_measurement_recall_pct": 72.08,
+      "all_fields_correct_measurements": 0,
+      "all_fields_correct_precision_pct": 0.0,
+      "all_fields_correct_recall_pct": 0.0,
+      "identity_precision_pct": 95.49,
+      "identity_recall_pct": 75.65,
+      "context_accuracy_given_identity_match_pct": 0.0,
+      "value_accuracy_given_identity_match_pct": 95.28
+    },
+    "FOB score": {
+      "gold_readouts": 670,
+      "scoped_atlas_readouts": 648,
+      "true_positive": 648,
+      "false_negative": 22,
+      "false_positive": 0,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 100.0,
+      "recall_pct": 96.72,
+      "precision_ci95": {
+        "low_pct": 99.41,
+        "high_pct": 100.0
+      },
+      "recall_ci95": {
+        "low_pct": 95.08,
+        "high_pct": 97.82
+      },
+      "fully_correct_measurements": 648,
+      "fully_correct_measurement_precision_pct": 100.0,
+      "fully_correct_measurement_recall_pct": 96.72,
+      "all_fields_correct_measurements": 470,
+      "all_fields_correct_precision_pct": 72.53,
+      "all_fields_correct_recall_pct": 70.15,
+      "identity_precision_pct": 100.0,
+      "identity_recall_pct": 96.72,
+      "context_accuracy_given_identity_match_pct": 72.53,
+      "value_accuracy_given_identity_match_pct": 100.0
+    },
+    "inhibition": {
+      "gold_readouts": 20104,
+      "scoped_atlas_readouts": 7479,
+      "true_positive": 7461,
+      "false_negative": 12643,
+      "false_positive": 18,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 99.75,
+      "recall_pct": 37.11,
+      "precision_ci95": {
+        "low_pct": 99.6,
+        "high_pct": 99.84
+      },
+      "recall_ci95": {
+        "low_pct": 36.44,
+        "high_pct": 37.78
+      },
+      "fully_correct_measurements": 7460,
+      "fully_correct_measurement_precision_pct": 99.75,
+      "fully_correct_measurement_recall_pct": 37.11,
+      "all_fields_correct_measurements": 7180,
+      "all_fields_correct_precision_pct": 96.0,
+      "all_fields_correct_recall_pct": 35.71,
+      "identity_precision_pct": 99.76,
+      "identity_recall_pct": 37.11,
+      "context_accuracy_given_identity_match_pct": 96.23,
+      "value_accuracy_given_identity_match_pct": 99.99
+    },
+    "other hepatic biomarker": {
+      "gold_readouts": 918,
+      "scoped_atlas_readouts": 693,
+      "true_positive": 651,
+      "false_negative": 267,
+      "false_positive": 42,
+      "identity_unresolved_gold_counted_as_fn": 0,
+      "identity_unresolved_atlas_counted_as_fp": 0,
+      "precision_pct": 89.47,
+      "recall_pct": 67.54,
+      "precision_ci95": {
+        "low_pct": 86.96,
+        "high_pct": 91.54
+      },
+      "recall_ci95": {
+        "low_pct": 64.44,
+        "high_pct": 70.49
+      },
+      "fully_correct_measurements": 620,
+      "fully_correct_measurement_precision_pct": 89.47,
+      "fully_correct_measurement_recall_pct": 67.54,
+      "all_fields_correct_measurements": 0,
+      "all_fields_correct_precision_pct": 0.0,
+      "all_fields_correct_recall_pct": 0.0,
+      "identity_precision_pct": 93.94,
+      "identity_recall_pct": 70.92,
+      "context_accuracy_given_identity_match_pct": 0.0,
+      "value_accuracy_given_identity_match_pct": 95.24
+    }
+  },
+  "definitions": {
+    "primary_linkage": "table class + endpoint + channel + compound + retained multiplicity only",
+    "tp": "one-to-one identity match under primary linkage",
+    "fn": "every other Gold readout in equivalent/partial/absent mapped tables",
+    "fp": "every other Atlas readout in declared production-canonical tables",
+    "precision_pct": "identity-paired, value-correct measurements / all scoped Atlas measurements",
+    "recall_pct": "identity-paired, value-correct measurements / all scored Gold measurements",
+    "fully_correct": "identity-paired measurement whose outcome passes legacy.same_value",
+    "all_fields_correct": "value-correct pair with all declared downstream dose/assay fields correct",
+    "identity_precision_pct": "identity pairs / all scoped Atlas measurements",
+    "identity_recall_pct": "identity pairs / all scored Gold measurements",
+    "outcome_comparator": "legacy.same_value (scalar, text, list and numpy/vector aware)",
+    "partial": "fixed production canonical file is admitted; non-overlap becomes FN/FP",
+    "absent": "Gold table had no valid transcribed canonical counterpart (input/formatting failure or false similarity collapse); all Gold readouts become FN",
+    "unresolved": "source relationship validation incomplete; excluded and blocks complete status",
+    "scope_source": "patent_collate _deduplicate_files file_to_canonical, before transcription",
+    "downstream_provenance": "raw collations contain canonical files only; canonical_link duplicates are filtered before step-3 collation"
+  }
+}

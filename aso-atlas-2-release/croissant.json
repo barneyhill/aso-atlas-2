@@ -1,0 +1,1260 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "sc": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "dct": "http://purl.org/dc/terms/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "annotation": "cr:annotation",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "description": {
+      "@container": "@language"
+    },
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "excludes": "cr:excludes",
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "readLines": "cr:readLines",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
+    "sdVersion": "cr:sdVersion",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "unArchive": "cr:unArchive",
+    "value": "cr:value",
+    "name": {
+      "@container": "@language"
+    }
+  },
+  "@type": "sc:Dataset",
+  "name": "ASO Atlas 2.0",
+  "description": "A versioned benchmark dataset for evaluating antisense oligonucleotide prediction across the preclinical pipeline, with in vitro inhibition, dose-response, hepatotoxicity and neurotoxicity assay records. Cross-category linkage retains the submitted source-identifier unit: a distinct Compound ID reported in at least two of the four assay categories. By this definition, 15,339 of 168,537 source Compound IDs (9.1%) are linked.",
+  "conformsTo": [
+    "http://mlcommons.org/croissant/1.1",
+    "http://mlcommons.org/croissant/RAI/1.0"
+  ],
+  "url": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/tree/neurips-rebuttal",
+  "sameAs": "https://doi.org/10.57967/hf/8687",
+  "version": "neurips-rebuttal",
+  "datePublished": "2026-04-30",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "creator": [
+    {
+      "@type": "sc:Person",
+      "name": "Barney Hill"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Nicola Whiffin"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Carlo Rinaldi"
+    },
+    {
+      "@type": "sc:Person",
+      "name": "Stephan J. Sanders"
+    }
+  ],
+  "keywords": [
+    "antisense oligonucleotides",
+    "drug discovery",
+    "toxicity",
+    "dose response",
+    "benchmarking",
+    "HELM"
+  ],
+  "citeAs": "@dataset{hill_aso_atlas_2_2026, author={Hill, Barney and Whiffin, Nicola and Rinaldi, Carlo and Sanders, Stephan J.}, title={ASO Atlas 2.0}, year={2026}, version={neurips-rebuttal}, doi={10.57967/hf/8687}}",
+  "isLiveDataset": false,
+  "rai:dataLimitations": [
+    "The measurements come from patent disclosures by one organisation and mainly represent 2'-MOE gapmers; other chemistries, organisations and experimental protocols are underrepresented.",
+    "Patent reporting is selective, protocols are heterogeneous and the measurements have not been independently replicated across laboratories.",
+    "LLM-assisted extraction can introduce errors despite automated checks and a manually verified audit. This dataset is not recommended for clinical decision-making, human safety prediction, dose selection or legal conclusions.",
+    "Rows without a resolvable HELM annotation are retained to preserve the complete assay corpus but cannot be used as chemistry-aware model inputs; model_eligible identifies the HELM-resolved benchmark subset."
+  ],
+  "rai:dataBiases": [
+    "Single-originator and patent-selection bias may make reported pass rates and model performance unrepresentative of the wider ASO design space.",
+    "Mouse and rat experiments dominate the in vivo records; monkey and dog data are sparse, and disclosed negative results may be incomplete.",
+    "Cell-line, target-gene and assay-protocol coverage follows the source patents rather than a population-balanced sampling design."
+  ],
+  "rai:personalSensitiveInformation": "No human-subject records, patient-level health information or personally identifiable information are included. The release contains public patent assay records, compound structures, animal-study measurements and public CCLE cell-line identifiers only.",
+  "rai:dataUseCases": "Established uses are research benchmarking and exploratory model development for patent-derived ASO in vitro efficacy and preclinical toxicity endpoints, using the supplied patent-grouped folds. The records represent reported assay outcomes, not independently replicated biological truth. Validity has not been established for clinical decisions, human toxicity, treatment selection, cross-chemistry generalisation or prospective laboratory deployment.",
+  "rai:dataSocialImpact": "Potential benefits include more reproducible ASO model evaluation, lower screening costs and reduced animal use. Potential harms arise if extraction errors or the source patents' narrow chemistry and target distribution are treated as universally representative, which could misprioritise candidates or research areas. Version pinning, source identifiers, leakage-controlled folds, a validation audit and explicit non-clinical-use limitations mitigate but do not eliminate these risks.",
+  "rai:hasSyntheticData": false,
+  "prov:wasDerivedFrom": [
+    {
+      "@id": "https://ppubs.uspto.gov/pubwebapp/"
+    },
+    {
+      "@id": "https://depmap.org/portal/data_page/?tab=allData"
+    }
+  ],
+  "prov:wasGeneratedBy": [
+    {
+      "@type": "prov:Activity",
+      "prov:label": "USPTO patent-table extraction",
+      "description": "A three-stage GPT-5-mini/GPT-5 pipeline located and transformed tables from public USPTO full-text XML. Models called Python for data transformations rather than directly generating assay values."
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:label": "Curation, annotation and quality control",
+      "description": "HELM chemistry, gene and cell-line names were standardised; CCLE identifiers were joined from DepMap Public 25Q3 Model.csv (downloaded 2026-01-20; SHA-256 9dbb9de8805696c1345816ab07edd23fb4fd95e117739f3c5c3b1cf062c1233b); implausible values and unusable chemistry were filtered; duplicate measurements were resolved. Manual mappings and a verified patent-table audit checked extraction quality."
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "in_vitro_inhibition.parquet",
+      "name": "in_vitro_inhibition.parquet",
+      "description": "Version-pinned assay records.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/in_vitro_inhibition.parquet?download=true",
+      "encodingFormat": "application/x-parquet",
+      "contentSize": "9024462 B",
+      "sha256": "447426f598d3c1763efd0eb31786cc8fdf3daecbcf594c5aa96a95964c367e7f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "dose_response.parquet",
+      "name": "dose_response.parquet",
+      "description": "Version-pinned assay records.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/dose_response.parquet?download=true",
+      "encodingFormat": "application/x-parquet",
+      "contentSize": "2363540 B",
+      "sha256": "0492e31f172951d0210e2aaa510dcdd7574075568fc248f46b81c4a0aa40d002"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "hepatotoxicity.parquet",
+      "name": "hepatotoxicity.parquet",
+      "description": "Version-pinned assay records.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/hepatotoxicity.parquet?download=true",
+      "encodingFormat": "application/x-parquet",
+      "contentSize": "182535 B",
+      "sha256": "16c30ef6882d0a2e018dbc997b42bd9de411d0a1f9fd8872a5e486c618be3c34"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "neurotoxicity.parquet",
+      "name": "neurotoxicity.parquet",
+      "description": "Version-pinned assay records.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/neurotoxicity.parquet?download=true",
+      "encodingFormat": "application/x-parquet",
+      "contentSize": "197775 B",
+      "sha256": "62b40fc65031a286f54419f7ea27a1840db0418e638dbc68c7234394fb982ca8"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/in_vitro_inhibition_folds.csv.gz",
+      "name": "in_vitro_inhibition_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/in_vitro_inhibition_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "1368204 B",
+      "sha256": "ef8ba96295980c4083fd98637980e7143e23e23d57f6ee931240b40d9c71adc2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/potency_folds.csv.gz",
+      "name": "potency_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/potency_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "92387 B",
+      "sha256": "9b8ed5697312d31359d6871808724f3865f596119c65af687924451e468160d9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/mouse_hepatic_folds.csv.gz",
+      "name": "mouse_hepatic_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/mouse_hepatic_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "21228 B",
+      "sha256": "ba2110b24cd2b97925ababeff74f1f5ab2446b3308f90d594286179040406310"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/rat_hepatic_folds.csv.gz",
+      "name": "rat_hepatic_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/rat_hepatic_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "6513 B",
+      "sha256": "845f39141a51317f26a9380feeb4355a2c510937f266547b3581447a3828aeb9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/mouse_neuro_folds.csv.gz",
+      "name": "mouse_neuro_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/mouse_neuro_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "31084 B",
+      "sha256": "875e092307e48379b69896e63158ac9719e7367b90e59ce941becdcff1c186dd"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/rat_neuro_folds.csv.gz",
+      "name": "rat_neuro_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/rat_neuro_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "20740 B",
+      "sha256": "c385052dad804a40b0455b6c2378e87b32a1cbbcedb1c625f43513ef6b754c73"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "folds/oligoai_folds.csv.gz",
+      "name": "oligoai_folds.csv.gz",
+      "description": "Exact endpoint-specific paper benchmark fold assignments.",
+      "contentUrl": "https://huggingface.co/datasets/barneyhill/aso-atlas-2/resolve/neurips-rebuttal/folds/oligoai_folds.csv.gz?download=true",
+      "encodingFormat": "application/gzip",
+      "contentSize": "1148007 B",
+      "sha256": "b036d1d26f5454f1dd9f565a2792b4d41f785cd2221f0fe8a3ebc71f1c6d3eed"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "@id": "in_vitro_inhibition",
+      "name": "in_vitro_inhibition",
+      "description": "174,459 in_vitro_inhibition assay records.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/USPTO_ID",
+          "name": "USPTO ID",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "USPTO ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/Table_Number",
+          "name": "Table Number",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "Table Number"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/Compound_ID",
+          "name": "Compound ID",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "Compound ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/HELM_Annotation",
+          "name": "HELM Annotation",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "HELM Annotation"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/model_eligible",
+          "name": "model_eligible",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "model_eligible"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/cell_line",
+          "name": "cell_line",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "cell_line"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/dosage_nm",
+          "name": "dosage_nm",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "dosage_nm"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/target_RNA",
+          "name": "target_RNA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "target_RNA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/Inhibition_pct",
+          "name": "Inhibition_pct",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "Inhibition_pct"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/cells_per_well",
+          "name": "cells_per_well",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "cells_per_well"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/cell_line_species",
+          "name": "cell_line_species",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "cell_line_species"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/transfection_method",
+          "name": "transfection_method",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "transfection_method"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/treatment_period_hrs",
+          "name": "treatment_period_hrs",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "treatment_period_hrs"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/ccle_cell_line_name",
+          "name": "ccle_cell_line_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "ccle_cell_line_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/ccle_model_id",
+          "name": "ccle_model_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "ccle_model_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/ccle_oncotree_lineage",
+          "name": "ccle_oncotree_lineage",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "ccle_oncotree_lineage"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/ccle_oncotree_disease",
+          "name": "ccle_oncotree_disease",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "ccle_oncotree_disease"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "in_vitro_inhibition/cell_line_mapping_source",
+          "name": "cell_line_mapping_source",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "in_vitro_inhibition.parquet"
+            },
+            "extract": {
+              "column": "cell_line_mapping_source"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "dose_response",
+      "name": "dose_response",
+      "description": "99,821 dose_response assay records.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/USPTO_ID",
+          "name": "USPTO ID",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "USPTO ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/Table_Number",
+          "name": "Table Number",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "Table Number"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/Compound_ID",
+          "name": "Compound ID",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "Compound ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/HELM_Annotation",
+          "name": "HELM Annotation",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "HELM Annotation"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/model_eligible",
+          "name": "model_eligible",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "model_eligible"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/cell_line",
+          "name": "cell_line",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "cell_line"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/dosage_nm",
+          "name": "dosage_nm",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "dosage_nm"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/target_RNA",
+          "name": "target_RNA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "target_RNA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/Inhibition_pct",
+          "name": "Inhibition_pct",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "Inhibition_pct"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/cells_per_well",
+          "name": "cells_per_well",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "cells_per_well"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/cell_line_species",
+          "name": "cell_line_species",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "cell_line_species"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/transfection_method",
+          "name": "transfection_method",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "transfection_method"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/treatment_period_hrs",
+          "name": "treatment_period_hrs",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "treatment_period_hrs"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/ccle_cell_line_name",
+          "name": "ccle_cell_line_name",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "ccle_cell_line_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/ccle_model_id",
+          "name": "ccle_model_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "ccle_model_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/ccle_oncotree_lineage",
+          "name": "ccle_oncotree_lineage",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "ccle_oncotree_lineage"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/ccle_oncotree_disease",
+          "name": "ccle_oncotree_disease",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "ccle_oncotree_disease"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "dose_response/cell_line_mapping_source",
+          "name": "cell_line_mapping_source",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dose_response.parquet"
+            },
+            "extract": {
+              "column": "cell_line_mapping_source"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "hepatotoxicity",
+      "name": "hepatotoxicity",
+      "description": "4,341 hepatotoxicity assay records.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/Compound_ID",
+          "name": "Compound ID",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "Compound ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/species",
+          "name": "species",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "species"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/num_doses",
+          "name": "num_doses",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "num_doses"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/dosing_period_days",
+          "name": "dosing_period_days",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "dosing_period_days"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/dosage_mg_per_kg",
+          "name": "dosage_mg_per_kg",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "dosage_mg_per_kg"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/measurement_source",
+          "name": "measurement_source",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "measurement_source"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/adminstration_method",
+          "name": "adminstration_method",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "adminstration_method"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/ALB",
+          "name": "ALB",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "ALB"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/ALT",
+          "name": "ALT",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "ALT"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/AST",
+          "name": "AST",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "AST"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/BUN",
+          "name": "BUN",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "BUN"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/CREA",
+          "name": "CREA",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "CREA"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/TBIL",
+          "name": "TBIL",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "TBIL"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/PC_ratio",
+          "name": "PC_ratio",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "PC_ratio"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/USPTO_ID",
+          "name": "USPTO ID",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "USPTO ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/Table_Number",
+          "name": "Table Number",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "Table Number"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/HELM_Annotation",
+          "name": "HELM Annotation",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "HELM Annotation"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/target_RNA",
+          "name": "target_RNA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "target_RNA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/species_strain",
+          "name": "species_strain",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "species_strain"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "hepatotoxicity/model_eligible",
+          "name": "model_eligible",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileObject": {
+              "@id": "hepatotoxicity.parquet"
+            },
+            "extract": {
+              "column": "model_eligible"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "neurotoxicity",
+      "name": "neurotoxicity",
+      "description": "4,900 neurotoxicity assay records.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/USPTO_ID",
+          "name": "USPTO ID",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "USPTO ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/Table_Number",
+          "name": "Table Number",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "Table Number"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/Compound_ID",
+          "name": "Compound ID",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "Compound ID"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/HELM_Annotation",
+          "name": "HELM Annotation",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "HELM Annotation"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/species",
+          "name": "species",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "species"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/FOB_score",
+          "name": "FOB_score",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "FOB_score"
+            }
+          },
+          "isArray": true
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/dosage_ug",
+          "name": "dosage_ug",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "dosage_ug"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/species_strain",
+          "name": "species_strain",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "species_strain"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/latency_time_hours",
+          "name": "latency_time_hours",
+          "dataType": "sc:Float",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "latency_time_hours"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/administration_method",
+          "name": "administration_method",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "administration_method"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/tolerability_score_type",
+          "name": "tolerability_score_type",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "tolerability_score_type"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/target_RNA",
+          "name": "target_RNA",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "target_RNA"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "neurotoxicity/model_eligible",
+          "name": "model_eligible",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileObject": {
+              "@id": "neurotoxicity.parquet"
+            },
+            "extract": {
+              "column": "model_eligible"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

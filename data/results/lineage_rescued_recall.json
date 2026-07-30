@@ -1,0 +1,207 @@
+{
+  "status": "complete",
+  "estimand": "fraction of verified Gold readout occurrences whose content reaches a released row through an exact source/canonical raw-collation and production-group lineage",
+  "matching_guardrail": "content is searched only inside the Gold table's frozen production-equivalence class; unrelated release-wide value matches are never credited",
+  "overall": {
+    "recovered": 20795,
+    "gold_readouts": 22000,
+    "recall_pct": 94.52,
+    "ci95": {
+      "low_pct": 94.21,
+      "high_pct": 94.82
+    }
+  },
+  "directly_retained": 8902,
+  "rescued_through_deduplication": 11893,
+  "losses_by_reason": {
+    "content_not_preserved_in_winner": 11,
+    "eligible_group_not_released": 158,
+    "filtered_before_deduplication": 88,
+    "no_raw_collation_lineage": 562,
+    "raw_row_found_but_content_differs": 386
+  },
+  "by_endpoint": {
+    "hepatotox": {
+      "recovered": 854,
+      "gold_readouts": 1226,
+      "recall_pct": 69.66,
+      "ci95": {
+        "low_pct": 67.03,
+        "high_pct": 72.17
+      }
+    },
+    "inhibition": {
+      "recovered": 19288,
+      "gold_readouts": 20104,
+      "recall_pct": 95.94,
+      "ci95": {
+        "low_pct": 95.66,
+        "high_pct": 96.21
+      }
+    },
+    "neurotox": {
+      "recovered": 653,
+      "gold_readouts": 670,
+      "recall_pct": 97.46,
+      "ci95": {
+        "low_pct": 95.97,
+        "high_pct": 98.41
+      }
+    }
+  },
+  "by_assay_readout": {
+    "ALT": {
+      "recovered": 224,
+      "gold_readouts": 308,
+      "recall_pct": 72.73,
+      "ci95": {
+        "low_pct": 67.5,
+        "high_pct": 77.4
+      }
+    },
+    "FOB score": {
+      "recovered": 653,
+      "gold_readouts": 670,
+      "recall_pct": 97.46,
+      "ci95": {
+        "low_pct": 95.97,
+        "high_pct": 98.41
+      }
+    },
+    "inhibition": {
+      "recovered": 19288,
+      "gold_readouts": 20104,
+      "recall_pct": 95.94,
+      "ci95": {
+        "low_pct": 95.66,
+        "high_pct": 96.21
+      }
+    },
+    "other hepatic biomarker": {
+      "recovered": 630,
+      "gold_readouts": 918,
+      "recall_pct": 68.63,
+      "ci95": {
+        "low_pct": 65.55,
+        "high_pct": 71.55
+      }
+    }
+  },
+  "by_table_format": {
+    "dose-series": {
+      "recovered": 7207,
+      "gold_readouts": 7890,
+      "recall_pct": 91.34,
+      "ci95": {
+        "low_pct": 90.7,
+        "high_pct": 91.94
+      }
+    },
+    "single-dose": {
+      "recovered": 13588,
+      "gold_readouts": 14110,
+      "recall_pct": 96.3,
+      "ci95": {
+        "low_pct": 95.98,
+        "high_pct": 96.6
+      }
+    }
+  },
+  "by_table_layout": {
+    "multi-column melt": {
+      "recovered": 1469,
+      "gold_readouts": 1840,
+      "recall_pct": 79.84,
+      "ci95": {
+        "low_pct": 77.94,
+        "high_pct": 81.61
+      }
+    },
+    "single measurement column": {
+      "recovered": 19326,
+      "gold_readouts": 20160,
+      "recall_pct": 95.86,
+      "ci95": {
+        "low_pct": 95.58,
+        "high_pct": 96.13
+      }
+    }
+  },
+  "by_unit_conversion": {
+    "% control \u2192 % inhibition": {
+      "recovered": 10923,
+      "gold_readouts": 11126,
+      "recall_pct": 98.18,
+      "ci95": {
+        "low_pct": 97.91,
+        "high_pct": 98.41
+      }
+    },
+    "no outcome conversion": {
+      "recovered": 8365,
+      "gold_readouts": 8978,
+      "recall_pct": 93.17,
+      "ci95": {
+        "low_pct": 92.63,
+        "high_pct": 93.68
+      }
+    },
+    "not applicable (toxicity endpoint)": {
+      "recovered": 1507,
+      "gold_readouts": 1896,
+      "recall_pct": 79.48,
+      "ci95": {
+        "low_pct": 77.61,
+        "high_pct": 81.24
+      }
+    }
+  },
+  "by_chemistry_class": {
+    "5-10-5 MOE gapmer": {
+      "recovered": 2342,
+      "gold_readouts": 2700,
+      "recall_pct": 86.74,
+      "ci95": {
+        "low_pct": 85.41,
+        "high_pct": 87.97
+      }
+    },
+    "MOE gapmer (other wing)": {
+      "recovered": 1449,
+      "gold_readouts": 1555,
+      "recall_pct": 93.18,
+      "ci95": {
+        "low_pct": 91.82,
+        "high_pct": 94.33
+      }
+    },
+    "cEt gapmer": {
+      "recovered": 790,
+      "gold_readouts": 963,
+      "recall_pct": 82.04,
+      "ci95": {
+        "low_pct": 79.48,
+        "high_pct": 84.33
+      }
+    },
+    "mixed MOE/cEt": {
+      "recovered": 4190,
+      "gold_readouts": 4424,
+      "recall_pct": 94.71,
+      "ci95": {
+        "low_pct": 94.01,
+        "high_pct": 95.33
+      }
+    },
+    "unknown / not stated": {
+      "recovered": 12024,
+      "gold_readouts": 12358,
+      "recall_pct": 97.3,
+      "ci95": {
+        "low_pct": 97.0,
+        "high_pct": 97.57
+      }
+    }
+  },
+  "gold_readouts_reconciled": 22000
+}

@@ -185,8 +185,12 @@ def _potency_ef(df: pd.DataFrame, electro_ids: set[str] | None = None) -> dict:
 
 
 def _aggregate_5fold() -> dict | None:
-    """If per-fold prediction parquets exist, compute EF per fold and
-    return mean±std with per-fold EFs. Returns None if none present.
+    """Compute pooled OOF point estimates and retain fold-level variability.
+
+    The primary point estimate is calculated once from the concatenated held-out
+    predictions, matching the pooled OOF convention used by the OligoGym models.
+    Fold-level EFs and selected-pass rates are retained for uncertainty analyses.
+    Returns ``None`` when no fold predictions are available.
     """
     available = [p for p in PREDICTIONS_PATHS_5FOLD if p.exists()]
     if not available:
@@ -196,21 +200,39 @@ def _aggregate_5fold() -> dict | None:
     except FileNotFoundError:
         electro_ids = None
     eff_efs: list[float] = []
+    eff_precs: list[float] = []
+    eff_base_rates: list[float] = []
     pot_efs: list[float] = []
+    pot_precs: list[float] = []
+    pot_base_rates: list[float] = []
+    frames: list[pd.DataFrame] = []
     per_fold = []
     for p in available:
         df = pd.read_parquet(p)
+        frames.append(df)
         eff = _efficacy_ef(df)
         pot = _potency_ef(df, electro_ids=electro_ids)
         eff_efs.append(float(eff["enrichment_factor"]))
+        eff_precs.append(float(eff["selected_pass_rate"]))
+        eff_base_rates.append(float(eff["base_rate"]))
         pot_efs.append(float(pot["enrichment_factor"]))
+        pot_precs.append(float(pot["selected_pass_rate"]))
+        pot_base_rates.append(float(pot["base_rate"]))
         per_fold.append({
             "path": str(p.relative_to(_ROOT)),
             "efficacy_ef": eff["enrichment_factor"],
+            "efficacy_precision": eff["selected_pass_rate"],
+            "efficacy_base_rate": eff["base_rate"],
             "potency_ef": pot["enrichment_factor"],
+            "potency_precision": pot["selected_pass_rate"],
+            "potency_base_rate": pot["base_rate"],
             "n_efficacy": eff["n"],
             "n_potency": pot["n"],
         })
+
+    pooled_df = pd.concat(frames, ignore_index=True)
+    pooled_eff = _efficacy_ef(pooled_df)
+    pooled_pot = _potency_ef(pooled_df, electro_ids=electro_ids)
 
     def _agg(lst):
         arr = np.asarray(lst, dtype=float)
@@ -222,18 +244,30 @@ def _aggregate_5fold() -> dict | None:
 
     return {
         "efficacy": {
-            "enrichment_factor": _agg(eff_efs)["mean"],
+            "enrichment_factor": pooled_eff["enrichment_factor"],
+            "selected_pass_rate": pooled_eff["selected_pass_rate"],
+            "base_rate": pooled_eff["base_rate"],
+            "n": pooled_eff["n"],
+            "n_selected": pooled_eff["n_selected"],
             "enrichment_factor_std": _agg(eff_efs)["std"],
             "fold_efs": eff_efs,
+            "fold_precs": eff_precs,
+            "fold_base_rates": eff_base_rates,
             "n_folds": len(eff_efs),
-            "source": _SOURCE_NOTE,
+            "source": _SOURCE_NOTE + "; primary point estimate pooled across OOF predictions",
         },
         "potency": {
-            "enrichment_factor": _agg(pot_efs)["mean"],
+            "enrichment_factor": pooled_pot["enrichment_factor"],
+            "selected_pass_rate": pooled_pot["selected_pass_rate"],
+            "base_rate": pooled_pot["base_rate"],
+            "n": pooled_pot["n"],
+            "n_selected": pooled_pot["n_selected"],
             "enrichment_factor_std": _agg(pot_efs)["std"],
             "fold_efs": pot_efs,
+            "fold_precs": pot_precs,
+            "fold_base_rates": pot_base_rates,
             "n_folds": len(pot_efs),
-            "source": _SOURCE_NOTE,
+            "source": _SOURCE_NOTE + "; primary point estimate pooled across OOF predictions",
         },
         "meta": {
             "mode": "5fold_patent_split",
@@ -250,9 +284,9 @@ def main() -> None:
         OUT_PATH.write_text(json.dumps(agg, indent=2))
         print(f"Wrote {OUT_PATH} (5-fold aggregation; "
               f"n_folds={agg['efficacy']['n_folds']})")
-        print(f"  efficacy EF = {agg['efficacy']['enrichment_factor']:.3f} "
+        print(f"  pooled efficacy EF = {agg['efficacy']['enrichment_factor']:.3f} "
               f"± {agg['efficacy']['enrichment_factor_std']:.3f}")
-        print(f"  potency  EF = {agg['potency']['enrichment_factor']:.3f} "
+        print(f"  pooled potency  EF = {agg['potency']['enrichment_factor']:.3f} "
               f"± {agg['potency']['enrichment_factor_std']:.3f}")
         return
 

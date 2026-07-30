@@ -1,0 +1,68 @@
+{
+  "status": "complete",
+  "estimand": "1,000-fold dose-scale error rate among one-to-one canonical Gold/Atlas measurement pairs where both sides state dose",
+  "definition": "Atlas dose / Gold dose equals 1000 or 0.001",
+  "paired_measurements": 8993,
+  "both_state_dose": 8691,
+  "atlas_dose_missing": 302,
+  "gold_dose_missing": 0,
+  "both_dose_missing": 0,
+  "thousand_fold_errors": 0,
+  "thousand_fold_error_rate_pct": 0.0,
+  "thousand_fold_error_rate_ci95": {
+    "low_pct": 0.0,
+    "high_pct": 0.0442
+  },
+  "exact_dose_agreements": 8592,
+  "other_dose_discrepancies": 99,
+  "by_endpoint": {
+    "hepatotox": {
+      "both_stated": 884,
+      "exact_agreement": 840,
+      "other_dose_discrepancy": 44
+    },
+    "inhibition": {
+      "atlas_missing": 149,
+      "both_stated": 7312,
+      "exact_agreement": 7257,
+      "other_dose_discrepancy": 55
+    },
+    "neurotox": {
+      "atlas_missing": 153,
+      "both_stated": 495,
+      "exact_agreement": 495
+    }
+  },
+  "other_discrepancies_by_table": [
+    {
+      "endpoint": "hepatotox",
+      "patent": "US20190160090A1",
+      "table": "41",
+      "count": 20
+    },
+    {
+      "endpoint": "hepatotox",
+      "patent": "US20190160090A1",
+      "table": "54",
+      "count": 24
+    },
+    {
+      "endpoint": "inhibition",
+      "patent": "US20190160090A1",
+      "table": "17",
+      "count": 54
+    },
+    {
+      "endpoint": "inhibition",
+      "patent": "US20210038631A1",
+      "table": "87",
+      "count": 1
+    }
+  ],
+  "thousand_fold_error_examples": [],
+  "interpretation": "Missing doses and non-scale dose discrepancies are reported separately; they are not counted as successful unit conversions.",
+  "source": {
+    "ledger": "data/validation/canonical_source_match_ledger.csv",
+    "sha256": "9d8c2aaa3e8afd06004876efc8ccb3e51b21e698182d38b079a618845454c3a7"
+  }
+}

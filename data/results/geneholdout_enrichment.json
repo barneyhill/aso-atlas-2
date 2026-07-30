@@ -1,0 +1,160 @@
+{
+  "efficacy": {
+    "gene": "SCN2A",
+    "stage": "efficacy",
+    "stage_name": "In vitro efficacy",
+    "assay": "electroporation, single dose 4000 nM",
+    "threshold": "inhibition > 80%",
+    "n_asos": 1941,
+    "base_rate": 0.0799,
+    "n_pass": 155,
+    "top_fraction_curve": [
+      {
+        "top_fraction": 0.5,
+        "enrichment_factor": 1.846,
+        "selected_pass_rate": 0.1474,
+        "n_selected": 970,
+        "below_floor": false
+      },
+      {
+        "top_fraction": 0.25,
+        "enrichment_factor": 2.375,
+        "selected_pass_rate": 0.1897,
+        "n_selected": 485,
+        "below_floor": false
+      },
+      {
+        "top_fraction": 0.1,
+        "enrichment_factor": 3.098,
+        "selected_pass_rate": 0.2474,
+        "n_selected": 194,
+        "below_floor": false
+      },
+      {
+        "top_fraction": 0.05,
+        "enrichment_factor": 3.227,
+        "selected_pass_rate": 0.2577,
+        "n_selected": 97,
+        "below_floor": false
+      },
+      {
+        "top_fraction": 0.025,
+        "enrichment_factor": 3.392,
+        "selected_pass_rate": 0.2708,
+        "n_selected": 48,
+        "below_floor": false
+      }
+    ]
+  },
+  "potency": {
+    "gene": "UBE3A-ATS",
+    "stage": "potency",
+    "stage_name": "In vitro potency",
+    "assay": "free uptake (gymnosis), iCell GABANeurons",
+    "cell_line": "iCell GABANeurons",
+    "n_curves_fitted": 200,
+    "n_curves_candidate": 238,
+    "thresholds": {
+      "ic50_lt_1000nM": {
+        "threshold": "IC50 < 1000 nM",
+        "base_rate": 0.1,
+        "n_pass": 20,
+        "top_fraction_curve": [
+          {
+            "top_fraction": 0.5,
+            "enrichment_factor": 1.0,
+            "selected_pass_rate": 0.1,
+            "n_selected": 100,
+            "below_floor": false
+          },
+          {
+            "top_fraction": 0.25,
+            "enrichment_factor": 1.2,
+            "selected_pass_rate": 0.12,
+            "n_selected": 50,
+            "below_floor": false
+          },
+          {
+            "top_fraction": 0.1,
+            "enrichment_factor": 1.0,
+            "selected_pass_rate": 0.1,
+            "n_selected": 20,
+            "below_floor": true
+          },
+          {
+            "top_fraction": 0.05,
+            "enrichment_factor": 2.0,
+            "selected_pass_rate": 0.2,
+            "n_selected": 10,
+            "below_floor": true
+          },
+          {
+            "top_fraction": 0.025,
+            "enrichment_factor": 4.0,
+            "selected_pass_rate": 0.4,
+            "n_selected": 5,
+            "below_floor": true
+          }
+        ]
+      },
+      "ic50_lt_500nM": {
+        "threshold": "IC50 < 500 nM",
+        "base_rate": 0.03,
+        "n_pass": 6,
+        "top_fraction_curve": [
+          {
+            "top_fraction": 0.5,
+            "enrichment_factor": 1.0,
+            "selected_pass_rate": 0.03,
+            "n_selected": 100,
+            "below_floor": false
+          },
+          {
+            "top_fraction": 0.25,
+            "enrichment_factor": 1.333,
+            "selected_pass_rate": 0.04,
+            "n_selected": 50,
+            "below_floor": false
+          },
+          {
+            "top_fraction": 0.1,
+            "enrichment_factor": 1.667,
+            "selected_pass_rate": 0.05,
+            "n_selected": 20,
+            "below_floor": true
+          },
+          {
+            "top_fraction": 0.05,
+            "enrichment_factor": 3.333,
+            "selected_pass_rate": 0.1,
+            "n_selected": 10,
+            "below_floor": true
+          },
+          {
+            "top_fraction": 0.025,
+            "enrichment_factor": 6.667,
+            "selected_pass_rate": 0.2,
+            "n_selected": 5,
+            "below_floor": true
+          }
+        ]
+      }
+    }
+  },
+  "meta": {
+    "predictions": "data/results/oligoai_geneholdout_predictions.parquet",
+    "holdout_genes": [
+      "SCN2A",
+      "UBE3A-ATS"
+    ],
+    "top_fractions": [
+      0.5,
+      0.25,
+      0.1,
+      0.05,
+      0.025
+    ],
+    "min_selected_floor": 30,
+    "note": "Honest gene-level holdout: SCN2A and UBE3A-ATS held fully out of training. Efficacy and potency use different genes/contexts (SCN2A electroporation primary screen; UBE3A-ATS free-uptake iPSC-neuron dose response)."
+  }
+}
