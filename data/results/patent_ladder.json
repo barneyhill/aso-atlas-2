@@ -1,0 +1,42 @@
+{
+  "stages": [
+    {
+      "name": "listed_applications",
+      "patents": 1156,
+      "description": "Ionis/Isis A1 applications in the source Lens export"
+    },
+    {
+      "name": "xmls_downloaded",
+      "patents": 1155,
+      "description": "USPTO full-text XMLs successfully retrieved"
+    },
+    {
+      "name": "xmls_with_a_table",
+      "patents": 1125,
+      "description": "XMLs containing at least one <table> element; the figure quoted in Methods"
+    },
+    {
+      "name": "patents_with_extracted_rows",
+      "patents": 734,
+      "description": "At least one row extracted into a raw collation file"
+    },
+    {
+      "name": "patents_after_cleaning",
+      "patents": 606,
+      "description": "At least one measurement surviving QC, HGNC mapping and deduplication"
+    },
+    {
+      "name": "patents_in_release",
+      "patents": 596,
+      "description": "At least one measurement with a resolvable HELM annotation; the card's count"
+    }
+  ],
+  "drops": {
+    "listed_applications_to_xmls_downloaded": 1,
+    "xmls_downloaded_to_xmls_with_a_table": 30,
+    "xmls_with_a_table_to_patents_with_extracted_rows": 391,
+    "patents_with_extracted_rows_to_patents_after_cleaning": 128,
+    "patents_after_cleaning_to_patents_in_release": 10
+  },
+  "strays": {}
+}

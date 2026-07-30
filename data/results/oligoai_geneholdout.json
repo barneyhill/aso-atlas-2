@@ -1,0 +1,30 @@
+{
+  "overall": {
+    "n": 183706,
+    "mae": 11.0507,
+    "rmse": 14.7323,
+    "r2": 0.7718,
+    "pearson": 0.8785,
+    "spearman": 0.882
+  },
+  "train": {
+    "n": 176035,
+    "mae": 10.6506,
+    "rmse": 14.0256,
+    "r2": 0.7977,
+    "pearson": 0.8931,
+    "spearman": 0.8967
+  },
+  "test": {
+    "n": 7671,
+    "mae": 20.2329,
+    "rmse": 26.1429,
+    "r2": 0.212,
+    "pearson": 0.4604,
+    "spearman": 0.4652
+  },
+  "test_spearman_by_target": {
+    "SCN2A": 0.6465,
+    "UBE3A-ATS": 0.351
+  }
+}

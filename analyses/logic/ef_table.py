@@ -360,10 +360,17 @@ def _extract_base_rates(gym_data: dict[str, dict[str, dict]]) -> dict[int, float
 
 
 def _add_oligoai_precision(enrichment: dict[str, dict], base_rates: dict[int, float]) -> None:
-    """Compute approximate precision for OligoAI from EF × base_rate."""
+    """Ensure OligoAI entries contain precision, with a legacy fallback.
+
+    Current OligoAI result files contain pooled OOF selected-pass rates and
+    fold-level precisions directly.  The EF × reference-base-rate calculation is
+    retained only so older result files remain readable.
+    """
     for ds, ef_entry in enrichment.items():
         idx = DATASET_TO_STAGE.get(ds)
         if idx is None or idx not in base_rates:
+            continue
+        if ef_entry.get("selected_pass_rate") is not None:
             continue
         br = base_rates[idx]
         ef = ef_entry.get("enrichment_factor")

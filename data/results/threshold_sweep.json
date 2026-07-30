@@ -1,0 +1,293 @@
+{
+  "design": "one-at-a-time threshold sensitivity using pooled out-of-fold predictions",
+  "ef_floor": false,
+  "canonical_ceiling_savings_pct": 70.8,
+  "canonical_expected_savings_pct": 77.4,
+  "tornado": [
+    {
+      "stage_idx": 0,
+      "label": "Efficacy (inhib >)",
+      "display_name": "Efficacy",
+      "points": [
+        {
+          "threshold": 70.0,
+          "threshold_display": ">70%",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.2228,
+          "model_selected_pass_rate": 0.3963,
+          "enrichment_factor": 1.779,
+          "ceiling_savings_pct": 67.7,
+          "expected_savings_pct": 75.0
+        },
+        {
+          "threshold": 80.0,
+          "threshold_display": ">80%",
+          "is_canonical": true,
+          "baseline_pass_rate": 0.1181,
+          "model_selected_pass_rate": 0.2396,
+          "enrichment_factor": 2.029,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 90.0,
+          "threshold_display": ">90%",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.0368,
+          "model_selected_pass_rate": 0.0914,
+          "enrichment_factor": 2.482,
+          "ceiling_savings_pct": 79.3,
+          "expected_savings_pct": 84.1
+        }
+      ],
+      "ceiling_min": 67.7,
+      "ceiling_max": 79.3
+    },
+    {
+      "stage_idx": 1,
+      "label": "Potency (IC50 < nM)",
+      "display_name": "Potency",
+      "points": [
+        {
+          "threshold": 250.0,
+          "threshold_display": "<250 nM",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.1194,
+          "model_selected_pass_rate": 0.2085,
+          "enrichment_factor": 1.746,
+          "ceiling_savings_pct": 78.4,
+          "expected_savings_pct": 83.5
+        },
+        {
+          "threshold": 500.0,
+          "threshold_display": "<500 nM",
+          "is_canonical": true,
+          "baseline_pass_rate": 0.3144,
+          "model_selected_pass_rate": 0.5612,
+          "enrichment_factor": 1.785,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 1000.0,
+          "threshold_display": "<1000 nM",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.5453,
+          "model_selected_pass_rate": 0.8174,
+          "enrichment_factor": 1.499,
+          "ceiling_savings_pct": 66.9,
+          "expected_savings_pct": 74.2
+        }
+      ],
+      "ceiling_min": 66.9,
+      "ceiling_max": 78.4
+    },
+    {
+      "stage_idx": 2,
+      "label": "Mouse hepatic (ALT xULN)",
+      "display_name": "Mouse ALT",
+      "points": [
+        {
+          "threshold": 105.0,
+          "threshold_display": "<1.5\u00d7ULN",
+          "is_canonical": true,
+          "baseline_pass_rate": 0.5139,
+          "model_selected_pass_rate": 0.7646,
+          "enrichment_factor": 1.488,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 140.0,
+          "threshold_display": "<2\u00d7ULN",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.568,
+          "model_selected_pass_rate": 0.7938,
+          "enrichment_factor": 1.398,
+          "ceiling_savings_pct": 68.6,
+          "expected_savings_pct": 76.2
+        },
+        {
+          "threshold": 210.0,
+          "threshold_display": "<3\u00d7ULN",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.6318,
+          "model_selected_pass_rate": 0.8463,
+          "enrichment_factor": 1.339,
+          "ceiling_savings_pct": 66.8,
+          "expected_savings_pct": 75.1
+        }
+      ],
+      "ceiling_min": 66.8,
+      "ceiling_max": 70.8
+    },
+    {
+      "stage_idx": 3,
+      "label": "Mouse neuro (bFOB <=)",
+      "display_name": "Mouse bFOB",
+      "points": [
+        {
+          "threshold": 1.0,
+          "threshold_display": "\u22641",
+          "is_canonical": true,
+          "baseline_pass_rate": 0.4451,
+          "model_selected_pass_rate": 0.9128,
+          "enrichment_factor": 2.051,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 2.0,
+          "threshold_display": "\u22642",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.5542,
+          "model_selected_pass_rate": 0.9481,
+          "enrichment_factor": 1.711,
+          "ceiling_savings_pct": 66.3,
+          "expected_savings_pct": 73.6
+        },
+        {
+          "threshold": 3.0,
+          "threshold_display": "\u22643",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.6541,
+          "model_selected_pass_rate": 0.9703,
+          "enrichment_factor": 1.483,
+          "ceiling_savings_pct": 62.3,
+          "expected_savings_pct": 70.5
+        }
+      ],
+      "ceiling_min": 62.3,
+      "ceiling_max": 70.8
+    },
+    {
+      "stage_idx": 4,
+      "label": "Rat hepatic (ALT xULN)",
+      "display_name": "Rat ALT",
+      "points": [
+        {
+          "threshold": 58.5,
+          "threshold_display": "<1.5\u00d7ULN",
+          "is_canonical": true,
+          "baseline_pass_rate": 0.3996,
+          "model_selected_pass_rate": 0.4058,
+          "enrichment_factor": 1.015,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 78.0,
+          "threshold_display": "<2\u00d7ULN",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.6004,
+          "model_selected_pass_rate": 0.6594,
+          "enrichment_factor": 1.098,
+          "ceiling_savings_pct": 62.8,
+          "expected_savings_pct": 75.8
+        },
+        {
+          "threshold": 117.0,
+          "threshold_display": "<3\u00d7ULN",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.7756,
+          "model_selected_pass_rate": 0.8188,
+          "enrichment_factor": 1.056,
+          "ceiling_savings_pct": 59.2,
+          "expected_savings_pct": 73.1
+        }
+      ],
+      "ceiling_min": 59.2,
+      "ceiling_max": 70.8
+    },
+    {
+      "stage_idx": 5,
+      "label": "Rat neuro (mFOB <=)",
+      "display_name": "Rat mFOB",
+      "points": [
+        {
+          "threshold": 1.0,
+          "threshold_display": "\u22641",
+          "is_canonical": true,
+          "baseline_pass_rate": 0.3522,
+          "model_selected_pass_rate": 0.7493,
+          "enrichment_factor": 2.127,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 2.0,
+          "threshold_display": "\u22642",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.5799,
+          "model_selected_pass_rate": 0.9211,
+          "enrichment_factor": 1.588,
+          "ceiling_savings_pct": 62.7,
+          "expected_savings_pct": 69.1
+        },
+        {
+          "threshold": 3.0,
+          "threshold_display": "\u22643",
+          "is_canonical": false,
+          "baseline_pass_rate": 0.7863,
+          "model_selected_pass_rate": 0.9831,
+          "enrichment_factor": 1.25,
+          "ceiling_savings_pct": 62.7,
+          "expected_savings_pct": 61.2
+        }
+      ],
+      "ceiling_min": 62.7,
+      "ceiling_max": 70.8
+    },
+    {
+      "stage_idx": 6,
+      "label": "NHP hepatic (ALT xULN)",
+      "display_name": "NHP ALT",
+      "points": [
+        {
+          "threshold": 154.5,
+          "threshold_display": "<1.5\u00d7ULN",
+          "is_canonical": true,
+          "baseline_pass_rate": 1.0,
+          "model_selected_pass_rate": null,
+          "enrichment_factor": null,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 206.0,
+          "threshold_display": "<2\u00d7ULN",
+          "is_canonical": false,
+          "baseline_pass_rate": 1.0,
+          "model_selected_pass_rate": null,
+          "enrichment_factor": null,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        },
+        {
+          "threshold": 309.0,
+          "threshold_display": "<3\u00d7ULN",
+          "is_canonical": false,
+          "baseline_pass_rate": 1.0,
+          "model_selected_pass_rate": null,
+          "enrichment_factor": null,
+          "ceiling_savings_pct": 70.8,
+          "expected_savings_pct": 77.4
+        }
+      ],
+      "ceiling_min": 70.8,
+      "ceiling_max": 70.8
+    }
+  ],
+  "ion582_lenient": {
+    "gate": "rat neuro mFOB <= 2",
+    "baseline_pass_rate": 0.5799,
+    "model_selected_pass_rate": 0.9211,
+    "enrichment_factor": 1.588,
+    "ceiling_savings_pct": 62.7,
+    "expected_savings_pct": 69.1
+  },
+  "overall_ceiling_min": 59.2,
+  "overall_ceiling_max": 79.3,
+  "overall_expected_min": 61.2,
+  "overall_expected_max": 84.1
+}

@@ -3,6 +3,7 @@ license: cc-by-4.0
 language:
   - en
 pretty_name: ASO Atlas 2.0
+version: neurips-rebuttal
 size_categories:
   - 100K<n<1M
 task_categories:
@@ -17,48 +18,97 @@ tags:
   - benchmarking
 configs:
   - config_name: in_vitro_inhibition
-    data_files: in_vitro_inhibition.parquet
     description: Single-dose in vitro mRNA inhibition measurements
+    data_files:
+      - split: full
+        path: in_vitro_inhibition.parquet
   - config_name: dose_response
-    data_files: dose_response.parquet
     description: Multi-dose in vitro inhibition measurements for dose-response curve fitting
+    data_files:
+      - split: full
+        path: dose_response.parquet
   - config_name: hepatotoxicity
-    data_files: hepatotoxicity.parquet
     description: In vivo hepatic toxicity biomarker measurements (ALT, AST, ALB, BUN, CREA, TBIL, PC ratio)
+    data_files:
+      - split: full
+        path: hepatotoxicity.parquet
   - config_name: neurotoxicity
-    data_files: neurotoxicity.parquet
     description: In vivo neurotoxicity functional observation battery (FOB) scores
+    data_files:
+      - split: full
+        path: neurotoxicity.parquet
 ---
 
 # ASO Atlas 2.0
 
 A benchmark dataset for evaluating antisense oligonucleotide (ASO) prediction across the preclinical pipeline.
 
+**Snapshot `neurips-rebuttal`.** The dataset revision, release-build code and Croissant metadata
+are pinned by the tag `neurips-rebuttal`; the submitted manuscript remains pinned to its
+submission commit:
+
+| Artifact | Pinned at |
+|---|---|
+| Dataset revision (this repo) | `neurips-rebuttal` |
+| Code | [`https://github.com/barneyhill/aso-atlas-2`](https://github.com/barneyhill/aso-atlas-2/tree/neurips-rebuttal), tag `neurips-rebuttal` |
+| Manuscript source | commit `ff973af` (`neurips-submission`) |
+| NeurIPS Croissant metadata | [`croissant.json`](croissant.json), Croissant 1.1 core + RAI, pinned to `neurips-rebuttal` |
+
+Every count on this card is generated from `release_manifest.json`; none is maintained by hand.
+
 ## Dataset Summary
 
-ASO Atlas 2.0 contains 283,239 measurements across 168,395 unique ASO compounds extracted from 606 USPTO patent filings via an LLM-based extraction pipeline. Each compound's chemistry is encoded in [HELM notation](https://piscienceofhope.github.io/HELMNotationToolkit/), enabling direct use as model input.
+ASO Atlas 2.0 contains 295,007 assay readouts targeting 430 named
+genes and contributed by 606 USPTO patent filings. Of these,
+290,841 readouts have a resolved HELM annotation and span
+165,782 unique HELM compounds; 4,166 readouts retain the
+reported assay outcome but lack resolvable chemistry.
+
+A readout is one non-null assay value. In vitro and neurotoxicity observations carry one
+readout; a hepatotoxicity observation can carry up to seven biomarker readouts.
+A named target gene is one unique non-null target_RNA after resolving transcript identifiers to gene symbols with the same genomic annotation mapping used by the submitted manuscript.
+A unique HELM compound is one unique non-null HELM Annotation. Rows without a resolvable HELM remain in the assay corpus but are excluded from unique-HELM-compound and model-benchmark counts.
+Cross-category linkage retains the submitted source-identifier unit: a distinct Compound ID reported in at least two of the four assay categories. By this definition, 15,339 of 168,537 source Compound IDs (9.1%) are linked.
+model_eligible is true exactly when HELM Annotation is non-null. These rows form the chemistry-aware modelling subset; false rows remain valid assay readouts for corpus and phenotype-frequency analyses.
+
+### Paper-count reconciliation
+
+The submitted manuscript and tagged `neurips-rebuttal` snapshot both contain 295,007 processed readouts. Of these, 4,166 lack a resolvable HELM annotation and are retained with `model_eligible=false`; the remaining 290,841 readouts form the chemistry-aware modelling subset. The manuscript's 1,125 count refers to table-bearing source documents entering extraction; 606 USPTO filings contribute data to the complete release and 596 contribute to its HELM-resolved subset.
 
 The dataset spans four preclinical assay types that mirror the sequential screening pipeline used in ASO drug development:
 
-| Config | Rows | Compounds | Description |
-|--------|------|-----------|-------------|
-| `in_vitro_inhibition` | 174,297 | 163,688 | Single-dose mRNA knockdown (% inhibition) |
-| `dose_response` | 99,719 | 16,814 | Multi-dose inhibition for IC50 fitting |
-| `hepatotoxicity` | 4,323 | 2,037 | Liver toxicity biomarkers (ALT, AST, etc.) |
-| `neurotoxicity` | 4,900 | 3,316 | Functional observation battery scores |
+| Config | Readouts | Model-eligible readouts | Unique HELM compounds | Named target genes |
+|--------|---------:|------------------------:|----------------------:|-------------------:|
+| `in_vitro_inhibition` | 174,459 | 173,286 | 161,434 | 389 |
+| `dose_response` | 99,821 | 97,236 | 16,375 | 130 |
+| `hepatotoxicity` | 15,831 | 15,427 | 1,881 | 42 |
+| `neurotoxicity` | 4,896 | 4,892 | 3,312 | 15 |
+| **Total** | **295,007** | **290,841** | **165,782** | **430** |
 
-## Usage
+## Paper benchmark folds
 
-```python
-from datasets import load_dataset
+The `folds/` directory contains the **exact endpoint-specific five-fold assignments used
+for every benchmark reported in the submitted paper**. These are the reproduction
+partitions: six OligoGym endpoint files are checked against the frozen test-group
+membership saved by the submitted run, and `oligoai_folds.csv.gz` is derived from the
+five frozen OligoAI training files. See `folds/README.md` for schemas and fold sizes.
 
-# Load a single config
-ds = load_dataset("barneyhill/aso-atlas-2", "in_vitro_inhibition")
+The paper built each model-ready endpoint separately before applying patent-level
+`GroupKFold`, so the fold number for a patent can differ between endpoints and between
+OligoGym and OligoAI. Those differences are preserved rather than replaced by a new
+common assignment. In every file, fold `k` is the paper's test set for CV run `k`; the
+other four folds are its training set.
 
-# Load all configs
-configs = ["in_vitro_inhibition", "dose_response", "hepatotoxicity", "neurotoxicity"]
-atlas = {c: load_dataset("barneyhill/aso-atlas-2", c) for c in configs}
-```
+## Review snapshots
+
+| Snapshot | Change |
+|---------|--------|
+| `neurips-submission` | Preserved legacy revision of the unversioned snapshot originally available during review. Its card reported pre-filter counts that described neither its files nor the manuscript. |
+| `neurips-rebuttal` | Reconciled review snapshot. Includes all 295,007 valid processed readouts, marks the 4,166 readouts without resolved HELM as `model_eligible=false`, supplies the exact submitted-paper folds, and retains the submitted source `Compound ID` unit for cross-category linkage. |
+
+No measurement value was edited in preparing the rebuttal snapshot. It preserves the
+complete processed assay corpus and exact paper folds while making the readout,
+model-eligibility and compound-identity units explicit.
 
 ## Data Fields
 
@@ -69,7 +119,8 @@ atlas = {c: load_dataset("barneyhill/aso-atlas-2", c) for c in configs}
 | `USPTO ID` | string | Source patent identifier (e.g., `US20150011212`) |
 | `Table Number` | int | Table number within the patent |
 | `Compound ID` | int | Compound identifier within the patent |
-| `HELM Annotation` | string | Full chemical structure in HELM notation |
+| `HELM Annotation` | string, nullable | Full chemical structure in HELM notation; null where chemistry could not be resolved |
+| `model_eligible` | bool | True when a resolved HELM annotation permits chemistry-aware model input |
 | `target_RNA` | string | Target gene/transcript name |
 
 ### in_vitro_inhibition / dose_response
@@ -78,7 +129,7 @@ atlas = {c: load_dataset("barneyhill/aso-atlas-2", c) for c in configs}
 |-------|------|-------------|
 | `cell_line` | string | Cell line used (e.g., HepG2, A549) |
 | `dosage_nm` | float | Dose in nanomolar |
-| `Inhibition_pct` | float | mRNA inhibition percentage (−1000 to 100) |
+| `Inhibition_pct` | float | mRNA inhibition percentage (-1000 to 100) |
 | `cells_per_well` | float | Cells seeded per well |
 | `cell_line_species` | string | Species of origin (human, mouse, etc.) |
 | `transfection_method` | string | Delivery method (electroporation, lipofection, etc.) |
@@ -115,7 +166,7 @@ atlas = {c: load_dataset("barneyhill/aso-atlas-2", c) for c in configs}
 | `species` | string | Test species |
 | `species_strain` | string | Strain |
 | `dosage_ug` | float | Dose in micrograms |
-| `FOB_score` | list[float] | Functional observation battery scores (0–7) |
+| `FOB_score` | list[float] | Functional observation battery scores (0-7) |
 | `latency_time_hours` | float | Time from dosing to observation |
 | `administration_method` | string | Route (typically intracerebroventricular) |
 | `tolerability_score_type` | string | Scoring system used |
@@ -124,7 +175,7 @@ atlas = {c: load_dataset("barneyhill/aso-atlas-2", c) for c in configs}
 
 HELM (Hierarchical Editing Language for Macromolecules) encodes full oligonucleotide chemistry including sugar modifications, backbone linkages, and base modifications.
 
-**Example:** `RNA1{[moe](C)[sp].[moe](T)[sp].d(A)[sp].d(G)[sp].[cet](A)}$$$$`
+**Example:** `RNA1{{[moe](C)[sp].[moe](T)[sp].d(A)[sp].d(G)[sp].[cet](A)}}$$$$`
 
 | Sugar | Chemistry | Backbone | Chemistry |
 |-------|-----------|----------|-----------|
@@ -141,25 +192,48 @@ HELM (Hierarchical Editing Language for Macromolecules) encodes full oligonucleo
 
 All data was extracted from publicly available USPTO patent filings using an LLM-based text mining pipeline. Patents were identified via keyword search for antisense oligonucleotide-related terms, and data tables within each patent were parsed to extract compound structures, assay conditions, and measured endpoints.
 
+Cell-line enrichment uses `Model.csv` from **DepMap Public 25Q3**, downloaded on
+20 January 2026 (source SHA-256
+`9dbb9de8805696c1345816ab07edd23fb4fd95e117739f3c5c3b1cf062c1233b`). Only
+cell-line names, model identifiers and OncoTree fields derived from that lookup are
+included here; no patient-level source fields are released.
+
+### Source terms and attribution
+
+- USPTO patent full-text XML is governed by the [USPTO website terms](https://www.uspto.gov/terms-use-uspto-websites). Patent text and drawings are typically not copyright-restricted, subject to the exceptions stated there; source patent identifiers are retained on every record.
+
+- DepMap Public 25Q3 is attributed to Broad DepMap and its source release terms. Broad-generated DepMap data is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). ASO Atlas republishes only derived cell-line mapping fields.
+
+- The processed ASO Atlas 2.0 release is distributed under CC BY 4.0. Dataset publication does not grant permission to practise inventions claimed by active patents.
+
 ### Processing
 
 1. HELM quality filtering: removed sequences with uncertain chemistry (`?`), length <11 nucleotides, missing DNA gap, homopolymers, or naked DNA
 2. Gene name standardisation via manual curated mappings
 3. Cell line standardisation and CCLE (Cancer Cell Line Encyclopedia) enrichment
-4. Inhibition values filtered to [−1000%, 100%]
+4. Inhibition values filtered to [-1000%, 100%]
 5. Hepatic biomarker values filtered to physiologically plausible ranges
-6. FOB scores validated to 0–7 range
+6. FOB scores validated to 0-7 range
 7. Deduplication by compound and measurement
+8. Rows without a resolvable HELM annotation are retained and marked `model_eligible=false`
 
-### No canonical train/test split
+## Intended uses
 
-This dataset ships raw measurements without a predefined split. The accompanying paper uses patent-level GroupKFold cross-validation to prevent data leakage (compounds from the same patent always stay in the same fold). We recommend the same strategy.
+The established uses are research benchmarking and exploratory model development for
+patent-derived ASO in vitro efficacy and preclinical toxicity endpoints. Use the supplied
+patent-grouped paper folds to reproduce or extend the submitted results. The measurements
+represent outcomes reported in patents, not independently replicated biological truth.
+
+This dataset is **not validated for clinical decision-making, prediction of human safety,
+dose selection, treatment selection, prospective laboratory deployment, legal conclusions,
+or generalisation to chemistries and organisations absent from the source patents**.
 
 ## Considerations
 
 ### Biases
 
 - **Patent bias**: Data comes exclusively from pharmaceutical patent filings, which over-represent compound classes pursued by industry (predominantly 2'-MOE gapmers). Academic and early-stage chemistries may be underrepresented.
+- **Single-originator bias**: All filings come from one organisation, so quantities estimated from this corpus (pass rates, enrichment factors) bound to its chemistry and target choices rather than to ASO development in general.
 - **Species bias**: Mouse and rat data dominate; monkey and dog data are sparse.
 - **Reporting bias**: Patents report results selectively. Negative results may be underrepresented.
 
@@ -168,7 +242,21 @@ This dataset ships raw measurements without a predefined split. The accompanying
 - **No independent validation**: All measurements originate from patent applicants' own experiments. Cross-laboratory reproducibility is unknown.
 - **Extraction errors**: LLM-based extraction may introduce errors. A validation audit is included in the accompanying code repository.
 - **Heterogeneous protocols**: Assay conditions (cell lines, doses, timepoints) vary across patents and are not standardised.
+- **Unresolved chemistry**: 4,166 assay readouts lack a resolvable HELM annotation and cannot be used directly in chemistry-aware models.
 
 ### Ethical considerations
 
-No human subjects data. All data derives from public USPTO patent documents and public biological databases (CCLE). No personally identifiable information is present.```
+No human-subject records, patient-level health information or personally identifiable
+information are included. The release contains public patent assay records, compound
+structures, animal-study measurements and public CCLE cell-line identifiers. It contains
+no synthetic assay records: LLMs transformed source tables but were not permitted to
+generate measurement values directly.
+
+### Social impact
+
+Potential benefits include more reproducible ASO model evaluation, lower screening costs
+and reduced animal use. Potential harms arise if extraction errors or the source patents'
+narrow chemistry and target distribution are treated as universally representative; this
+could misprioritise candidates or research areas. Version pinning, source identifiers,
+leakage-controlled folds, a validation audit and the non-clinical-use limits above reduce
+but do not eliminate those risks.

@@ -15,10 +15,24 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Circle, PathPatch, Wedge
 from matplotlib.path import Path as MPath
+from PIL import Image
 
 from analyses.utils.compounds import has_measurement
 
 _root = Path(__file__).resolve().parents[2]
+
+
+def compose_full_figure(panel_a_path: Path, lower_path: Path, output_path: Path) -> None:
+    """Stack the preserved pipeline diagram above regenerated data panels B/C."""
+    panel_a = Image.open(panel_a_path).convert("RGB")
+    lower = Image.open(lower_path).convert("RGB")
+    if lower.width != panel_a.width:
+        height = round(lower.height * panel_a.width / lower.width)
+        lower = lower.resize((panel_a.width, height), Image.Resampling.LANCZOS)
+    canvas = Image.new("RGB", (panel_a.width, panel_a.height + lower.height), "white")
+    canvas.paste(panel_a, (0, 0))
+    canvas.paste(lower, (0, panel_a.height))
+    canvas.save(output_path)
 
 
 def draw_sankey_tapered(flows, node_positions, node_heights, node_labels, node_colors,
@@ -145,15 +159,25 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
         .sort_values(ascending=False)
     )
     n_genes = len(gene_meas)
-    total_meas = int(gene_meas.sum())
+
+    # Readouts without a target-gene annotation still belong to the dataset.
+    # Keep them in the donut by absorbing them into "Other", rather than
+    # silently dropping them through pandas' null-excluding groupby.
+    named_meas = int(gene_meas.sum())
+    total_meas = int(
+        len(in_vitro_df)
+        + len(dose_response_df)
+        + hepatictox_df["_meas"].sum()
+        + neurotox_df["_meas"].sum()
+    )
+    unannotated_meas = total_meas - named_meas
 
     # Split major vs minor: keep genes individually labelled until their
     # label midpoint enters the bottom-right of the circle (past 270°).
-    total_all = gene_meas.sum()
     cumulative_angle = 0
     cutoff_idx = len(gene_meas)
     for i, count in enumerate(gene_meas.values):
-        wedge_angle = 360 * count / total_all
+        wedge_angle = 360 * count / named_meas
         mid_angle = cumulative_angle + wedge_angle / 2
         if (mid_angle % 360) > 270:
             cutoff_idx = i
@@ -165,7 +189,7 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
     genes = list(major.index)
     counts = list(major.values.astype(int))
     genes.append('Other')
-    counts.append(int(minor.sum()))
+    counts.append(int(minor.sum()) + unannotated_meas)
     other_count = len(minor)
     total = sum(counts)
 
@@ -230,11 +254,13 @@ def draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
 
 
 def main():
-    data_dir = _root / "data/oligostack/processed"
-    in_vitro_df = pd.read_parquet(data_dir / "in_vitro_inhibition_processed.parquet")
-    dose_response_df = pd.read_parquet(data_dir / "dose_response_processed.parquet")
-    neurotox_df = pd.read_parquet(data_dir / "neurotoxicity_processed.parquet")
-    hepatictox_df = pd.read_parquet(data_dir / "hepatictoxicity_processed.parquet")
+    # Figure 1 describes the complete downloadable neurips-rebuttal corpus. Panel B
+    # retains the submitted source Compound ID definition for linkage.
+    data_dir = _root / "aso-atlas-2-release"
+    in_vitro_df = pd.read_parquet(data_dir / "in_vitro_inhibition.parquet")
+    dose_response_df = pd.read_parquet(data_dir / "dose_response.parquet")
+    neurotox_df = pd.read_parquet(data_dir / "neurotoxicity.parquet")
+    hepatictox_df = pd.read_parquet(data_dir / "hepatotoxicity.parquet")
 
     biomarker_cols = ['ALB', 'ALT', 'AST', 'BUN', 'CREA', 'TBIL', 'PC_ratio']
 
@@ -249,10 +275,10 @@ def main():
     print(f"Hepatic tox: {hepatictox_df['_measurements'].sum():,} measurements")
 
     # Compute flow proportions
-    in_vitro_compounds = set(in_vitro_df["Compound ID"].unique())
-    dose_response_compounds = set(dose_response_df["Compound ID"].unique())
-    neurotox_compounds = set(neurotox_df["Compound ID"].unique())
-    hepatictox_compounds = set(hepatictox_df["Compound ID"].unique())
+    in_vitro_compounds = set(in_vitro_df["Compound ID"].dropna().unique())
+    dose_response_compounds = set(dose_response_df["Compound ID"].dropna().unique())
+    neurotox_compounds = set(neurotox_df["Compound ID"].dropna().unique())
+    hepatictox_compounds = set(hepatictox_df["Compound ID"].dropna().unique())
 
     in_vitro_to_dose = in_vitro_compounds & dose_response_compounds
     dose_to_neurotox = dose_response_compounds & neurotox_compounds
@@ -277,8 +303,8 @@ def main():
     }
 
     # Build bottom row: sankey + gene circle
-    fig, (ax_circle, ax_sankey) = plt.subplots(1, 2, figsize=(16, 8), dpi=300,
-                                                gridspec_kw={'width_ratios': [3, 4], 'wspace': 0.05})
+    fig, (ax_sankey, ax_circle) = plt.subplots(1, 2, figsize=(18, 7.5), dpi=300,
+                                                gridspec_kw={'width_ratios': [4, 3], 'wspace': 0.05})
 
     flows = [
         (0, 1, flow_proportions[(0, 1)][0], flow_proportions[(0, 1)][1]),
@@ -316,10 +342,10 @@ def main():
     n_neurotox_asos = neurotox_df["Compound ID"].nunique()
 
     node_labels = {
-        0: f"$\\bf{{\\it{{In\\ vitro}}}}$\n$\\bf{{hit\\ screening}}$\n{in_vitro_total_meas:,} measurements\nacross {n_in_vitro_asos:,} ASOs",
-        1: f"$\\bf{{\\it{{In\\ vitro}}}}$\n$\\bf{{dose\\ response}}$\n{dose_total_meas:,} measurements\nacross {n_dose_asos:,} ASOs",
-        2: f"$\\bf{{\\it{{In\\ vivo}}}}$\n$\\bf{{hepatorenal\\ toxicity}}$\n{hepatic_total_meas:,} measurements\nacross {n_hepatic_asos:,} ASOs",
-        3: f"$\\bf{{\\it{{In\\ vivo}}}}$\n$\\bf{{neuro\\ tolerability}}$\n{neurotox_total_meas:,} measurements\nacross {n_neurotox_asos:,} ASOs",
+        0: f"$\\bf{{\\it{{In\\ vitro}}}}$\n$\\bf{{hit\\ screening}}$\n{in_vitro_total_meas:,} measurements\n{n_in_vitro_asos:,} source IDs",
+        1: f"$\\bf{{\\it{{In\\ vitro}}}}$\n$\\bf{{dose\\ response}}$\n{dose_total_meas:,} measurements\n{n_dose_asos:,} source IDs",
+        2: f"$\\bf{{\\it{{In\\ vivo}}}}$\n$\\bf{{hepatorenal\\ toxicity}}$\n{hepatic_total_meas:,} measurements\n{n_hepatic_asos:,} source IDs",
+        3: f"$\\bf{{\\it{{In\\ vivo}}}}$\n$\\bf{{neuro\\ tolerability}}$\n{neurotox_total_meas:,} measurements\n{n_neurotox_asos:,} source IDs",
         5: "",
     }
 
@@ -338,8 +364,8 @@ def main():
     bb_b = ax_sankey.get_position()
     bb_c = ax_circle.get_position()
     label_y = max(bb_b.y1, bb_c.y1) + 0.01
-    fig.text(bb_c.x0, label_y, "B", fontsize=16, fontweight="bold", va="bottom")
-    fig.text(bb_b.x0, label_y, "C", fontsize=16, fontweight="bold", va="bottom")
+    fig.text(bb_b.x0, label_y, "B", fontsize=16, fontweight="bold", va="bottom")
+    fig.text(bb_c.x0, label_y, "C", fontsize=16, fontweight="bold", va="bottom")
 
     out_dir = _root / "typst/plots/fig_atlas"
     sankey_gene_path = out_dir / "sankey_gene_circle.svg"
@@ -347,6 +373,19 @@ def main():
     fig.savefig(sankey_gene_path.with_suffix(".png"), format="png", dpi=300, bbox_inches='tight')
     print(f"Saved {sankey_gene_path}")
     plt.close(fig)
+
+    panel_a_path = out_dir / "fig_atlas_A.png"
+    if not panel_a_path.exists():
+        raise FileNotFoundError(
+            f"Missing preserved panel A asset: {panel_a_path}"
+        )
+    full_figure_path = out_dir / "fig1@2x.png"
+    compose_full_figure(
+        panel_a_path,
+        sankey_gene_path.with_suffix(".png"),
+        full_figure_path,
+    )
+    print(f"Saved {full_figure_path}")
 
     # Standalone panels (no letter labels) for manual fig_atlas.svg assembly
     fig_b, ax_b = plt.subplots(figsize=(9, 8), dpi=300)

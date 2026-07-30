@@ -1,0 +1,2688 @@
+{
+  "validation_role": "deprecated release-wide diagnostic; not primary precision or recall",
+  "primary_validation": "analyses/validation/canonical_source_audit.py with a frozen Gold-to-production-canonical source-table mapping",
+  "corpus": {
+    "patents": [
+      {
+        "id": "US20160251655A1",
+        "gene": "C9ORF72",
+        "verified_tables": 68,
+        "gold_measurements": 4207
+      },
+      {
+        "id": "US20240026353A1",
+        "gene": "SCN2A",
+        "verified_tables": 87,
+        "gold_measurements": 4668
+      },
+      {
+        "id": "US20210038631A1",
+        "gene": "IRF4",
+        "verified_tables": 141,
+        "gold_measurements": 8711
+      },
+      {
+        "id": "US20190160090A1",
+        "gene": "AGT",
+        "verified_tables": 33,
+        "gold_measurements": 4414
+      }
+    ],
+    "verified_tables_total": 329,
+    "tables_still_under_review": 12,
+    "gold_measurements_total": 22000,
+    "gold_compounds": 11385,
+    "gold_chemistry_compounds": 10758,
+    "measurements_by_endpoint": {
+      "in vitro inhibition": 20104,
+      "neurotoxicity": 670,
+      "hepatotoxicity": 1226
+    },
+    "unit_definition": "one measurement = one assay readout: one inhibition value, one FOB observation, or one biomarker readout (a hepatotoxicity row contributes up to 7)"
+  },
+  "audit_scope": {
+    "audited_patents": [
+      "US20160251655A1",
+      "US20240026353A1",
+      "US20210038631A1",
+      "US20190160090A1"
+    ],
+    "released_rows_under_the_audited_patents": 6710,
+    "released_rows_under_family_members_sharing_these_compounds": 14322,
+    "family_members": {
+      "US20220241320A1": 5431,
+      "US20240102012A1": 3155,
+      "US20230112920A1": 2725,
+      "US20220000901A1": 2339,
+      "US20190367916A1": 401,
+      "US20160068846A1": 65,
+      "US20220315927A1": 56,
+      "US20240200067A1": 30,
+      "US20200239882A1": 29,
+      "US20180273577A1": 22,
+      "US20220298200A1": 19,
+      "US20200179435A1": 11
+    },
+    "note": "Recall is matched release-wide, so a measurement republished by a continuation still counts as covered. Precision is scored only on rows filed under the four audited patents; rows under family members are outside the annotated ground truth and are not scored either way."
+  },
+  "controls_excluded": {
+    "note": "Vehicle and control arms (PBS, saline, untreated) are dropped from the release on purpose. They are excluded from BOTH sides here, so that choice is never scored as a coverage failure: load_gold() keeps a row only if its treatment field carries a 4-7 digit compound number, which no control arm does. Counted here so the exclusion is visible rather than implicit.",
+    "control_rows_in_the_verified_tables": 68,
+    "control_rows_reaching_the_audit": 0,
+    "gold_measurements_at_zero_dose": 0
+  },
+  "recall": {
+    "anywhere_in_release": {
+      "k": 20967,
+      "n": 22000,
+      "pct": 95.3,
+      "ci_lo": 95.02,
+      "ci_hi": 95.58
+    },
+    "same_patent_only": {
+      "k": 7137,
+      "n": 22000,
+      "pct": 32.44,
+      "ci_lo": 31.83,
+      "ci_hi": 33.06
+    },
+    "same_patent_and_table": {
+      "k": 7042,
+      "n": 22000,
+      "pct": 32.01,
+      "ci_lo": 31.4,
+      "ci_hi": 32.63
+    },
+    "chance_floor_permuted_values": {
+      "mean_pct": 1.8,
+      "sd_pct": 0.0,
+      "n_permutations": 1
+    },
+    "note": "Historical release-wide, value-based diagnostic only. Patent-family republication motivates a predeclared production-canonical source scope; it does not make unrestricted anywhere-in-release matching a valid primary recall estimate."
+  },
+  "precision": {
+    "corroborated": {
+      "k": 7142,
+      "n": 7198,
+      "pct": 99.22,
+      "ci_lo": 98.99,
+      "ci_hi": 99.4
+    },
+    "released_rows_audited": 7198,
+    "released_rows_for_compounds_absent_from_gold": 1,
+    "released_rows_excluded_table_still_under_review": 36,
+    "unauditable_row_reasons": {
+      "compound verified elsewhere, not at this endpoint": 1
+    },
+    "by_dataset": {
+      "dose_response": {
+        "k": 2960,
+        "n": 3014,
+        "pct": 98.21,
+        "ci_lo": 97.67,
+        "ci_hi": 98.62
+      },
+      "hepatotoxicity": {
+        "k": 649,
+        "n": 649,
+        "pct": 100.0,
+        "ci_lo": 99.41,
+        "ci_hi": 100.0
+      },
+      "in_vitro_inhibition": {
+        "k": 2885,
+        "n": 2885,
+        "pct": 100.0,
+        "ci_lo": 99.87,
+        "ci_hi": 100.0
+      },
+      "neurotoxicity": {
+        "k": 648,
+        "n": 650,
+        "pct": 99.69,
+        "ci_lo": 98.89,
+        "ci_hi": 99.92
+      }
+    },
+    "stratified": [
+      {
+        "by": "endpoint",
+        "levels": {
+          "in vitro inhibition": {
+            "k": 5845,
+            "n": 5899,
+            "pct": 99.08,
+            "ci_lo": 98.81,
+            "ci_hi": 99.3
+          },
+          "neurotoxicity": {
+            "k": 648,
+            "n": 650,
+            "pct": 99.69,
+            "ci_lo": 98.89,
+            "ci_hi": 99.92
+          },
+          "hepatotoxicity": {
+            "k": 649,
+            "n": 649,
+            "pct": 100.0,
+            "ci_lo": 99.41,
+            "ci_hi": 100.0
+          }
+        }
+      },
+      {
+        "by": "table format",
+        "levels": {
+          "single-dose": {
+            "k": 4070,
+            "n": 4072,
+            "pct": 99.95,
+            "ci_lo": 99.82,
+            "ci_hi": 99.99
+          },
+          "dose-series": {
+            "k": 3072,
+            "n": 3126,
+            "pct": 98.27,
+            "ci_lo": 97.75,
+            "ci_hi": 98.67
+          }
+        }
+      },
+      {
+        "by": "table layout",
+        "levels": {
+          "single measurement column": {
+            "k": 5874,
+            "n": 5930,
+            "pct": 99.06,
+            "ci_lo": 98.78,
+            "ci_hi": 99.27
+          },
+          "multi-column melt": {
+            "k": 1268,
+            "n": 1268,
+            "pct": 100.0,
+            "ci_lo": 99.7,
+            "ci_hi": 100.0
+          }
+        }
+      },
+      {
+        "by": "unit conversion (potency scale)",
+        "levels": {
+          "% control -> % inhibition": {
+            "k": 3463,
+            "n": 3463,
+            "pct": 100.0,
+            "ci_lo": 99.89,
+            "ci_hi": 100.0
+          },
+          "no conversion": {
+            "k": 2382,
+            "n": 2436,
+            "pct": 97.78,
+            "ci_lo": 97.12,
+            "ci_hi": 98.3
+          }
+        }
+      },
+      {
+        "by": "chemistry class",
+        "levels": {
+          "5-10-5 MOE gapmer": {
+            "k": 3049,
+            "n": 3051,
+            "pct": 99.93,
+            "ci_lo": 99.76,
+            "ci_hi": 99.98
+          },
+          "cET gapmer": {
+            "k": 2381,
+            "n": 2431,
+            "pct": 97.94,
+            "ci_lo": 97.3,
+            "ci_hi": 98.44
+          },
+          "mixed MOE/cET": {
+            "k": 1296,
+            "n": 1300,
+            "pct": 99.69,
+            "ci_lo": 99.21,
+            "ci_hi": 99.88
+          },
+          "MOE gapmer (other wing)": {
+            "k": 416,
+            "n": 416,
+            "pct": 100.0,
+            "ci_lo": 99.08,
+            "ci_hi": 100.0
+          }
+        }
+      },
+      {
+        "by": "patent",
+        "levels": {
+          "US20210038631A1 (IRF4)": {
+            "k": 2818,
+            "n": 2818,
+            "pct": 100.0,
+            "ci_lo": 99.86,
+            "ci_hi": 100.0
+          },
+          "US20190160090A1 (AGT)": {
+            "k": 1779,
+            "n": 1833,
+            "pct": 97.05,
+            "ci_lo": 96.18,
+            "ci_hi": 97.74
+          },
+          "US20240026353A1 (SCN2A)": {
+            "k": 1476,
+            "n": 1476,
+            "pct": 100.0,
+            "ci_lo": 99.74,
+            "ci_hi": 100.0
+          },
+          "US20160251655A1 (C9ORF72)": {
+            "k": 1069,
+            "n": 1071,
+            "pct": 99.81,
+            "ci_lo": 99.32,
+            "ci_hi": 99.95
+          }
+        }
+      }
+    ],
+    "discordance_examples": [
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594626",
+        "channel": "Inhibition_pct",
+        "atlas_value": "94.0",
+        "atlas_dose": 94.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "20.0",
+          "36",
+          "58.0",
+          "84.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594630",
+        "channel": "Inhibition_pct",
+        "atlas_value": "13.0",
+        "atlas_dose": 13.0,
+        "gold_values": [
+          "-10.0",
+          "13.0",
+          "35.0",
+          "52.0",
+          "78.0",
+          "79"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594629",
+        "channel": "Inhibition_pct",
+        "atlas_value": "94.0",
+        "atlas_dose": 94.0,
+        "gold_values": [
+          "-1.0",
+          "-20.0",
+          "39.0",
+          "67.0",
+          "84",
+          "94.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594629",
+        "channel": "Inhibition_pct",
+        "atlas_value": "67.0",
+        "atlas_dose": 67.0,
+        "gold_values": [
+          "-1.0",
+          "-20.0",
+          "39.0",
+          "67.0",
+          "84",
+          "94.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594629",
+        "channel": "Inhibition_pct",
+        "atlas_value": "39.0",
+        "atlas_dose": 39.0,
+        "gold_values": [
+          "-1.0",
+          "-20.0",
+          "39.0",
+          "67.0",
+          "84",
+          "94.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594628",
+        "channel": "Inhibition_pct",
+        "atlas_value": "87.0",
+        "atlas_dose": 87.0,
+        "gold_values": [
+          "-30.0",
+          "13",
+          "4.0",
+          "48",
+          "51",
+          "51.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594628",
+        "channel": "Inhibition_pct",
+        "atlas_value": "78.0",
+        "atlas_dose": 78.0,
+        "gold_values": [
+          "-30.0",
+          "13",
+          "4.0",
+          "48",
+          "51",
+          "51.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594628",
+        "channel": "Inhibition_pct",
+        "atlas_value": "51.0",
+        "atlas_dose": 51.0,
+        "gold_values": [
+          "-30.0",
+          "13",
+          "4.0",
+          "48",
+          "51",
+          "51.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594628",
+        "channel": "Inhibition_pct",
+        "atlas_value": "4.0",
+        "atlas_dose": 4.0,
+        "gold_values": [
+          "-30.0",
+          "13",
+          "4.0",
+          "48",
+          "51",
+          "51.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594627",
+        "channel": "Inhibition_pct",
+        "atlas_value": "95.0",
+        "atlas_dose": 95.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "36.0",
+          "72.0",
+          "92",
+          "93.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594627",
+        "channel": "Inhibition_pct",
+        "atlas_value": "93.0",
+        "atlas_dose": 93.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "36.0",
+          "72.0",
+          "92",
+          "93.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594627",
+        "channel": "Inhibition_pct",
+        "atlas_value": "72.0",
+        "atlas_dose": 72.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "36.0",
+          "72.0",
+          "92",
+          "93.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594627",
+        "channel": "Inhibition_pct",
+        "atlas_value": "36.0",
+        "atlas_dose": 36.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "36.0",
+          "72.0",
+          "92",
+          "93.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594627",
+        "channel": "Inhibition_pct",
+        "atlas_value": "11.0",
+        "atlas_dose": 11.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "36.0",
+          "72.0",
+          "92",
+          "93.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594626",
+        "channel": "Inhibition_pct",
+        "atlas_value": "84.0",
+        "atlas_dose": 84.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "20.0",
+          "36",
+          "58.0",
+          "84.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594626",
+        "channel": "Inhibition_pct",
+        "atlas_value": "58.0",
+        "atlas_dose": 58.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "20.0",
+          "36",
+          "58.0",
+          "84.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594626",
+        "channel": "Inhibition_pct",
+        "atlas_value": "20.0",
+        "atlas_dose": 20.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "20.0",
+          "36",
+          "58.0",
+          "84.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594626",
+        "channel": "Inhibition_pct",
+        "atlas_value": "11.0",
+        "atlas_dose": 11.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "20.0",
+          "36",
+          "58.0",
+          "84.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594625",
+        "channel": "Inhibition_pct",
+        "atlas_value": "95.0",
+        "atlas_dose": 95.0,
+        "gold_values": [
+          "0",
+          "11",
+          "14",
+          "14.0",
+          "24",
+          "31.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594625",
+        "channel": "Inhibition_pct",
+        "atlas_value": "90.0",
+        "atlas_dose": 90.0,
+        "gold_values": [
+          "0",
+          "11",
+          "14",
+          "14.0",
+          "24",
+          "31.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594625",
+        "channel": "Inhibition_pct",
+        "atlas_value": "74.0",
+        "atlas_dose": 74.0,
+        "gold_values": [
+          "0",
+          "11",
+          "14",
+          "14.0",
+          "24",
+          "31.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594625",
+        "channel": "Inhibition_pct",
+        "atlas_value": "31.0",
+        "atlas_dose": 31.0,
+        "gold_values": [
+          "0",
+          "11",
+          "14",
+          "14.0",
+          "24",
+          "31.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594625",
+        "channel": "Inhibition_pct",
+        "atlas_value": "14.0",
+        "atlas_dose": 14.0,
+        "gold_values": [
+          "0",
+          "11",
+          "14",
+          "14.0",
+          "24",
+          "31.0"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594624",
+        "channel": "Inhibition_pct",
+        "atlas_value": "96.0",
+        "atlas_dose": 96.0,
+        "gold_values": [
+          "0",
+          "13.0",
+          "37.0",
+          "54",
+          "57",
+          "62"
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594624",
+        "channel": "Inhibition_pct",
+        "atlas_value": "92.0",
+        "atlas_dose": 92.0,
+        "gold_values": [
+          "0",
+          "13.0",
+          "37.0",
+          "54",
+          "57",
+          "62"
+        ]
+      }
+    ]
+  },
+  "endpoint_layout_confounding": {
+    "note": "endpoint and table layout overlap heavily, so the two strata above are not independent evidence; this cross-tab shows how much of each layout level is one endpoint.",
+    "cells": {
+      "hepatotoxicity / multi-column melt": {
+        "k": 840,
+        "n": 1215,
+        "pct": 69.14,
+        "ci_lo": 66.48,
+        "ci_hi": 71.67
+      },
+      "hepatotoxicity / single measurement column": {
+        "k": 10,
+        "n": 11,
+        "pct": 90.91,
+        "ci_lo": 62.26,
+        "ci_hi": 98.38
+      },
+      "in vitro inhibition / multi-column melt": {
+        "k": 621,
+        "n": 625,
+        "pct": 99.36,
+        "ci_lo": 98.37,
+        "ci_hi": 99.75
+      },
+      "in vitro inhibition / single measurement column": {
+        "k": 18839,
+        "n": 19479,
+        "pct": 96.71,
+        "ci_lo": 96.45,
+        "ci_hi": 96.96
+      },
+      "neurotoxicity / single measurement column": {
+        "k": 657,
+        "n": 670,
+        "pct": 98.06,
+        "ci_lo": 96.71,
+        "ci_hi": 98.86
+      }
+    }
+  },
+  "compounds_with_no_chemistry_in_the_release": {
+    "measurements": 173,
+    "compounds": 31,
+    "note": "These carry no HELM in the release, so they cannot be matched and cannot be assigned a chemistry class. They are excluded from the chemistry stratum (where they would read as a 0%-recall class) and counted here instead.",
+    "by_endpoint": {
+      "in vitro inhibition": 45,
+      "hepatotoxicity": 127,
+      "neurotoxicity": 1
+    }
+  },
+  "corpus_self_check": {
+    "method": "per table, compare the dose arms each side holds. Applied in both directions so a gap in the verified corpus is not reported as a defect in the release.",
+    "tables_compared": 127,
+    "tables_where_corpus_is_incomplete": [],
+    "tables_where_release_is_incomplete": [
+      {
+        "patent": "US20190160090A1",
+        "table": 39,
+        "endpoint": "hepatotoxicity",
+        "doses_only_in_corpus": [
+          4.0,
+          10.0,
+          40.0
+        ],
+        "doses_in_release": [
+          1.0
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 41,
+        "endpoint": "hepatotoxicity",
+        "doses_only_in_corpus": [
+          5.0,
+          15.0
+        ],
+        "doses_in_release": [
+          1.0
+        ]
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 54,
+        "endpoint": "hepatotoxicity",
+        "doses_only_in_corpus": [
+          5.0,
+          10.0
+        ],
+        "doses_in_release": [
+          20.0
+        ]
+      }
+    ],
+    "n_corpus_incomplete": 0,
+    "n_release_incomplete": 3,
+    "tables_with_transposed_dose_column": [
+      {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "endpoint": "in vitro inhibition",
+        "release_doses": [
+          2.0,
+          4.0,
+          11.0,
+          13.0,
+          14.0,
+          15.0,
+          16.0,
+          20.0,
+          27.0,
+          30.0
+        ],
+        "corpus_doses": [
+          39.1,
+          156.3,
+          625.0,
+          2500.0,
+          10000.0
+        ],
+        "diagnosis": "release dose column holds the measurement values"
+      }
+    ]
+  },
+  "filtering_vs_extraction_recall": {
+    "definition": "filtering recall = share of verified measurements that the documented QC rules retain; extraction recall = share of those retained measurements the pipeline actually captured. Their product is the end-to-end recall.",
+    "filtering_recall": {
+      "k": 21815,
+      "n": 22000,
+      "pct": 99.16,
+      "ci_lo": 99.03,
+      "ci_hi": 99.27
+    },
+    "extraction_recall_of_retained": {
+      "k": 20967,
+      "n": 21815,
+      "pct": 96.11,
+      "ci_lo": 95.85,
+      "ci_hi": 96.36
+    },
+    "end_to_end_recall": {
+      "k": 20967,
+      "n": 22000,
+      "pct": 95.3,
+      "ci_lo": 95.02,
+      "ci_hi": 95.58
+    },
+    "unexplained_omissions": {
+      "k": 304,
+      "n": 22000,
+      "pct": 1.38,
+      "ci_lo": 1.24,
+      "ci_hi": 1.54
+    },
+    "by_rule": {
+      "retained and present": 20967,
+      "no measurement of this source table appears in the release": 544,
+      "unexplained by any documented filter": 304,
+      "compound carries no HELM annotation in the release": 173,
+      "collapsed by deduplication: in_vitro key is compound + inhibition value, excluding dose": 10,
+      "collapsed by deduplication: neurotoxicity key excludes readout timepoint": 2
+    },
+    "by_rule_and_endpoint": {
+      "in vitro inhibition": {
+        "retained and present": 19460,
+        "no measurement of this source table appears in the release": 467,
+        "unexplained by any documented filter": 122,
+        "compound carries no HELM annotation in the release": 45,
+        "collapsed by deduplication: in_vitro key is compound + inhibition value, excluding dose": 10
+      },
+      "neurotoxicity": {
+        "retained and present": 657,
+        "no measurement of this source table appears in the release": 7,
+        "unexplained by any documented filter": 3,
+        "collapsed by deduplication: neurotoxicity key excludes readout timepoint": 2,
+        "compound carries no HELM annotation in the release": 1
+      },
+      "hepatotoxicity": {
+        "retained and present": 850,
+        "unexplained by any documented filter": 179,
+        "compound carries no HELM annotation in the release": 127,
+        "no measurement of this source table appears in the release": 70
+      }
+    },
+    "examples": {
+      "collapsed by deduplication: in_vitro key is compound + inhibition value, excluding dose": [
+        {
+          "patent": "US20160251655A1",
+          "table": 17,
+          "compound": "619420",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "100",
+          "dose": 4000.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 17,
+          "compound": "655172",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "10",
+          "dose": 4000.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 19,
+          "compound": "576816",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "53",
+          "dose": 4000.0
+        }
+      ],
+      "no measurement of this source table appears in the release": [
+        {
+          "patent": "US20160251655A1",
+          "table": 43,
+          "compound": "576816",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "75",
+          "dose": 700.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 43,
+          "compound": "673035",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "47",
+          "dose": 700.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 43,
+          "compound": "673036",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "57",
+          "dose": 700.0
+        }
+      ],
+      "compound carries no HELM annotation in the release": [
+        {
+          "patent": "US20160251655A1",
+          "table": 45,
+          "compound": "673338",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "43",
+          "dose": 700.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 45,
+          "compound": "673343",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "50",
+          "dose": 700.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 52,
+          "compound": "673338",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "0",
+          "dose": 185.0
+        }
+      ],
+      "collapsed by deduplication: neurotoxicity key excludes readout timepoint": [
+        {
+          "patent": "US20160251655A1",
+          "table": 96,
+          "compound": "576974",
+          "endpoint": "neurotoxicity",
+          "channel": "FOB_score",
+          "value": "7, 5, 7",
+          "dose": 700.0
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 96,
+          "compound": "577065",
+          "endpoint": "neurotoxicity",
+          "channel": "FOB_score",
+          "value": "7, 7, 7",
+          "dose": 700.0
+        }
+      ],
+      "unexplained by any documented filter": [
+        {
+          "patent": "US20190160090A1",
+          "table": 2,
+          "compound": "568637",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "92",
+          "dose": 4500.0
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 3,
+          "compound": "568637",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "91",
+          "dose": 4000.0
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 3,
+          "compound": "568637",
+          "endpoint": "in vitro inhibition",
+          "channel": "Inhibition_pct",
+          "value": "97",
+          "dose": 4000.0
+        }
+      ]
+    }
+  },
+  "unit_conversion_accuracy": {
+    "conversions_present_in_the_audited_corpus": {
+      "in_vitro_tables_inspected": 243,
+      "tables_printing_%_control_(need 100-x)": 164,
+      "tables_printing_dose_in_uM_or_mM_(need x1000)": 0,
+      "note": "Every in-vitro table in these four patents states its concentrations in nM, so the dose-unit conversion has no exercised level here and its recall stratum has a single cell. That is a property of the corpus, not an omission from the audit. The potency-scale conversion is exercised and is reported below."
+    },
+    "potency_scale_orientation": {
+      "definition": "tables printing % control must be stored as 100 - x; a value stored uninverted is a conversion failure",
+      "correct": {
+        "k": 11007,
+        "n": 11007,
+        "pct": 100.0,
+        "ci_lo": 99.97,
+        "ci_hi": 100.0
+      },
+      "counts": {
+        "converted correctly (% inhibition)": 11007,
+        "no counterpart to compare": 86
+      },
+      "examples": []
+    },
+    "power_of_ten_errors": {
+      "definition": "among omitted measurements, how many are present in the release at exactly 10^k times the printed value or dose",
+      "n_detected": 6,
+      "of_omissions": 1033,
+      "by_pattern": {
+        "value differs by 10^-1": 1,
+        "dose differs by 10^1": 1,
+        "dose differs by 10^-1": 1,
+        "dose differs by 10^-2": 1,
+        "value differs by 10^1": 2
+      },
+      "examples": [
+        {
+          "patent": "US20160251655A1",
+          "table": 45,
+          "compound": "576816",
+          "field": "value",
+          "factor": 0.1,
+          "patent_value": 60.0,
+          "patent_dose": 700.0,
+          "release_value": "6.0",
+          "release_dose": 185.0
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 39,
+          "compound": "654451",
+          "field": "dose",
+          "factor": 10.0,
+          "patent_value": 0.13,
+          "patent_dose": 4.0,
+          "release_value": "0.13",
+          "release_dose": 40.0
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 39,
+          "compound": "654691",
+          "field": "dose",
+          "factor": 0.1,
+          "patent_value": 32.0,
+          "patent_dose": 10.0,
+          "release_value": "32.0",
+          "release_dose": 1.0
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 47,
+          "compound": "654472",
+          "field": "dose",
+          "factor": 0.01,
+          "patent_value": 28.0,
+          "patent_dose": 100.0,
+          "release_value": "28.0",
+          "release_dose": 1.0
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 124,
+          "compound": "792169",
+          "field": "value",
+          "factor": 10.0,
+          "patent_value": 1.0,
+          "patent_dose": 200.0,
+          "release_value": "10.0",
+          "release_dose": 400.0
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 124,
+          "compound": "792169",
+          "field": "value",
+          "factor": 10.0,
+          "patent_value": 1.0,
+          "patent_dose": 1000.0,
+          "release_value": "10.0",
+          "release_dose": 400.0
+        }
+      ]
+    }
+  },
+  "stratified_recall": [
+    {
+      "by": "endpoint",
+      "levels": {
+        "in vitro inhibition": {
+          "k": 19460,
+          "n": 20104,
+          "pct": 96.8,
+          "ci_lo": 96.54,
+          "ci_hi": 97.03
+        },
+        "hepatotoxicity": {
+          "k": 850,
+          "n": 1226,
+          "pct": 69.33,
+          "ci_lo": 66.69,
+          "ci_hi": 71.85
+        },
+        "neurotoxicity": {
+          "k": 657,
+          "n": 670,
+          "pct": 98.06,
+          "ci_lo": 96.71,
+          "ci_hi": 98.86
+        }
+      }
+    },
+    {
+      "by": "hepatotoxicity biomarker channel",
+      "levels": {
+        "ALT": {
+          "k": 224,
+          "n": 308,
+          "pct": 72.73,
+          "ci_lo": 67.5,
+          "ci_hi": 77.4
+        },
+        "AST": {
+          "k": 215,
+          "n": 297,
+          "pct": 72.39,
+          "ci_lo": 67.04,
+          "ci_hi": 77.16
+        },
+        "TBIL": {
+          "k": 182,
+          "n": 264,
+          "pct": 68.94,
+          "ci_lo": 63.12,
+          "ci_hi": 74.22
+        },
+        "BUN": {
+          "k": 181,
+          "n": 264,
+          "pct": 68.56,
+          "ci_lo": 62.73,
+          "ci_hi": 73.86
+        },
+        "ALB": {
+          "k": 30,
+          "n": 44,
+          "pct": 68.18,
+          "ci_lo": 53.44,
+          "ci_hi": 80.0
+        },
+        "CREA": {
+          "k": 9,
+          "n": 29,
+          "pct": 31.03,
+          "ci_lo": 17.28,
+          "ci_hi": 49.23
+        },
+        "PC_ratio": {
+          "k": 9,
+          "n": 20,
+          "pct": 45.0,
+          "ci_lo": 25.82,
+          "ci_hi": 65.79
+        }
+      }
+    },
+    {
+      "by": "table format",
+      "levels": {
+        "single-dose": {
+          "k": 13365,
+          "n": 14110,
+          "pct": 94.72,
+          "ci_lo": 94.34,
+          "ci_hi": 95.08
+        },
+        "dose-series": {
+          "k": 7602,
+          "n": 7890,
+          "pct": 96.35,
+          "ci_lo": 95.91,
+          "ci_hi": 96.74
+        }
+      }
+    },
+    {
+      "by": "table layout",
+      "levels": {
+        "single measurement column": {
+          "k": 19506,
+          "n": 20160,
+          "pct": 96.76,
+          "ci_lo": 96.5,
+          "ci_hi": 96.99
+        },
+        "multi-column melt": {
+          "k": 1461,
+          "n": 1840,
+          "pct": 79.4,
+          "ci_lo": 77.49,
+          "ci_hi": 81.19
+        }
+      }
+    },
+    {
+      "by": "unit conversion (potency scale)",
+      "levels": {
+        "% control -> % inhibition": {
+          "k": 11031,
+          "n": 11126,
+          "pct": 99.15,
+          "ci_lo": 98.96,
+          "ci_hi": 99.3
+        },
+        "no conversion": {
+          "k": 8429,
+          "n": 8978,
+          "pct": 93.89,
+          "ci_lo": 93.37,
+          "ci_hi": 94.36
+        }
+      }
+    },
+    {
+      "by": "unit conversion (dose)",
+      "levels": {
+        "dose stated in nM": {
+          "k": 19460,
+          "n": 20104,
+          "pct": 96.8,
+          "ci_lo": 96.54,
+          "ci_hi": 97.03
+        }
+      }
+    },
+    {
+      "by": "chemistry class",
+      "levels": {
+        "5-10-5 MOE gapmer": {
+          "k": 7447,
+          "n": 7658,
+          "pct": 97.24,
+          "ci_lo": 96.85,
+          "ci_hi": 97.59
+        },
+        "cET gapmer": {
+          "k": 7215,
+          "n": 7316,
+          "pct": 98.62,
+          "ci_lo": 98.33,
+          "ci_hi": 98.86
+        },
+        "mixed MOE/cET": {
+          "k": 4464,
+          "n": 4967,
+          "pct": 89.87,
+          "ci_lo": 89.0,
+          "ci_hi": 90.68
+        },
+        "MOE gapmer (other wing)": {
+          "k": 1841,
+          "n": 1886,
+          "pct": 97.61,
+          "ci_lo": 96.82,
+          "ci_hi": 98.21
+        }
+      }
+    },
+    {
+      "by": "patent",
+      "levels": {
+        "US20210038631A1 (IRF4)": {
+          "k": 8514,
+          "n": 8711,
+          "pct": 97.74,
+          "ci_lo": 97.4,
+          "ci_hi": 98.03
+        },
+        "US20240026353A1 (SCN2A)": {
+          "k": 4623,
+          "n": 4668,
+          "pct": 99.04,
+          "ci_lo": 98.71,
+          "ci_hi": 99.28
+        },
+        "US20190160090A1 (AGT)": {
+          "k": 4090,
+          "n": 4414,
+          "pct": 92.66,
+          "ci_lo": 91.85,
+          "ci_hi": 93.39
+        },
+        "US20160251655A1 (C9ORF72)": {
+          "k": 3740,
+          "n": 4207,
+          "pct": 88.9,
+          "ci_lo": 87.91,
+          "ci_hi": 89.81
+        }
+      }
+    }
+  ],
+  "error_taxonomy": [
+    {
+      "mode": "measurement printed in the patent but absent from the release",
+      "kind": "coverage",
+      "n": 1033,
+      "of": 22000,
+      "reaches_a_modelled_endpoint": true,
+      "example": null,
+      "dominant_pattern": "dose arm dropped (compound captured at other doses only)"
+    },
+    {
+      "mode": "HELM differs only by 5-methyl-cytosine annotation",
+      "kind": "normalisation",
+      "n": 708,
+      "of": 1696,
+      "reaches_a_modelled_endpoint": true,
+      "example": null,
+      "dominant_pattern": "patents state methylation once in prose, not per compound in the table"
+    },
+    {
+      "mode": "hepatotox.dosing_period_days disagrees",
+      "kind": "extraction",
+      "n": 540,
+      "of": 564,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20190160090A1",
+        "table": 25,
+        "compound": "568605",
+        "gold": "18",
+        "atlas": "17.0"
+      },
+      "dominant_pattern": "28 != 30.0"
+    },
+    {
+      "mode": "inhibition.treatment_period_hrs disagrees",
+      "kind": "extraction",
+      "n": 71,
+      "of": 621,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20160251655A1",
+        "table": 17,
+        "compound": "576816",
+        "gold": "24",
+        "atlas": "16.0"
+      },
+      "dominant_pattern": "24 != 16.0"
+    },
+    {
+      "mode": "released measurement not corroborated by the verified re-extraction",
+      "kind": "extraction",
+      "n": 56,
+      "of": 7198,
+      "reaches_a_modelled_endpoint": true,
+      "example": {
+        "patent": "US20190160090A1",
+        "table": 17,
+        "compound": "594626",
+        "channel": "Inhibition_pct",
+        "atlas_value": "94.0",
+        "atlas_dose": 94.0,
+        "gold_values": [
+          "0",
+          "11.0",
+          "20.0",
+          "36",
+          "58.0",
+          "84.0"
+        ]
+      },
+      "dominant_pattern": null
+    },
+    {
+      "mode": "inhibition.cells_per_well disagrees",
+      "kind": "extraction",
+      "n": 16,
+      "of": 5920,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20210038631A1",
+        "table": 11,
+        "compound": "609408",
+        "gold": "20000",
+        "atlas": "5000.0"
+      },
+      "dominant_pattern": "35000 != 20000.0"
+    },
+    {
+      "mode": "inhibition.cell_line disagrees",
+      "kind": "normalisation",
+      "n": 7,
+      "of": 5855,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20210038631A1",
+        "table": 11,
+        "compound": "609408",
+        "gold": "SK-MEL-28",
+        "atlas": "MM.1R"
+      },
+      "dominant_pattern": "mm.1r != kms11"
+    },
+    {
+      "mode": "neurotox.tolerability_score_type disagrees",
+      "kind": "normalisation",
+      "n": 7,
+      "of": 532,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20160251655A1",
+        "table": 92,
+        "compound": "687978",
+        "gold": "Body parts",
+        "atlas": "Behavioral"
+      },
+      "dominant_pattern": "body parts != behavioral"
+    },
+    {
+      "mode": "hepatotox.num_doses disagrees",
+      "kind": "extraction",
+      "n": 3,
+      "of": 530,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20190160090A1",
+        "table": 39,
+        "compound": "654691",
+        "gold": "2",
+        "atlas": "15.0"
+      },
+      "dominant_pattern": "8 != 6.0"
+    },
+    {
+      "mode": "hepatotox.species disagrees",
+      "kind": "normalisation",
+      "n": 3,
+      "of": 564,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20190160090A1",
+        "table": 39,
+        "compound": "654691",
+        "gold": "huAGT transgenic mice",
+        "atlas": "monkey"
+      },
+      "dominant_pattern": "cd1 mice != rat"
+    },
+    {
+      "mode": "inhibition.transfection_method disagrees",
+      "kind": "normalisation",
+      "n": 2,
+      "of": 5920,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20210038631A1",
+        "table": 11,
+        "compound": "609408",
+        "gold": "Electroporation",
+        "atlas": "Gymnosis"
+      },
+      "dominant_pattern": "electroporation != gymnosis"
+    },
+    {
+      "mode": "inhibition.cell_line_species disagrees",
+      "kind": "normalisation",
+      "n": 1,
+      "of": 5920,
+      "reaches_a_modelled_endpoint": false,
+      "example": {
+        "patent": "US20160251655A1",
+        "table": 47,
+        "compound": "576816",
+        "gold": "human",
+        "atlas": "monkey"
+      },
+      "dominant_pattern": "human != monkey"
+    }
+  ],
+  "secondary_fields": [
+    {
+      "endpoint": "hepatotox",
+      "field": "adminstration_method",
+      "kind": "normalisation",
+      "raw": {
+        "k": 564,
+        "n": 564,
+        "pct": 100.0,
+        "ci_lo": 99.32,
+        "ci_hi": 100.0
+      },
+      "after_vocabulary": {
+        "k": 564,
+        "n": 564,
+        "pct": 100.0,
+        "ci_lo": 99.32,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 564,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "hepatotox",
+      "field": "dosage_mg_per_kg",
+      "kind": "extraction",
+      "raw": {
+        "k": 564,
+        "n": 564,
+        "pct": 100.0,
+        "ci_lo": 99.32,
+        "ci_hi": 100.0
+      },
+      "after_vocabulary": {
+        "k": 564,
+        "n": 564,
+        "pct": 100.0,
+        "ci_lo": 99.32,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 564,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "hepatotox",
+      "field": "dosing_period_days",
+      "kind": "extraction",
+      "raw": {
+        "k": 24,
+        "n": 564,
+        "pct": 4.26,
+        "ci_lo": 2.88,
+        "ci_hi": 6.25
+      },
+      "after_vocabulary": {
+        "k": 24,
+        "n": 564,
+        "pct": 4.26,
+        "ci_lo": 2.88,
+        "ci_hi": 6.25
+      },
+      "coverage": {
+        "both_state_it": 564,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "28 != 30.0",
+          184
+        ],
+        [
+          "42 != 37.0",
+          80
+        ],
+        [
+          "42 != 44.0",
+          60
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20190160090A1",
+          "table": 25,
+          "compound": "568605",
+          "gold": "18",
+          "atlas": "17.0"
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 25,
+          "compound": "568605",
+          "gold": "18",
+          "atlas": "17.0"
+        },
+        {
+          "patent": "US20190160090A1",
+          "table": 25,
+          "compound": "568605",
+          "gold": "18",
+          "atlas": "17.0"
+        }
+      ]
+    },
+    {
+      "endpoint": "hepatotox",
+      "field": "num_doses",
+      "kind": "extraction",
+      "raw": {
+        "k": 527,
+        "n": 530,
+        "pct": 99.43,
+        "ci_lo": 98.35,
+        "ci_hi": 99.81
+      },
+      "after_vocabulary": {
+        "k": 527,
+        "n": 530,
+        "pct": 99.43,
+        "ci_lo": 98.35,
+        "ci_hi": 99.81
+      },
+      "coverage": {
+        "both_state_it": 530,
+        "only_patent_states_it": 34,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "8 != 6.0",
+          2
+        ],
+        [
+          "2 != 15.0",
+          1
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20190160090A1",
+          "table": 39,
+          "compound": "654691",
+          "gold": "2",
+          "atlas": "15.0"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 161,
+          "compound": "881413",
+          "gold": "8",
+          "atlas": "6.0"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 166,
+          "compound": "882085",
+          "gold": "8",
+          "atlas": "6.0"
+        }
+      ]
+    },
+    {
+      "endpoint": "hepatotox",
+      "field": "species",
+      "kind": "normalisation",
+      "raw": {
+        "k": 0,
+        "n": 564,
+        "pct": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.68
+      },
+      "after_vocabulary": {
+        "k": 561,
+        "n": 564,
+        "pct": 99.47,
+        "ci_lo": 98.45,
+        "ci_hi": 99.82
+      },
+      "coverage": {
+        "both_state_it": 564,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "cd1 mice != rat",
+          2
+        ],
+        [
+          "huagt transgenic mice != monkey",
+          1
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20190160090A1",
+          "table": 39,
+          "compound": "654691",
+          "gold": "huAGT transgenic mice",
+          "atlas": "monkey"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 161,
+          "compound": "881413",
+          "gold": "CD1 mice",
+          "atlas": "rat"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 166,
+          "compound": "882085",
+          "gold": "CD1 mice",
+          "atlas": "rat"
+        }
+      ]
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "cell_line",
+      "kind": "normalisation",
+      "raw": {
+        "k": 5848,
+        "n": 5855,
+        "pct": 99.88,
+        "ci_lo": 99.75,
+        "ci_hi": 99.94
+      },
+      "after_vocabulary": {
+        "k": 5848,
+        "n": 5855,
+        "pct": 99.88,
+        "ci_lo": 99.75,
+        "ci_hi": 99.94
+      },
+      "coverage": {
+        "both_state_it": 5855,
+        "only_patent_states_it": 65,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "mm.1r != kms11",
+          4
+        ],
+        [
+          "sk mel 28 != mm.1r",
+          1
+        ],
+        [
+          "jvm2 != sk mel 28",
+          1
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20210038631A1",
+          "table": 11,
+          "compound": "609408",
+          "gold": "SK-MEL-28",
+          "atlas": "MM.1R"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 41,
+          "compound": "609408",
+          "gold": "MM.1R",
+          "atlas": "KMS11"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 53,
+          "compound": "609408",
+          "gold": "MM.1R",
+          "atlas": "KMS11"
+        }
+      ]
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "cell_line_species",
+      "kind": "normalisation",
+      "raw": {
+        "k": 5606,
+        "n": 5920,
+        "pct": 94.7,
+        "ci_lo": 94.1,
+        "ci_hi": 95.24
+      },
+      "after_vocabulary": {
+        "k": 5919,
+        "n": 5920,
+        "pct": 99.98,
+        "ci_lo": 99.9,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 5920,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "human != monkey",
+          1
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20160251655A1",
+          "table": 47,
+          "compound": "576816",
+          "gold": "human",
+          "atlas": "monkey"
+        }
+      ]
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "cells_per_well",
+      "kind": "extraction",
+      "raw": {
+        "k": 5904,
+        "n": 5920,
+        "pct": 99.73,
+        "ci_lo": 99.56,
+        "ci_hi": 99.83
+      },
+      "after_vocabulary": {
+        "k": 5904,
+        "n": 5920,
+        "pct": 99.73,
+        "ci_lo": 99.56,
+        "ci_hi": 99.83
+      },
+      "coverage": {
+        "both_state_it": 5920,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "35000 != 20000.0",
+          10
+        ],
+        [
+          "5000 != 10000.0",
+          4
+        ],
+        [
+          "20000 != 5000.0",
+          1
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20210038631A1",
+          "table": 11,
+          "compound": "609408",
+          "gold": "20000",
+          "atlas": "5000.0"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 41,
+          "compound": "609408",
+          "gold": "5000",
+          "atlas": "10000.0"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 53,
+          "compound": "609408",
+          "gold": "5000",
+          "atlas": "10000.0"
+        }
+      ]
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "dosage_nm",
+      "kind": "extraction",
+      "raw": {
+        "k": 5766,
+        "n": 5766,
+        "pct": 100.0,
+        "ci_lo": 99.93,
+        "ci_hi": 100.0
+      },
+      "after_vocabulary": {
+        "k": 5766,
+        "n": 5766,
+        "pct": 100.0,
+        "ci_lo": 99.93,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 5766,
+        "only_patent_states_it": 154,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "target_RNA",
+      "kind": "normalisation",
+      "raw": {
+        "k": 5920,
+        "n": 5920,
+        "pct": 100.0,
+        "ci_lo": 99.94,
+        "ci_hi": 100.0
+      },
+      "after_vocabulary": {
+        "k": 5920,
+        "n": 5920,
+        "pct": 100.0,
+        "ci_lo": 99.94,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 5920,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "transfection_method",
+      "kind": "normalisation",
+      "raw": {
+        "k": 5918,
+        "n": 5920,
+        "pct": 99.97,
+        "ci_lo": 99.88,
+        "ci_hi": 99.99
+      },
+      "after_vocabulary": {
+        "k": 5918,
+        "n": 5920,
+        "pct": 99.97,
+        "ci_lo": 99.88,
+        "ci_hi": 99.99
+      },
+      "coverage": {
+        "both_state_it": 5920,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "electroporation != gymnosis",
+          1
+        ],
+        [
+          "gymnosis != electroporation",
+          1
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20210038631A1",
+          "table": 11,
+          "compound": "609408",
+          "gold": "Electroporation",
+          "atlas": "Gymnosis"
+        },
+        {
+          "patent": "US20210038631A1",
+          "table": 132,
+          "compound": "609408",
+          "gold": "Gymnosis",
+          "atlas": "Electroporation"
+        }
+      ]
+    },
+    {
+      "endpoint": "inhibition",
+      "field": "treatment_period_hrs",
+      "kind": "extraction",
+      "raw": {
+        "k": 550,
+        "n": 621,
+        "pct": 88.57,
+        "ci_lo": 85.82,
+        "ci_hi": 90.84
+      },
+      "after_vocabulary": {
+        "k": 550,
+        "n": 621,
+        "pct": 88.57,
+        "ci_lo": 85.82,
+        "ci_hi": 90.84
+      },
+      "coverage": {
+        "both_state_it": 621,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 5299,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "24 != 16.0",
+          71
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20160251655A1",
+          "table": 17,
+          "compound": "576816",
+          "gold": "24",
+          "atlas": "16.0"
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 17,
+          "compound": "619343",
+          "gold": "24",
+          "atlas": "16.0"
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 17,
+          "compound": "625183",
+          "gold": "24",
+          "atlas": "16.0"
+        }
+      ]
+    },
+    {
+      "endpoint": "neurotox",
+      "field": "administration_method",
+      "kind": "normalisation",
+      "raw": {
+        "k": 0,
+        "n": 496,
+        "pct": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.77
+      },
+      "after_vocabulary": {
+        "k": 496,
+        "n": 496,
+        "pct": 100.0,
+        "ci_lo": 99.23,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 496,
+        "only_patent_states_it": 157,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "neurotox",
+      "field": "dosage_ug",
+      "kind": "extraction",
+      "raw": {
+        "k": 500,
+        "n": 500,
+        "pct": 100.0,
+        "ci_lo": 99.24,
+        "ci_hi": 100.0
+      },
+      "after_vocabulary": {
+        "k": 500,
+        "n": 500,
+        "pct": 100.0,
+        "ci_lo": 99.24,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 500,
+        "only_patent_states_it": 153,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "neurotox",
+      "field": "latency_time_hours",
+      "kind": "extraction",
+      "raw": {
+        "k": 0,
+        "n": 0,
+        "pct": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0
+      },
+      "after_vocabulary": {
+        "k": 0,
+        "n": 0,
+        "pct": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0
+      },
+      "coverage": {
+        "both_state_it": 0,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 653,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "neurotox",
+      "field": "species",
+      "kind": "normalisation",
+      "raw": {
+        "k": 0,
+        "n": 653,
+        "pct": 0.0,
+        "ci_lo": 0.0,
+        "ci_hi": 0.58
+      },
+      "after_vocabulary": {
+        "k": 653,
+        "n": 653,
+        "pct": 100.0,
+        "ci_lo": 99.42,
+        "ci_hi": 100.0
+      },
+      "coverage": {
+        "both_state_it": 653,
+        "only_patent_states_it": 0,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [],
+      "examples": []
+    },
+    {
+      "endpoint": "neurotox",
+      "field": "tolerability_score_type",
+      "kind": "normalisation",
+      "raw": {
+        "k": 525,
+        "n": 532,
+        "pct": 98.68,
+        "ci_lo": 97.31,
+        "ci_hi": 99.36
+      },
+      "after_vocabulary": {
+        "k": 525,
+        "n": 532,
+        "pct": 98.68,
+        "ci_lo": 97.31,
+        "ci_hi": 99.36
+      },
+      "coverage": {
+        "both_state_it": 532,
+        "only_patent_states_it": 121,
+        "only_atlas_states_it": 0,
+        "neither": 0
+      },
+      "top_mismatch_modes": [
+        [
+          "body parts != behavioral",
+          7
+        ]
+      ],
+      "examples": [
+        {
+          "patent": "US20160251655A1",
+          "table": 92,
+          "compound": "687978",
+          "gold": "Body parts",
+          "atlas": "Behavioral"
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 92,
+          "compound": "688022",
+          "gold": "Body parts",
+          "atlas": "Behavioral"
+        },
+        {
+          "patent": "US20160251655A1",
+          "table": 92,
+          "compound": "688077",
+          "gold": "Body parts",
+          "atlas": "Behavioral"
+        }
+      ]
+    }
+  ],
+  "chemistry_normalisation": {
+    "n_compounds": 10755,
+    "sequence": {
+      "k": 10752,
+      "n": 10755,
+      "pct": 99.97,
+      "ci_lo": 99.92,
+      "ci_hi": 99.99
+    },
+    "sugar_motif_where_stated": {
+      "k": 4675,
+      "n": 4677,
+      "pct": 99.96,
+      "ci_lo": 99.84,
+      "ci_hi": 99.99
+    },
+    "linkage_motif_where_stated": {
+      "k": 2066,
+      "n": 2075,
+      "pct": 99.57,
+      "ci_lo": 99.18,
+      "ci_hi": 99.77
+    },
+    "selection_sensitivity": {
+      "note": "headline figures above require EVERY Atlas annotation for the compound to agree. The permissive variant, scoring the best-agreeing annotation, is shown for comparison; the two differ only because 3 compounds carry more than one HELM.",
+      "compounds_with_multiple_helms": 3,
+      "sequence_best_agreeing": {
+        "k": 10755,
+        "n": 10755,
+        "pct": 100.0,
+        "ci_lo": 99.96,
+        "ci_hi": 100.0
+      },
+      "sugar_best_agreeing": {
+        "k": 4677,
+        "n": 4677,
+        "pct": 100.0,
+        "ci_lo": 99.92,
+        "ci_hi": 100.0
+      },
+      "linkage_best_agreeing": {
+        "k": 2068,
+        "n": 2075,
+        "pct": 99.66,
+        "ci_lo": 99.31,
+        "ci_hi": 99.84
+      }
+    },
+    "helm_denominator_note": "helm_exact and helm_ignoring_5mec are computed only where the patent states BOTH the sugar and the linkage motif, so a full HELM can be built at all. That is a minority of compounds; the coverage block below gives how often each motif is stated.",
+    "helm_exact": {
+      "k": 988,
+      "n": 1696,
+      "pct": 58.25,
+      "ci_lo": 55.89,
+      "ci_hi": 60.58
+    },
+    "helm_ignoring_5mec": {
+      "k": 1689,
+      "n": 1696,
+      "pct": 99.59,
+      "ci_lo": 99.15,
+      "ci_hi": 99.8
+    },
+    "unique_sequence_in_atlas": {
+      "k": 10752,
+      "n": 10755,
+      "pct": 99.97,
+      "ci_lo": 99.92,
+      "ci_hi": 99.99
+    },
+    "coverage": {
+      "sugar_motif_stated_in_patent": {
+        "k": 4677,
+        "n": 10755,
+        "pct": 43.49,
+        "ci_lo": 42.55,
+        "ci_hi": 44.43
+      },
+      "linkage_motif_stated_in_patent": {
+        "k": 2075,
+        "n": 10755,
+        "pct": 19.29,
+        "ci_lo": 18.56,
+        "ci_hi": 20.05
+      },
+      "cytosine_methylation_stated_in_table": {
+        "k": 1120,
+        "n": 10755,
+        "pct": 10.41,
+        "ci_lo": 9.85,
+        "ci_hi": 11.01
+      },
+      "atlas_annotates_5meC": {
+        "k": 9203,
+        "n": 10755,
+        "pct": 85.57,
+        "ci_lo": 84.89,
+        "ci_hi": 86.22
+      }
+    },
+    "note": "The dominant HELM discrepancy is 5-methyl-cytosine, which the patents state once in prose ('each cytosine residue is a 5-methyl cytosine') rather than per compound in the table. helm_exact vs helm_ignoring_5mec isolates that single normalisation error mode."
+  },
+  "coverage": {
+    "omission_modes": {
+      "dose arm captured, this value absent": 156,
+      "dose arm dropped (compound captured at other doses only)": 667,
+      "compound has no record at this endpoint in the release": 210
+    },
+    "omission_modes_by_endpoint": {
+      "in vitro inhibition": {
+        "dose arm captured, this value absent": 99,
+        "dose arm dropped (compound captured at other doses only)": 495,
+        "compound has no record at this endpoint in the release": 50
+      },
+      "neurotoxicity": {
+        "dose arm captured, this value absent": 11,
+        "dose arm dropped (compound captured at other doses only)": 1,
+        "compound has no record at this endpoint in the release": 1
+      },
+      "hepatotoxicity": {
+        "dose arm dropped (compound captured at other doses only)": 171,
+        "dose arm captured, this value absent": 46,
+        "compound has no record at this endpoint in the release": 159
+      }
+    },
+    "dropped_dose_arm_examples": [
+      {
+        "patent": "US20160251655A1",
+        "table": 17,
+        "compound": "655172",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 4000.0,
+        "patent_value": "10",
+        "doses_in_release": [
+          3500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "576816",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "75",
+        "doses_in_release": [
+          50.0,
+          78.1,
+          82.3,
+          110.0,
+          185.0,
+          246.9,
+          312.5,
+          330.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673035",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "47",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673036",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "57",
+        "doses_in_release": [
+          185.0,
+          500.0,
+          560.0,
+          1670.0,
+          5000.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673037",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "39",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673038",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "48",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673039",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "35",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673040",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "40",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673041",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "35",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673042",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "26",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673043",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "44",
+        "doses_in_release": [
+          500.0
+        ]
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "compound": "673044",
+        "endpoint": "in vitro inhibition",
+        "channel": "Inhibition_pct",
+        "patent_dose": 700.0,
+        "patent_value": "44",
+        "doses_in_release": [
+          500.0
+        ]
+      }
+    ],
+    "tables_with_zero_coverage": [
+      {
+        "patent": "US20160251655A1",
+        "table": 43,
+        "endpoint": "in vitro inhibition",
+        "gold_measurements": 151
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 44,
+        "endpoint": "in vitro inhibition",
+        "gold_measurements": 151
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 45,
+        "endpoint": "in vitro inhibition",
+        "gold_measurements": 151
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 47,
+        "endpoint": "hepatotoxicity",
+        "gold_measurements": 70
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 124,
+        "endpoint": "in vitro inhibition",
+        "gold_measurements": 24
+      },
+      {
+        "patent": "US20240026353A1",
+        "table": 75,
+        "endpoint": "neurotoxicity",
+        "gold_measurements": 1
+      },
+      {
+        "patent": "US20240026353A1",
+        "table": 77,
+        "endpoint": "neurotoxicity",
+        "gold_measurements": 1
+      },
+      {
+        "patent": "US20240026353A1",
+        "table": 92,
+        "endpoint": "neurotoxicity",
+        "gold_measurements": 6
+      }
+    ],
+    "n_tables_with_zero_coverage": 8,
+    "measurements_in_zero_coverage_tables": 555,
+    "lowest_coverage_partial_tables": [
+      {
+        "patent": "US20210038631A1",
+        "table": 155,
+        "endpoint": "hepatotoxicity",
+        "recalled": 4,
+        "gold_measurements": 56
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 156,
+        "endpoint": "hepatotoxicity",
+        "recalled": 4,
+        "gold_measurements": 56
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 39,
+        "endpoint": "hepatotoxicity",
+        "recalled": 25,
+        "gold_measurements": 96
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 41,
+        "endpoint": "hepatotoxicity",
+        "recalled": 21,
+        "gold_measurements": 72
+      },
+      {
+        "patent": "US20190160090A1",
+        "table": 54,
+        "endpoint": "hepatotoxicity",
+        "recalled": 24,
+        "gold_measurements": 72
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 123,
+        "endpoint": "in vitro inhibition",
+        "recalled": 8,
+        "gold_measurements": 24
+      },
+      {
+        "patent": "US20240026353A1",
+        "table": 76,
+        "endpoint": "neurotoxicity",
+        "recalled": 3,
+        "gold_measurements": 6
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 177,
+        "endpoint": "hepatotoxicity",
+        "recalled": 15,
+        "gold_measurements": 25
+      },
+      {
+        "patent": "US20240026353A1",
+        "table": 52,
+        "endpoint": "in vitro inhibition",
+        "recalled": 52,
+        "gold_measurements": 76
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 133,
+        "endpoint": "in vitro inhibition",
+        "recalled": 12,
+        "gold_measurements": 16
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 134,
+        "endpoint": "in vitro inhibition",
+        "recalled": 12,
+        "gold_measurements": 16
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 135,
+        "endpoint": "in vitro inhibition",
+        "recalled": 12,
+        "gold_measurements": 16
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 188,
+        "endpoint": "hepatotoxicity",
+        "recalled": 54,
+        "gold_measurements": 70
+      },
+      {
+        "patent": "US20160251655A1",
+        "table": 96,
+        "endpoint": "neurotoxicity",
+        "recalled": 8,
+        "gold_measurements": 10
+      },
+      {
+        "patent": "US20210038631A1",
+        "table": 176,
+        "endpoint": "hepatotoxicity",
+        "recalled": 40,
+        "gold_measurements": 45
+      }
+    ]
+  },
+  "provenance": {
+    "seed": 2026,
+    "release_dir": "/Users/barneyh/dphil/paper2/aso-atlas-2-release",
+    "gold_dir": "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs"
+  }
+}

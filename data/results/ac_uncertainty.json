@@ -1,0 +1,507 @@
+{
+  "method": {
+    "primary_recursion": "expected counts",
+    "ef_floor": false,
+    "conditional_uplifts": "fixed at linked-compound point estimates",
+    "baseline_rate_distribution": "ordinary nonparametric bootstrap of observed binary pass/fail records, independently by stage",
+    "baseline_rate_draws": 100000,
+    "cost_distribution": "independent U[0.5, 1.5] multiplier by stage",
+    "model_choice_sensitivity": "expected-count recursion with shared conditional baseline uplifts, shared OligoAI efficacy/potency uplift, and model-specific hepatic and neuro uplifts from stored out-of-fold predictions",
+    "seed": 4274
+  },
+  "canonical": {
+    "marginal_ceiling_savings_pct": 70.8,
+    "marginal_expected_savings_pct": 77.4,
+    "corrected_ceiling_savings_pct": 55.4,
+    "corrected_expected_savings_pct": 70.0,
+    "baseline_rates_marginal": [
+      0.118106,
+      0.31436,
+      0.513903,
+      0.445059,
+      0.399606,
+      0.352215,
+      1.0
+    ],
+    "baseline_rates_corrected": [
+      0.118106,
+      0.382891,
+      0.513903,
+      0.445059,
+      0.444762,
+      0.536072,
+      1.0
+    ],
+    "model_precisions_corrected": {
+      "0": 0.2396,
+      "1": 0.748641,
+      "2": 0.7646,
+      "3": 0.9128,
+      "4": 0.493859,
+      "5": 0.890168
+    }
+  },
+  "corrected_ordering": {
+    "in_vitro_only_pct": 19.4,
+    "in_vivo_only_pct": 66.5,
+    "combined_pct": 70.0
+  },
+  "corrected_stage_contributions": [
+    {
+      "stage": 0,
+      "stage_name": "In vitro efficacy",
+      "savings_without_stage_pct": 69.1,
+      "contribution_pt": 0.9
+    },
+    {
+      "stage": 1,
+      "stage_name": "In vitro potency",
+      "savings_without_stage_pct": 68.3,
+      "contribution_pt": 1.7
+    },
+    {
+      "stage": 2,
+      "stage_name": "Mouse liver toxicity",
+      "savings_without_stage_pct": 66.8,
+      "contribution_pt": 3.2
+    },
+    {
+      "stage": 3,
+      "stage_name": "Mouse neuro tolerability",
+      "savings_without_stage_pct": 58.0,
+      "contribution_pt": 12.0
+    },
+    {
+      "stage": 4,
+      "stage_name": "Rat liver toxicity",
+      "savings_without_stage_pct": 68.1,
+      "contribution_pt": 1.9
+    },
+    {
+      "stage": 5,
+      "stage_name": "Rat neuro tolerability",
+      "savings_without_stage_pct": 56.6,
+      "contribution_pt": 13.4
+    }
+  ],
+  "corrected_ceiling_vs_expected": [
+    {
+      "target_candidates": 1,
+      "ceiling_savings_pct": 55.4,
+      "expected_savings_pct": 70.0,
+      "gap_pt": 14.6
+    },
+    {
+      "target_candidates": 2,
+      "ceiling_savings_pct": 62.2,
+      "expected_savings_pct": 70.0,
+      "gap_pt": 7.8
+    },
+    {
+      "target_candidates": 5,
+      "ceiling_savings_pct": 69.4,
+      "expected_savings_pct": 70.0,
+      "gap_pt": 0.6
+    },
+    {
+      "target_candidates": 10,
+      "ceiling_savings_pct": 68.5,
+      "expected_savings_pct": 70.0,
+      "gap_pt": 1.5
+    },
+    {
+      "target_candidates": 20,
+      "ceiling_savings_pct": 69.9,
+      "expected_savings_pct": 70.0,
+      "gap_pt": 0.1
+    }
+  ],
+  "corrected_cross_fold_combinations": {
+    "design": "Exact Cartesian product of one paired OligoAI efficacy/potency fold and independently varying folds for mouse hepatic, mouse neuro, rat hepatic, and rat neuro; fixed pooled conditional uplifts",
+    "interpretation": "cross-fold sensitivity distribution, not a confidence interval",
+    "n_combinations": 3125,
+    "mean": 64.4,
+    "sd": 11.0,
+    "min": 33.2,
+    "max": 77.3,
+    "p2.5": 38.8,
+    "median": 67.4,
+    "p97.5": 76.7
+  },
+  "per_stage_corrected_precision": {
+    "0": {
+      "stage_name": "In vitro efficacy",
+      "per_fold_pct": [
+        19.5,
+        19.3,
+        34.3,
+        24.1,
+        21.9
+      ],
+      "mean": 23.8,
+      "sd": 6.2,
+      "min": 19.3,
+      "max": 34.3,
+      "p2.5": 19.3,
+      "median": 21.9,
+      "p97.5": 33.3
+    },
+    "1": {
+      "stage_name": "In vitro potency",
+      "per_fold_pct": [
+        57.9,
+        60.7,
+        51.2,
+        100.0,
+        94.5
+      ],
+      "mean": 72.9,
+      "sd": 22.6,
+      "min": 51.2,
+      "max": 100.0,
+      "p2.5": 51.9,
+      "median": 60.7,
+      "p97.5": 99.5
+    },
+    "2": {
+      "stage_name": "Mouse liver toxicity",
+      "per_fold_pct": [
+        81.0,
+        70.3,
+        67.7,
+        70.3,
+        76.5
+      ],
+      "mean": 73.2,
+      "sd": 5.4,
+      "min": 67.7,
+      "max": 81.0,
+      "p2.5": 68.0,
+      "median": 70.3,
+      "p97.5": 80.5
+    },
+    "3": {
+      "stage_name": "Mouse neuro tolerability",
+      "per_fold_pct": [
+        91.6,
+        87.0,
+        93.5,
+        93.5,
+        81.3
+      ],
+      "mean": 89.4,
+      "sd": 5.2,
+      "min": 81.3,
+      "max": 93.5,
+      "p2.5": 81.9,
+      "median": 91.6,
+      "p97.5": 93.5
+    },
+    "4": {
+      "stage_name": "Rat liver toxicity",
+      "per_fold_pct": [
+        27.0,
+        68.2,
+        67.6,
+        34.8,
+        70.2
+      ],
+      "mean": 53.6,
+      "sd": 20.9,
+      "min": 27.0,
+      "max": 70.2,
+      "p2.5": 27.8,
+      "median": 67.6,
+      "p97.5": 70.0
+    },
+    "5": {
+      "stage_name": "Rat neuro tolerability",
+      "per_fold_pct": [
+        100.0,
+        62.9,
+        99.6,
+        78.7,
+        63.6
+      ],
+      "mean": 80.9,
+      "sd": 18.3,
+      "min": 62.9,
+      "max": 100.0,
+      "p2.5": 63.0,
+      "median": 78.7,
+      "p97.5": 100.0
+    }
+  },
+  "corrected_k_sensitivity": [
+    {
+      "K": 0.05,
+      "in_vitro_only_pct": 23.1,
+      "in_vivo_only_pct": 67.6,
+      "combined_pct": 71.4,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    },
+    {
+      "K": 0.1,
+      "in_vitro_only_pct": 21.6,
+      "in_vivo_only_pct": 70.4,
+      "combined_pct": 73.5,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    },
+    {
+      "K": 0.2,
+      "in_vitro_only_pct": 19.2,
+      "in_vivo_only_pct": 65.4,
+      "combined_pct": 69.0,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    },
+    {
+      "K": 0.3,
+      "in_vitro_only_pct": 16.2,
+      "in_vivo_only_pct": 61.5,
+      "combined_pct": 65.2,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    },
+    {
+      "K": 0.5,
+      "in_vitro_only_pct": 11.8,
+      "in_vivo_only_pct": 49.9,
+      "combined_pct": 54.1,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    },
+    {
+      "K": 0.7,
+      "in_vitro_only_pct": 6.5,
+      "in_vivo_only_pct": 33.0,
+      "combined_pct": 36.6,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    },
+    {
+      "K": 0.9,
+      "in_vitro_only_pct": 0.8,
+      "in_vivo_only_pct": 2.0,
+      "combined_pct": 2.7,
+      "conditional_uplifts": "fixed at pooled K=0.20 point estimates"
+    }
+  ],
+  "baseline_pass_rate_intervals": [
+    {
+      "stage": 0,
+      "stage_name": "In vitro efficacy",
+      "n_pass": 19346,
+      "n_total": 163802,
+      "corrected_point": 0.1181,
+      "p2.5": 0.1165,
+      "p97.5": 0.1197
+    },
+    {
+      "stage": 1,
+      "stage_name": "In vitro potency",
+      "n_pass": 2535,
+      "n_total": 8064,
+      "corrected_point": 0.3829,
+      "p2.5": 0.3705,
+      "p97.5": 0.3953
+    },
+    {
+      "stage": 2,
+      "stage_name": "Mouse liver toxicity",
+      "n_pass": 998,
+      "n_total": 1942,
+      "corrected_point": 0.5139,
+      "p2.5": 0.4918,
+      "p97.5": 0.536
+    },
+    {
+      "stage": 3,
+      "stage_name": "Mouse neuro tolerability",
+      "n_pass": 1207,
+      "n_total": 2712,
+      "corrected_point": 0.4451,
+      "p2.5": 0.4266,
+      "p97.5": 0.4639
+    },
+    {
+      "stage": 4,
+      "stage_name": "Rat liver toxicity",
+      "n_pass": 203,
+      "n_total": 508,
+      "corrected_point": 0.4448,
+      "p2.5": 0.3966,
+      "p97.5": 0.493
+    },
+    {
+      "stage": 5,
+      "stage_name": "Rat neuro tolerability",
+      "n_pass": 628,
+      "n_total": 1783,
+      "corrected_point": 0.5361,
+      "p2.5": 0.5019,
+      "p97.5": 0.5702
+    },
+    {
+      "stage": 6,
+      "stage_name": "NHP liver toxicity",
+      "n_pass": 97,
+      "n_total": 97,
+      "corrected_point": 1.0,
+      "p2.5": 1.0,
+      "p97.5": 1.0
+    }
+  ],
+  "baseline_pass_rate_uncertainty_savings_pct": {
+    "mean": 70.0,
+    "sd": 1.8,
+    "min": 62.0,
+    "max": 77.3,
+    "p2.5": 66.5,
+    "median": 70.0,
+    "p97.5": 73.4
+  },
+  "joint_model_fold_and_baseline_bootstrap_savings_pct": {
+    "interpretation": "95% resampling interval for all-stage held-out model performance and baseline pass-rate sampling, with fixed linked-data conditional corrections and fixed stage costs",
+    "mean": 64.4,
+    "sd": 11.2,
+    "min": 17.6,
+    "max": 81.3,
+    "p2.5": 37.9,
+    "median": 67.4,
+    "p97.5": 77.8
+  },
+  "stage_cost_sensitivity_savings_pct": {
+    "mean": 69.9,
+    "sd": 2.9,
+    "min": 58.3,
+    "max": 78.7,
+    "p2.5": 64.0,
+    "median": 70.0,
+    "p97.5": 75.1
+  },
+  "model_choice_sensitivity": [
+    {
+      "model": "Linear",
+      "marginal_ceiling_savings_pct": 69.6,
+      "marginal_expected_savings_pct": 79.8,
+      "corrected_ceiling_savings_pct": 53.6,
+      "corrected_expected_savings_pct": 70.6,
+      "linked_stage_model_uplifts": {
+        "hepatic": {
+          "model_precision_marginal": 0.52,
+          "model_precision_gate_matched": 0.529,
+          "model_uplift": 1.017,
+          "n_gate_matched": 84
+        },
+        "neuro": {
+          "model_precision_marginal": 0.794,
+          "model_precision_gate_matched": 0.972,
+          "model_uplift": 1.223,
+          "n_gate_matched": 355
+        }
+      }
+    },
+    {
+      "model": "Random Forest",
+      "marginal_ceiling_savings_pct": 70.8,
+      "marginal_expected_savings_pct": 79.6,
+      "corrected_ceiling_savings_pct": 60.4,
+      "corrected_expected_savings_pct": 73.0,
+      "linked_stage_model_uplifts": {
+        "hepatic": {
+          "model_precision_marginal": 0.48,
+          "model_precision_gate_matched": 0.615,
+          "model_uplift": 1.283,
+          "n_gate_matched": 65
+        },
+        "neuro": {
+          "model_precision_marginal": 0.78,
+          "model_precision_gate_matched": 0.908,
+          "model_uplift": 1.164,
+          "n_gate_matched": 381
+        }
+      }
+    },
+    {
+      "model": "XGBoost",
+      "marginal_ceiling_savings_pct": 70.8,
+      "marginal_expected_savings_pct": 77.4,
+      "corrected_ceiling_savings_pct": 55.4,
+      "corrected_expected_savings_pct": 70.0,
+      "linked_stage_model_uplifts": {
+        "hepatic": {
+          "model_precision_marginal": 0.469,
+          "model_precision_gate_matched": 0.571,
+          "model_uplift": 1.217,
+          "n_gate_matched": 69
+        },
+        "neuro": {
+          "model_precision_marginal": 0.749,
+          "model_precision_gate_matched": 0.89,
+          "model_uplift": 1.188,
+          "n_gate_matched": 363
+        }
+      }
+    },
+    {
+      "model": "KNN",
+      "marginal_ceiling_savings_pct": 47.4,
+      "marginal_expected_savings_pct": 56.0,
+      "corrected_ceiling_savings_pct": 52.5,
+      "corrected_expected_savings_pct": 56.1,
+      "linked_stage_model_uplifts": {
+        "hepatic": {
+          "model_precision_marginal": 0.531,
+          "model_precision_gate_matched": 0.7,
+          "model_uplift": 1.319,
+          "n_gate_matched": 49
+        },
+        "neuro": {
+          "model_precision_marginal": 0.411,
+          "model_precision_gate_matched": 0.604,
+          "model_uplift": 1.469,
+          "n_gate_matched": 240
+        }
+      }
+    },
+    {
+      "model": "CatBoost",
+      "marginal_ceiling_savings_pct": 70.8,
+      "marginal_expected_savings_pct": 80.4,
+      "corrected_ceiling_savings_pct": 60.4,
+      "corrected_expected_savings_pct": 74.3,
+      "linked_stage_model_uplifts": {
+        "hepatic": {
+          "model_precision_marginal": 0.561,
+          "model_precision_gate_matched": 0.706,
+          "model_uplift": 1.258,
+          "n_gate_matched": 85
+        },
+        "neuro": {
+          "model_precision_marginal": 0.775,
+          "model_precision_gate_matched": 0.945,
+          "model_uplift": 1.22,
+          "n_gate_matched": 364
+        }
+      }
+    },
+    {
+      "model": "MLP",
+      "marginal_ceiling_savings_pct": 69.6,
+      "marginal_expected_savings_pct": 79.3,
+      "corrected_ceiling_savings_pct": 60.4,
+      "corrected_expected_savings_pct": 74.1,
+      "linked_stage_model_uplifts": {
+        "hepatic": {
+          "model_precision_marginal": 0.49,
+          "model_precision_gate_matched": 0.727,
+          "model_uplift": 1.485,
+          "n_gate_matched": 57
+        },
+        "neuro": {
+          "model_precision_marginal": 0.8,
+          "model_precision_gate_matched": 0.904,
+          "model_uplift": 1.13,
+          "n_gate_matched": 365
+        }
+      }
+    }
+  ]
+}

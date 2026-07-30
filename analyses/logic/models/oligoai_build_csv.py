@@ -8,13 +8,11 @@ the asogym2 create_Rinamlo_data notebook (cell 3):
 pyensembl release 110 (human) + GRCh38 primary-assembly FASTA,
 flank_size=50, unique-match required, strand-aware.
 
-Requires (optional deps, not in the main project dependency set):
-
-    uv pip install pyensembl biopython
-    pyensembl install --release 110 --species human   # one-time, ~1.5 GB
-
-The FASTA path defaults to the same file asogym2 uses; override with
-the OLIGOAI_GRCH38_FASTA env var.
+Prerequisites (one-time): run `just fetch-reference`, which downloads the
+Ensembl release-110 GRCh38 primary-assembly FASTA to data/reference/ (verifying
+its sha256) and installs the matching pyensembl annotation. The FASTA path
+defaults to that canonical location; override with the OLIGOAI_GRCH38_FASTA env
+var.
 """
 
 from __future__ import annotations
@@ -44,15 +42,23 @@ def _out_path_for_fold(fold_idx: int) -> Path:
         return _OUT_PATH_DEFAULT
     return _DATA_DIR / f"oligoai_train_fold{fold_idx}.csv.gz"
 
+# Canonical location populated by `just fetch-reference` (Ensembl release-110
+# GRCh38 primary assembly, sha256 651561b3…68fd). Override with OLIGOAI_GRCH38_FASTA.
 _DEFAULT_FASTA = os.environ.get(
     "OLIGOAI_GRCH38_FASTA",
-    str(Path.home() / "Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz"),
+    str(_ROOT / "data/reference/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa.gz"),
 )
 
 # OligoAI's hard-coded vocabularies (rinalmo/data/downstream/aso/dataset.py)
 _ALLOWED_SUGARS = {"MOE", "DNA", "cEt"}          # our Helm.parse spelling
 _SUGAR_TO_OLIGOAI = {"MOE": "MOE", "DNA": "DNA", "cEt": "cET"}  # OligoAI vocab spelling
 _ALLOWED_TRANSFECTION = {"Electroporation", "Gymnosis", "Lipofection"}
+
+# target_RNA symbols that aren't Ensembl gene names; map to the locus whose
+# sequence the ASOs actually target (rna_context lookup only — the original
+# target_RNA label is preserved in the output). UBE3A-ATS (the UBE3A antisense)
+# maps to its host transcript SNHG14: 240/245 of its ASOs match the SNHG14 span.
+_GENE_ALIASES = {"UBE3A-ATS": "SNHG14"}
 
 
 # ── Helm import (bypass analyses/utils/__init__.py which pulls xgboost) ───────
@@ -132,8 +138,9 @@ def main() -> None:
     fasta_path = os.environ.get("OLIGOAI_GRCH38_FASTA", _DEFAULT_FASTA)
     if not Path(fasta_path).exists():
         raise SystemExit(
-            f"GRCh38 FASTA not found at {fasta_path}. "
-            "Set OLIGOAI_GRCH38_FASTA to override."
+            f"GRCh38 reference FASTA not found at {fasta_path}.\n"
+            "Run `just fetch-reference` to download it (Ensembl release-110 primary "
+            "assembly + pyensembl 110), or set OLIGOAI_GRCH38_FASTA to an existing copy."
         )
 
     try:
@@ -197,7 +204,7 @@ def main() -> None:
     for gene_idx, gene_name in enumerate(unique_targets, start=1):
         sub = df[df["target_RNA"] == gene_name]
         try:
-            gene = ens.genes_by_name(gene_name)[0]
+            gene = ens.genes_by_name(_GENE_ALIASES.get(gene_name, gene_name))[0]
         except (ValueError, IndexError):
             stats["gene_not_found"] += len(sub)
             continue
@@ -298,27 +305,54 @@ def main() -> None:
     # checkpoint by mtime, so val isn't used for model selection.
     # OligoGym (the parity baseline) similarly has no val split.
     # Lightning's val_dataloader is allowed to be empty.
-    from sklearn.model_selection import GroupKFold
-    agg = agg.sort_values(["helm_annotation", "uspto_id"], kind="stable")
-    first_patent = (
-        agg.drop_duplicates("helm_annotation", keep="first")
-           [["helm_annotation", "uspto_id"]]
-           .set_index("helm_annotation")["uspto_id"]
-    )
-    agg["cv_group"] = agg["helm_annotation"].map(first_patent)
+    # Gene-holdout mode (OLIGOAI_HOLDOUT_GENES="SCN2A,UBE3A-ATS"): force every
+    # row of the named target genes into `test` and everything else into
+    # `train`. Unlike the patent-grouped GroupKFold below, this guarantees a
+    # *gene*-level holdout — no ASO of a held-out gene (from any patent) leaks
+    # into training — which is what an honest "predict for an unseen gene"
+    # evaluation requires. Used for the paper-3 q-feasibility enrichment.
+    holdout_genes_env = os.environ.get("OLIGOAI_HOLDOUT_GENES")
+    if holdout_genes_env:
+        holdout_genes = {g.strip() for g in holdout_genes_env.split(",") if g.strip()}
+        present = set(agg["target_RNA"].unique())
+        missing = holdout_genes - present
+        if missing:
+            raise SystemExit(
+                f"OLIGOAI_HOLDOUT_GENES names genes absent after filtering: "
+                f"{sorted(missing)} (present example targets: {sorted(present)[:5]})"
+            )
+        held = agg["target_RNA"].isin(holdout_genes)
+        agg["split"] = np.where(held, "test", "train")
+        # Invariant: held-out genes are entirely in test, never in train.
+        assert agg.loc[held, "split"].eq("test").all()
+        assert not agg.loc[agg["split"].eq("train"), "target_RNA"].isin(holdout_genes).any()
+        per_gene = agg[held].groupby("target_RNA").size().to_dict()
+        print(f"  gene holdout {sorted(holdout_genes)}: "
+              f"train={agg['split'].eq('train').sum()} "
+              f"test={agg['split'].eq('test').sum()} "
+              f"(held-out rows per gene: {per_gene}; no val split)")
+    else:
+        from sklearn.model_selection import GroupKFold
+        agg = agg.sort_values(["helm_annotation", "uspto_id"], kind="stable")
+        first_patent = (
+            agg.drop_duplicates("helm_annotation", keep="first")
+               [["helm_annotation", "uspto_id"]]
+               .set_index("helm_annotation")["uspto_id"]
+        )
+        agg["cv_group"] = agg["helm_annotation"].map(first_patent)
 
-    fold_idx = int(os.environ.get("OLIGOAI_FOLD", "0"))
-    n_splits = 5
-    groups = agg["cv_group"].values
-    gkf = GroupKFold(n_splits=n_splits)
-    folds = list(gkf.split(agg, agg["inhibition_percent"], groups))
-    train_idx, test_idx = folds[fold_idx]
-    agg["split"] = "train"
-    agg.iloc[test_idx, agg.columns.get_loc("split")] = "test"
-    print(f"  fold {fold_idx}/{n_splits}: "
-          f"train={agg['split'].eq('train').sum()} "
-          f"test={agg['split'].eq('test').sum()} "
-          f"(no val split)")
+        fold_idx = int(os.environ.get("OLIGOAI_FOLD", "0"))
+        n_splits = 5
+        groups = agg["cv_group"].values
+        gkf = GroupKFold(n_splits=n_splits)
+        folds = list(gkf.split(agg, agg["inhibition_percent"], groups))
+        train_idx, test_idx = folds[fold_idx]
+        agg["split"] = "train"
+        agg.iloc[test_idx, agg.columns.get_loc("split")] = "test"
+        print(f"  fold {fold_idx}/{n_splits}: "
+              f"train={agg['split'].eq('train').sum()} "
+              f"test={agg['split'].eq('test').sum()} "
+              f"(no val split)")
 
     out = agg[[
         "aso_sequence_5_to_3",
@@ -338,7 +372,10 @@ def main() -> None:
     # ASODataset uses ast.literal_eval on sugar_mods / backbone_mods, so write
     # them as Python-list repr strings (pandas does this by default for list
     # cells going through to_csv).
-    out_path = _out_path_for_fold(fold_idx)
+    out_path = (
+        _DATA_DIR / "oligoai_train_geneholdout.csv.gz"
+        if holdout_genes_env else _out_path_for_fold(fold_idx)
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(out_path, index=False)
     print(f"\nWrote {out_path}  ({len(out):,} rows, {out_path.stat().st_size/1e6:.1f} MB)")

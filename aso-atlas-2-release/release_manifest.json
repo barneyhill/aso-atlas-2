@@ -1,0 +1,109 @@
+{
+  "name": "ASO Atlas 2.0",
+  "version": "neurips-rebuttal",
+  "release_tag": "neurips-rebuttal",
+  "code_repo": "https://github.com/barneyhill/aso-atlas-2",
+  "manuscript_commit": "ff973af",
+  "manuscript_ref": "neurips-submission",
+  "unit_definition": "A row is one assay record. A measurement (assay readout) is one non-null assay value: in vitro inhibition and dose-response rows carry one readout each, a hepatotoxicity row carries up to 7 (one per biomarker channel), and a neurotoxicity row carries one FOB readout.",
+  "gene_definition": "A named target gene is one unique non-null target_RNA after resolving transcript identifiers to gene symbols with the same genomic annotation mapping used by the submitted manuscript.",
+  "compound_definition": "A unique HELM compound is one unique non-null HELM Annotation. Rows without a resolvable HELM remain in the assay corpus but are excluded from unique-HELM-compound and model-benchmark counts.",
+  "linkage_definition": "Cross-category linkage retains the submitted source-identifier unit: a distinct Compound ID reported in at least two of the four assay categories. By this definition, 15,339 of 168,537 source Compound IDs (9.1%) are linked.",
+  "model_eligibility_definition": "model_eligible is true exactly when HELM Annotation is non-null. These rows form the chemistry-aware modelling subset; false rows remain valid assay readouts for corpus and phenotype-frequency analyses.",
+  "paper_benchmark_folds": {
+    "directory": "folds/",
+    "role": "Exact endpoint-specific five-fold assignments used for the submitted paper's benchmark results.",
+    "oligogym_endpoints": [
+      "in_vitro_inhibition",
+      "potency",
+      "mouse_hepatic",
+      "rat_hepatic",
+      "mouse_neuro",
+      "rat_neuro"
+    ],
+    "oligoai_file": "folds/oligoai_folds.csv.gz",
+    "validation": "OligoGym patent-to-fold membership is checked against groups_test in data/results/oligogym_benchmark.json; OligoAI membership is read from the five frozen oligoai_train_fold CSVs."
+  },
+  "totals": {
+    "released_assay_readouts": 295007,
+    "compounds": 165782,
+    "patents": 606,
+    "named_target_genes": 430,
+    "model_eligible_assay_readouts": 290841,
+    "unresolved_helm_readouts": 4166,
+    "model_eligible_patents": 596,
+    "model_eligible_named_target_genes": 425
+  },
+  "cross_category_linkage": {
+    "identity_key": "Compound ID",
+    "total_source_ids": 168537,
+    "source_ids_in_multiple_categories": 15339,
+    "pct_in_multiple_categories": 9.1
+  },
+  "configs": {
+    "in_vitro_inhibition": {
+      "description": "Single-dose in vitro mRNA inhibition measurements",
+      "rows": 174459,
+      "assay_readouts": 174459,
+      "compounds": 161434,
+      "model_eligible_rows": 173286,
+      "unresolved_helm_rows": 1173,
+      "model_eligible_assay_readouts": 173286,
+      "unresolved_helm_readouts": 1173,
+      "patents": 482,
+      "named_target_genes": 389,
+      "model_eligible_patents": 476,
+      "model_eligible_named_target_genes": 384
+    },
+    "dose_response": {
+      "description": "Multi-dose in vitro inhibition measurements for dose-response curve fitting",
+      "rows": 99821,
+      "assay_readouts": 99821,
+      "compounds": 16375,
+      "model_eligible_rows": 97236,
+      "unresolved_helm_rows": 2585,
+      "model_eligible_assay_readouts": 97236,
+      "unresolved_helm_readouts": 2585,
+      "patents": 259,
+      "named_target_genes": 130,
+      "model_eligible_patents": 252,
+      "model_eligible_named_target_genes": 129
+    },
+    "hepatotoxicity": {
+      "description": "In vivo hepatic toxicity biomarker measurements (ALT, AST, ALB, BUN, CREA, TBIL, PC ratio)",
+      "rows": 4341,
+      "assay_readouts": 15831,
+      "compounds": 1881,
+      "model_eligible_rows": 4212,
+      "unresolved_helm_rows": 129,
+      "model_eligible_assay_readouts": 15427,
+      "unresolved_helm_readouts": 404,
+      "patents": 102,
+      "named_target_genes": 42,
+      "model_eligible_patents": 101,
+      "model_eligible_named_target_genes": 42
+    },
+    "neurotoxicity": {
+      "description": "In vivo neurotoxicity functional observation battery (FOB) scores",
+      "rows": 4900,
+      "assay_readouts": 4896,
+      "compounds": 3312,
+      "model_eligible_rows": 4896,
+      "unresolved_helm_rows": 4,
+      "model_eligible_assay_readouts": 4892,
+      "unresolved_helm_readouts": 4,
+      "patents": 26,
+      "named_target_genes": 15,
+      "model_eligible_patents": 26,
+      "model_eligible_named_target_genes": 15
+    }
+  },
+  "paper_cross_reference": {
+    "paper_assay_readouts": 295007,
+    "note": "The manuscript and release count assay readouts over every processed row. Rows whose HELM could not be resolved remain public and are marked model_eligible=false; chemistry-aware model analyses use the resolved subset, while cross-category linkage uses the submitted source Compound ID unit.",
+    "delta": 0,
+    "paper_named_target_genes": 430,
+    "released_named_target_genes": 430,
+    "excluded_named_target_genes": []
+  }
+}

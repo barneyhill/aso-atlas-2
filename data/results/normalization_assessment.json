@@ -1,0 +1,139 @@
+{
+  "status": "complete",
+  "role": "normalisation accuracy; not the primary precision/recall estimand",
+  "sequence_and_chemistry": {
+    "n_compounds": 10755,
+    "sequence": {
+      "k": 10752,
+      "n": 10755,
+      "pct": 99.97,
+      "ci_lo": 99.92,
+      "ci_hi": 99.99
+    },
+    "sugar_motif_where_stated": {
+      "k": 4675,
+      "n": 4677,
+      "pct": 99.96,
+      "ci_lo": 99.84,
+      "ci_hi": 99.99
+    },
+    "linkage_motif_where_stated": {
+      "k": 2066,
+      "n": 2075,
+      "pct": 99.57,
+      "ci_lo": 99.18,
+      "ci_hi": 99.77
+    },
+    "selection_sensitivity": {
+      "note": "headline figures above require EVERY Atlas annotation for the compound to agree. The permissive variant, scoring the best-agreeing annotation, is shown for comparison; the two differ only because 3 compounds carry more than one HELM.",
+      "compounds_with_multiple_helms": 3,
+      "sequence_best_agreeing": {
+        "k": 10755,
+        "n": 10755,
+        "pct": 100.0,
+        "ci_lo": 99.96,
+        "ci_hi": 100.0
+      },
+      "sugar_best_agreeing": {
+        "k": 4677,
+        "n": 4677,
+        "pct": 100.0,
+        "ci_lo": 99.92,
+        "ci_hi": 100.0
+      },
+      "linkage_best_agreeing": {
+        "k": 2068,
+        "n": 2075,
+        "pct": 99.66,
+        "ci_lo": 99.31,
+        "ci_hi": 99.84
+      }
+    },
+    "helm_denominator_note": "helm_exact and helm_ignoring_5mec are computed only where the patent states BOTH the sugar and the linkage motif, so a full HELM can be built at all. That is a minority of compounds; the coverage block below gives how often each motif is stated.",
+    "helm_exact": {
+      "k": 988,
+      "n": 1696,
+      "pct": 58.25,
+      "ci_lo": 55.89,
+      "ci_hi": 60.58
+    },
+    "helm_ignoring_5mec": {
+      "k": 1689,
+      "n": 1696,
+      "pct": 99.59,
+      "ci_lo": 99.15,
+      "ci_hi": 99.8
+    },
+    "unique_sequence_in_atlas": {
+      "k": 10752,
+      "n": 10755,
+      "pct": 99.97,
+      "ci_lo": 99.92,
+      "ci_hi": 99.99
+    },
+    "coverage": {
+      "sugar_motif_stated_in_patent": {
+        "k": 4677,
+        "n": 10755,
+        "pct": 43.49,
+        "ci_lo": 42.55,
+        "ci_hi": 44.43
+      },
+      "linkage_motif_stated_in_patent": {
+        "k": 2075,
+        "n": 10755,
+        "pct": 19.29,
+        "ci_lo": 18.56,
+        "ci_hi": 20.05
+      },
+      "cytosine_methylation_stated_in_table": {
+        "k": 1120,
+        "n": 10755,
+        "pct": 10.41,
+        "ci_lo": 9.85,
+        "ci_hi": 11.01
+      },
+      "atlas_annotates_5meC": {
+        "k": 9203,
+        "n": 10755,
+        "pct": 85.57,
+        "ci_lo": 84.89,
+        "ci_hi": 86.22
+      }
+    },
+    "note": "The dominant HELM discrepancy is 5-methyl-cytosine, which the patents state once in prose ('each cytosine residue is a 5-methyl cytosine') rather than per compound in the table. helm_exact vs helm_ignoring_5mec isolates that single normalisation error mode."
+  },
+  "percent_control_orientation": {
+    "definition": "Within frozen canonical one-to-one pairs from tables labelled as % control, an unflipped error has Atlas value = 100 - Gold inhibition.",
+    "gold_readouts_in_percent_control_tables": 11126,
+    "canonical_pairs_with_numeric_values": 5025,
+    "correct_normalized_values": 5024,
+    "other_value_discrepancies": 1,
+    "orientation_uninformative_at_50_pct": 59,
+    "orientation_informative_pairs": 4966,
+    "confirmed_unflipped_errors": 0,
+    "unflipped_error_rate_pct": 0.0,
+    "unflipped_error_rate_ci95": {
+      "low_pct": 0.0,
+      "high_pct": 0.0773
+    },
+    "examples": [
+      {
+        "patent": "US20210038631A1",
+        "table": 87,
+        "compound": "609408",
+        "gold_inhibition_pct": 59.0,
+        "atlas_value": 50.0,
+        "classification": "other value discrepancy"
+      }
+    ],
+    "provenance_guardrail": "No release-wide compound/dose substitution; cell line and table provenance are fixed by the canonical match before comparing values."
+  },
+  "source": {
+    "gold_compounds": 10758,
+    "gold_dir": "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs",
+    "release_dir": "/Users/barneyh/dphil/paper2/aso-atlas-2-release",
+    "canonical_ledger": "data/validation/canonical_source_match_ledger.csv",
+    "lineage_ledger": "data/validation/lineage_rescued_recall.csv"
+  }
+}

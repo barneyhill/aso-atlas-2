@@ -1,0 +1,319 @@
+{
+  "status": "complete",
+  "scope": "all represented canonical tables containing a matched value error, strict context mismatch, or scoped Atlas extra",
+  "manual_method": "row discrepancies grouped only by shared source statement and extraction behaviour, then checked against the original USPTO full-text XML",
+  "tables_adjudicated": 44,
+  "issue_groups": 22,
+  "matched_value_errors_adjudicated": 43,
+  "matched_context_errors_adjudicated": 1343,
+  "atlas_extras_adjudicated": 71,
+  "issue_groups_by_verdict": {
+    "mixed": 9,
+    "not a substantive error": 2,
+    "not a value error": 3,
+    "real Atlas error": 5,
+    "real Atlas error with timing ambiguity": 1,
+    "real Atlas schema/extraction error": 1,
+    "schema ambiguity": 1
+  },
+  "false_negative_note": "Gold-only missing occurrences are separately covered by the exhaustive XML cell-grid check and dedup_lineage audit; they are not represented-row error pairs and are therefore outside this manual discrepancy ledger.",
+  "issues": [
+    {
+      "issue_id": "C9_INH_T17",
+      "table_refs": "US20160251655A1:17",
+      "endpoint": "inhibition",
+      "matched_value_errors": "0",
+      "matched_context_errors": "149",
+      "atlas_extras": "0",
+      "verdict": "real Atlas error",
+      "charge_to": "Atlas context omission",
+      "xml_evidence": "Example 4 states LLC-MK2 and HepG2 cells were treated with 4,000 nM for 24 hours; Table 17 prints both assay columns.",
+      "adjudication": "Atlas retains the two cell-line channels and values but dose is null on every matched row. The apparent cell-line disagreement in individual matcher pairs is only pair ordering among equal outcomes; the systematic defect is the omitted 4",
+      "null": [
+        "000 nM dose."
+      ]
+    },
+    {
+      "issue_id": "C9_NEURO_MOUSE",
+      "table_refs": "US20160251655A1:68;US20160251655A1:70;US20160251655A1:72;US20160251655A1:74;US20160251655A1:76;US20160251655A1:78;US20160251655A1:80",
+      "endpoint": "neurotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "118",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "Atlas omissions plus representational differences",
+      "xml_evidence": "Example 14 states a single 700 \u00b5g ICV dose and evaluation at 3 hours; each cited FOB table has a 3 hr column.",
+      "adjudication": "Atlas values and 3-hour timepoints are supported. Atlas omits 700 \u00b5g in all seven tables and omits route or score type in most. ICV versus Intracerebroventricular and Mouse versus C57/Bl6 mice are normalization differences; Gold omits the printed 3-hour timepoint."
+    },
+    {
+      "issue_id": "C9_NEURO_RAT_3000",
+      "table_refs": "US20160251655A1:86;US20160251655A1:88;US20160251655A1:90",
+      "endpoint": "neurotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "43",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "Atlas omissions plus representational differences",
+      "xml_evidence": "Example 15 identifies Studies 3-5 as 3,000 \u00b5g intrathecal Sprague-Dawley rat studies and the FOB tables print 3 hr.",
+      "adjudication": "Atlas values and timepoints are supported. It omits route in all three tables and also omits dose in table 90 and score type in tables 88 and 90. Rat versus Sprague-Dawley rat is a normalization difference; Gold omits the printed timepoint."
+    },
+    {
+      "issue_id": "C9_NEURO_RAT_2000",
+      "table_refs": "US20160251655A1:92;US20160251655A1:94",
+      "endpoint": "neurotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "17",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "Atlas omissions and Gold dose error",
+      "xml_evidence": "Example 15 identifies Studies 6 and 7 as 2,000 \u00b5g intrathecal studies and both FOB tables print 3 hr.",
+      "adjudication": "Atlas omits dose and route; Gold records 3",
+      "null": [
+        "000 rather than the source's 2",
+        "000 \u00b5g and omits the timepoint. Body parts versus Behavioral is a vocabulary/granularity difference for the same summed FOB score."
+      ]
+    },
+    {
+      "issue_id": "AGT_INH_T17",
+      "table_refs": "US20190160090A1:17",
+      "endpoint": "inhibition",
+      "matched_value_errors": "0",
+      "matched_context_errors": "54",
+      "atlas_extras": "0",
+      "verdict": "real Atlas error",
+      "charge_to": "Atlas field transposition",
+      "xml_evidence": "The table is a five-dose HepG2 series at 39.1, 156.3, 625, 2,500 and 10,000 nM.",
+      "adjudication": "Atlas places the inhibition outcome into dose (for example dose 94 with outcome 94) instead of preserving the printed dose header. Values are correct but context is not."
+    },
+    {
+      "issue_id": "AGT_INH_T21",
+      "table_refs": "US20190160090A1:21",
+      "endpoint": "inhibition",
+      "matched_value_errors": "0",
+      "matched_context_errors": "65",
+      "atlas_extras": "0",
+      "verdict": "real Atlas error",
+      "charge_to": "Atlas context omission",
+      "xml_evidence": "The surrounding experiment and table caption identify HepG2 cells.",
+      "adjudication": "Atlas preserves the values and dose but omits HepG2 on all matched rows."
+    },
+    {
+      "issue_id": "IRF4_INH_T128",
+      "table_refs": "US20210038631A1:128",
+      "endpoint": "inhibition",
+      "matched_value_errors": "0",
+      "matched_context_errors": "12",
+      "atlas_extras": "0",
+      "verdict": "not a substantive error",
+      "charge_to": "string normalization",
+      "xml_evidence": "Table 128 says SupM2 cells.",
+      "adjudication": "SupM2 in Gold and SUP-M2 in Atlas denote the same cell line. This is an exact-string scorer artefact."
+    },
+    {
+      "issue_id": "IRF4_INH_T87",
+      "table_refs": "US20210038631A1:87;US20220241320A1:87",
+      "endpoint": "inhibition",
+      "matched_value_errors": "1",
+      "matched_context_errors": "1",
+      "atlas_extras": "18",
+      "verdict": "real Atlas schema/extraction error",
+      "charge_to": "Atlas IC50 mixing and one omitted dose",
+      "xml_evidence": "The source prints four measured doses (74, 222, 666 and 2,000 nM) plus a separate IC50 column in \u00b5M.",
+      "adjudication": "Atlas converts each IC50 into a synthetic 50% inhibition point at IC50\u00d71",
+      "null": [
+        "000 nM. Eighteen are strict extras. For compound 609408 the synthetic 400 nM point displaces the printed 666 nM measurement",
+        " producing the sole inhibition value mismatch. The second patent/table is the byte-identical production canonical copy."
+      ]
+    },
+    {
+      "issue_id": "AGT_HEP_T25",
+      "table_refs": "US20190160090A1:25",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "32",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "timing convention and species normalization",
+      "xml_evidence": "Treatment 1 is three weekly 20 mg/kg doses over 2.5 weeks; RNA is collected on day 17 and body weight on day 15.",
+      "adjudication": "Atlas period 17 follows the explicit collection day while Gold period 18 rounds 2.5 weeks. Mouse versus transgenic huAGT mice is loss of strain detail; plasma is correctly supplied by Atlas. The strict mismatch is not a value error."
+    },
+    {
+      "issue_id": "AGT_HEP_T28_T39",
+      "table_refs": "US20190160090A1:28;US20190160090A1:39",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "56",
+      "atlas_extras": "0",
+      "verdict": "not a substantive error",
+      "charge_to": "species/sample normalization",
+      "xml_evidence": "Table 28 belongs to the two-week 25 mg/kg huAGT study; table 39 to two injections over ten days. The chemistry-marker sections specify plasma.",
+      "adjudication": "Dose count and period agree numerically. Strict context fails because Atlas uses generic mouse and supplies plasma where Gold has the specific huAGT strain and no sample value."
+    },
+    {
+      "issue_id": "AGT_HEP_T31",
+      "table_refs": "US20190160090A1:31",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "34",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "Atlas omission and Gold timing convention",
+      "xml_evidence": "Treatment 3 gives 25 mg/kg weekly over two weeks and explicitly measures the table's body/organ weights on day 10.",
+      "adjudication": "Atlas day 10 is source-supported but omits the two-dose count. Gold's 14 days is the nominal treatment duration rather than the printed collection day. Species/sample differences are representational."
+    },
+    {
+      "issue_id": "AGT_HEP_T34",
+      "table_refs": "US20190160090A1:34",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "48",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "timing convention and species normalization",
+      "xml_evidence": "Treatment 4 is 5 mg/kg weekly for two weeks; plasma and organ weights are measured on day 15.",
+      "adjudication": "Atlas day 15 follows the explicit collection day; Gold 14 follows nominal treatment duration. Generic versus huAGT mouse is normalization rather than a wrong value."
+    },
+    {
+      "issue_id": "AGT_HEP_T41",
+      "table_refs": "US20190160090A1:41",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "18",
+      "matched_context_errors": "40",
+      "atlas_extras": "0",
+      "verdict": "real Atlas error",
+      "charge_to": "Atlas dose-arm collapse",
+      "xml_evidence": "Treatment 3 is a three-point 1, 5 and 15 mg/kg study with two injections over a week; collection is on day 8 and the table prints every dose arm.",
+      "adjudication": "Atlas retains only dose 1 and repeats values",
+      "null": [
+        " losing the 5 and 15 mg/kg arms. This causes 18 wrong value pairings plus missing Gold occurrences. Atlas day 8 is source-supported; Gold day 7 is nominal duration."
+      ]
+    },
+    {
+      "issue_id": "AGT_HEP_T45",
+      "table_refs": "US20190160090A1:45",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "45",
+      "atlas_extras": "45",
+      "verdict": "real Atlas error with timing ambiguity",
+      "charge_to": "Atlas duplicate expansion",
+      "xml_evidence": "The CD1 study doses 50 mg/kg twice weekly for six weeks, euthanizes 48 hours after the last dose and states sacrifice on day 43; each chemistry cell is a single scalar.",
+      "adjudication": "Every released biomarker value is duplicated",
+      "null": [
+        " creating 45 strict extras. Gold 42 and Atlas 44 use different inferred period conventions around an explicit day-43 collection; neither period exactly reproduces that statement. Generic species is representational."
+      ]
+    },
+    {
+      "issue_id": "AGT_HEP_T54",
+      "table_refs": "US20190160090A1:54",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "24",
+      "matched_context_errors": "48",
+      "atlas_extras": "0",
+      "verdict": "real Atlas error",
+      "charge_to": "Atlas dose-arm collapse and duplicate expansion",
+      "xml_evidence": "The table is explicitly a three-point study and prints 20, 10 and 5 mg/kg rows for each compound over four weeks, with day-29 body weight.",
+      "adjudication": "Atlas retains only 20 mg/kg and duplicates values",
+      "null": [
+        " losing the lower dose arms. This produces 24 incorrect value pairings plus missing occurrences. Gold 28 and Atlas 29 reflect nominal-duration versus collection-day conventions."
+      ]
+    },
+    {
+      "issue_id": "IRF4_HEP_T147",
+      "table_refs": "US20210038631A1:147",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "10",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "invalid Atlas dose count plus inferred timing",
+      "xml_evidence": "Example 29 says 50 mg/kg five times per week for 3.5 weeks, with sacrifice 24 hours after the last dose.",
+      "adjudication": "Atlas's 17.5 dose count is a literal multiplication but cannot be an administered number of doses. Gold 17 is also inferred rather than stated. Period 24 versus 25.5 is convention-dependent; generic species loses NOD-SCID detail."
+    },
+    {
+      "issue_id": "IRF4_HEP_BALBC",
+      "table_refs": "US20210038631A1:153;US20210038631A1:154;US20210038631A1:155;US20210038631A1:156",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "80",
+      "atlas_extras": "0",
+      "verdict": "not a value error",
+      "charge_to": "timing convention and species normalization",
+      "xml_evidence": "Example 33 gives eight doses over four weeks, euthanasia 48 hours after the last dose and table captions at week 4.",
+      "adjudication": "Gold period 28 is nominal study duration; Atlas 30 adds the post-dose 48 hours. Both are defensible encodings because the field does not distinguish dosing duration from collection time. Atlas's generic mouse loses Balb/c detail."
+    },
+    {
+      "issue_id": "IRF4_HEP_CD1_OTHER",
+      "table_refs": "US20210038631A1:161;US20210038631A1:163;US20210038631A1:164;US20210038631A1:165;US20210038631A1:166;US20210038631A1:167;US20210038631A1:168",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "318",
+      "atlas_extras": "0",
+      "verdict": "not a value error",
+      "charge_to": "timing convention and species normalization",
+      "xml_evidence": "Example 34 gives eight doses over four weeks, euthanasia 48 hours after the last dose and table captions at week 4.",
+      "adjudication": "As in the Balb/c block",
+      "null": [
+        " 28 versus 30 is nominal duration versus post-dose collection and mouse versus CD1 mice is normalization. All compared values are source-supported."
+      ]
+    },
+    {
+      "issue_id": "IRF4_HEP_CD1_T162",
+      "table_refs": "US20210038631A1:162",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "24",
+      "atlas_extras": "8",
+      "verdict": "mixed",
+      "charge_to": "provenance merge plus timing convention",
+      "xml_evidence": "Adjacent source tables 161 and 162 contain distinct supported values for compounds 881449 and 881658 under the same CD1 schedule.",
+      "adjudication": "Atlas vectors merge values from both source tables under table 162. The eight extras are real source values but have lost table-level provenance; the 28-versus-30 context difference is the same duration convention as the rest of the block."
+    },
+    {
+      "issue_id": "IRF4_HEP_RAT_37",
+      "table_refs": "US20210038631A1:176;US20210038631A1:178;US20210038631A1:179",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "80",
+      "atlas_extras": "0",
+      "verdict": "not a value error",
+      "charge_to": "timing convention and species normalization",
+      "xml_evidence": "Example 35 gives six weekly doses and sacrifice 48 hours after the last dose.",
+      "adjudication": "Gold 42 encodes six nominal weeks. Atlas 37 is consistent with doses on days 1",
+      "null": [
+        " 8",
+        " 15",
+        " 22",
+        " 29 and 36 followed by collection two days later",
+        " expressed as elapsed days. Rat versus Sprague-Dawley rat is normalization."
+      ]
+    },
+    {
+      "issue_id": "IRF4_HEP_RAT_T177",
+      "table_refs": "US20210038631A1:177",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "15",
+      "atlas_extras": "0",
+      "verdict": "mixed",
+      "charge_to": "inconsistent timing convention",
+      "xml_evidence": "Table 177 is part of the same six-week Sprague-Dawley study with sacrifice 48 hours after the last dose.",
+      "adjudication": "Atlas uses 44 here while using 37 in the adjacent tables from the same experiment. Forty-four is nominal six weeks plus two days; it is source-derivable but internally inconsistent. Gold uses nominal 42 days."
+    },
+    {
+      "issue_id": "IRF4_HEP_T188",
+      "table_refs": "US20210038631A1:188",
+      "endpoint": "hepatotox",
+      "matched_value_errors": "0",
+      "matched_context_errors": "54",
+      "atlas_extras": "0",
+      "verdict": "schema ambiguity",
+      "charge_to": "one period field cannot encode channel-specific time",
+      "xml_evidence": "Example 37 states blood, plasma and serum collection on day 44; the table header separately labels serum day 44 and urine day 42.",
+      "adjudication": "Gold period 42 and Atlas elapsed period 43 each collapse channel-specific times into one row-level field. The strict mismatch exposes schema loss",
+      "null": [
+        " not an outcome extraction error; monkey versus Cynomolgus monkey is normalization."
+      ]
+    }
+  ]
+}
