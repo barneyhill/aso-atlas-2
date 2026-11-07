@@ -1,17 +1,13 @@
-"""Upload ASO Atlas 2.0 aso-atlas-2-release/ directory to HuggingFace Hub.
+"""Upload the ASO Atlas 2.0 release directory to Hugging Face Hub.
 
-Tags the current remote state before pushing, so the snapshot a reviewer may have
-already downloaded stays reachable and diffable, then publishes the reconciled
-endpoint parquets and exact paper fold assignments.
+Preserves the earlier public revision, then publishes the current endpoint tables,
+metadata and frozen benchmark fold assignments.
 
     uv run python aso-atlas-2-release/upload_hf_release.py
 """
 
 import json
 from pathlib import Path
-
-from huggingface_hub import HfApi
-from huggingface_hub.utils import HfHubHTTPError
 
 REPO_ID = "barneyhill/aso-atlas-2"
 RELEASE = Path("aso-atlas-2-release")
@@ -44,6 +40,9 @@ def stale_remote_files(remote_files: set[str]) -> list[str]:
 
 
 def main() -> None:
+    from huggingface_hub import HfApi
+    from huggingface_hub.utils import HfHubHTTPError
+
     api = HfApi()
 
     manifest_path = RELEASE / "release_manifest.json"
@@ -92,7 +91,7 @@ def main() -> None:
         repo_id=REPO_ID,
         repo_type="dataset",
         commit_message=(
-            f"ASO Atlas 2.0 {release_tag}: reconciled counts and exact paper folds"
+            f"ASO Atlas 2.0: refresh dataset card and release metadata"
         ),
         delete_patterns=stale_files,
         # Publish an explicit allowlist. The staging directory also contains build

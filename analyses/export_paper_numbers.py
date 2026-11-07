@@ -197,6 +197,8 @@ def main() -> None:
             "n_named_target_genes": release_totals["named_target_genes"],
             "model_eligible_readouts": release_totals["model_eligible_assay_readouts"],
             "unresolved_helm_readouts": release_totals["unresolved_helm_readouts"],
+            "model_eligible_patents": release_totals["model_eligible_patents"],
+            "model_eligible_named_target_genes": release_totals["model_eligible_named_target_genes"],
         },
     }
 
@@ -428,11 +430,27 @@ def main() -> None:
         numbers["cost_sensitivity"] = _round_floats(json.loads(cs_path.read_text()))
 
     # ── Focused AC uncertainty analysis (corrected expected-count pipeline) ──
-    try:
-        from analyses.logic.models.ac_uncertainty import compute as _ac_uncertainty_compute
-        numbers["ac_uncertainty"] = _ac_uncertainty_compute()
-    except Exception as e:
-        warnings.warn(f"ac_uncertainty skipped: {e}")
+    from analyses.logic.models.ac_uncertainty import compute as _ac_uncertainty_compute
+    from analyses.logic.paper_pipeline import paper_pipeline
+    corrected = _ac_uncertainty_compute()
+    numbers["ac_uncertainty"] = corrected
+    (RESULTS_DIR / "ac_uncertainty.json").write_text(
+        json.dumps(corrected, indent=2) + "\n"
+    )
+    numbers["marginal_pipeline"] = numbers["pipeline"]
+    numbers["pipeline"] = paper_pipeline(corrected, pipeline_data["stages"])
+    numbers["conditional_pipeline"] = json.loads(
+        (RESULTS_DIR / "s1_conditional_pipeline.json").read_text()
+    )
+    numbers["measurement_audit"] = json.loads(
+        (RESULTS_DIR / "lineage_rescued_recall.json").read_text()
+    )
+    numbers["normalization_audit"] = json.loads(
+        (RESULTS_DIR / "normalization_assessment.json").read_text()
+    )
+    numbers["dose_scale_audit"] = json.loads(
+        (RESULTS_DIR / "dose_scale_assessment.json").read_text()
+    )
 
     # ── Threshold-sensitivity sweep (rebuttal S3: tornado + ION582 lenient gate) ──
     try:

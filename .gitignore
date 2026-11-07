@@ -18,9 +18,13 @@ wheels/
 CLAUDE.md
 .claude/worktrees/
 
-# Tests (local only), except the versioned dataset-release contract.
+# Most tests remain local; version the release and camera-ready regression contracts.
 tests/*
 !tests/test_release_splits.py
+!tests/test_paper_numbers.py
+!tests/test_rebuttal_aggregation_consistency.py
+!tests/test_adjudication_csv.py
+!tests/test_source_status_review.py
 
 # macOS
 .DS_Store

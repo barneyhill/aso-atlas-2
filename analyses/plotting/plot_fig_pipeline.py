@@ -17,6 +17,12 @@ from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path as MPath
 
+from analyses.plotting.style import panel_label
+from analyses.logic.paper_pipeline import load_corrected_analysis
+
+# Shared left margin for this figure's panel letters, in figure coordinates.
+PANEL_COLUMN_X = 0.005
+
 _root = Path(__file__).resolve().parents[2]
 RESULTS_PATH = _root / "data/results/pipeline_results.json"
 OUT_DIR = _root / "typst/plots/fig_pipeline"
@@ -86,7 +92,7 @@ def draw_pipeline_attrition(results, stages, ax, x_positions=None):
         )
         ax.add_patch(rect)
 
-        n_label = f"{asos[i]:,}" if asos[i] != 1 else "1"
+        n_label = f"{asos[i]:,.1f}" if asos[i] != 1 else "1"
         aso_label = "ASOs" if asos[i] != 1 else "ASO"
         ax.text(x, y_center + 0.005, n_label, ha="center", va="bottom",
                 fontsize=12.1, fontweight="bold", color="white", zorder=11)
@@ -231,7 +237,7 @@ def main():
     with open(RESULTS_PATH) as f:
         data = json.load(f)
 
-    baseline = data["baseline"]
+    baseline = load_corrected_analysis()["corrected_pipeline"]["baseline"]
     stages = data["stages"]
     distributions = data["distributions"]
     sample_sizes = data["sample_sizes"]
@@ -306,11 +312,11 @@ def main():
         arrow.set_transform(fig.transFigure)
         fig.add_artist(arrow)
 
-    # Panel labels — aligned in x; B sits just above the tallest funnel stage label
+    # Panel labels — one shared column x; B sits just above the tallest funnel stage label
     a_label_y = 0.73 + pa_h * 0.20 + 0.03
     b_label_y = funnel_bot + funnel_h_size * (y_center_funnel + box_h.max() / 2 + 0.12)
-    fig.text(0.005, a_label_y, "A", fontsize=24, fontweight="bold", va="bottom")
-    fig.text(0.005, b_label_y, "B", fontsize=24, fontweight="bold", va="bottom")
+    panel_label(fig, "A", PANEL_COLUMN_X, a_label_y)
+    panel_label(fig, "B", PANEL_COLUMN_X, b_label_y)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig_pipeline.svg"

@@ -1,14 +1,14 @@
-# ASO Atlas 2.0 — paper cross-validation folds
+# ASO Atlas 2.0 — benchmark cross-validation folds
 
-These are the exact endpoint-specific 5-fold assignments used for the submitted
-paper's benchmark results. They are the reproduction partitions requested by the
-reviewers; they are distinct from the release's optional global canonical split.
+These are frozen endpoint-specific 5-fold assignments for reproducible OligoGym and
+OligoAI evaluation. They group observations by source patent to reduce train-test
+leakage.
 
-The paper constructed each benchmark endpoint independently after its own filtering
-and aggregation, then applied patent-level `GroupKFold` with HELM-level deduplication.
+Each benchmark endpoint was constructed independently after its own filtering and
+aggregation, then patent-level `GroupKFold` was applied with HELM-level deduplication.
 Consequently each endpoint has its own patent-to-fold assignment. The assignments
-below are validated against the test-group membership frozen in the submitted run's
-result file, rather than assumed from the shared grouping rule.
+below are validated against the frozen test-group membership rather than inferred from
+the shared grouping rule.
 
 The six OligoGym endpoint CSVs contain:
 - `group` — patent id (the CV group)
@@ -19,9 +19,8 @@ The six OligoGym endpoint CSVs contain:
 adapter normalises that representation before modelling. Use the corresponding
 adapter in `analyses/utils/oligogym_adapter.py`, or join on its `x` output.
 
-`oligoai_folds.csv.gz` separately maps each full `helm_annotation` to its exact
-OligoAI test fold. It is derived from the five frozen training CSVs used by the
-submitted runs; OligoAI and OligoGym must not be assumed to share fold numbers.
+`oligoai_folds.csv.gz` separately maps each full `helm_annotation` to its frozen
+OligoAI test fold. OligoAI and OligoGym must not be assumed to share fold numbers.
 
 | OligoGym endpoint | Unique model inputs | Patents | Per-fold sizes |
 |---|--:|--:|---|

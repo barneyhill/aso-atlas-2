@@ -27,6 +27,7 @@ from analyses.logic.enrichment import (
 )
 from analyses.logic.ef_table import DATASET_STRATA_KEY, OLIGOAI_TOX_MODEL, per_fold_ef_and_prec
 from analyses.logic.pipeline import PIPELINE_STAGES, compute_savings_with_uncertainty
+from analyses.logic.paper_pipeline import load_corrected_analysis
 
 matplotlib.use("Agg")
 
@@ -216,7 +217,7 @@ def main():
     print("Computing in vivo sweeps...")
     tox_sweeps = compute_tox_sweeps(bench)
     print("Computing savings sweep...")
-    savings_mean, savings_hi, savings_lo = compute_savings_sweep(oligoai_sweeps, tox_sweeps, pipe)
+    corrected_k = load_corrected_analysis()["corrected_k_sensitivity"]
 
     panels = ["efficacy", "potency", "mouse_hepatic", "mouse_neuro", "rat_hepatic", "rat_neuro"]
     all_sweeps = {**oligoai_sweeps, **tox_sweeps}
@@ -253,8 +254,9 @@ def main():
 
     # Panel G: combined savings
     ax_sav = panel_axes[6]
-    ax_sav.plot(x_pct, savings_mean, linewidth=2, color="#264653")
-    ax_sav.fill_between(x_pct, savings_lo, savings_hi, alpha=0.25, color="#264653")
+    ax_sav.plot([r["K"] * 100 for r in corrected_k],
+                [r["combined_pct"] for r in corrected_k],
+                marker="o", linewidth=2, color="#264653")
     ax_sav.axvline(SELECTION_FRACTION * 100, color="#444444", linestyle="--",
                    linewidth=1, alpha=0.7)
     ax_sav.axhline(0, color="#999999", linestyle=":", linewidth=0.8)

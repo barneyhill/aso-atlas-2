@@ -49,6 +49,11 @@ def run(matches: Path, adjudication: Path, output: Path) -> dict:
 
     with adjudication.open(newline="") as handle:
         for row in csv.DictReader(handle):
+            if None in row or any(value is None for value in row.values()):
+                raise ValueError(
+                    f"Malformed adjudication CSV row {row.get('issue_id')}: "
+                    "expected exactly the header's columns; quote commas in explanations"
+                )
             refs = row["table_refs"].split(";")
             for ref in refs:
                 if ref in assigned:

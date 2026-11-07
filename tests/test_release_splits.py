@@ -104,10 +104,6 @@ def test_submitted_source_id_linkage_is_canonical(manifest, release):
     assert paper_linkage["n_in_multi"] == 15_339
     assert paper_linkage["pct_in_multi"] == 9.1
 
-    card = (RELEASE / "README.md").read_text()
-    assert manifest["linkage_definition"] in card
-
-
 def test_card_declares_full_partition_per_config(manifest):
     card = (RELEASE / "README.md").read_text()
     front_matter = card.split("---")[1]

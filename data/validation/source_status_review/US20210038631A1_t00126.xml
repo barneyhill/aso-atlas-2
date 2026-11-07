@@ -1,0 +1,110 @@
+<source>
+<tables id="TABLE-US-00126" num="00126">
+<table frame="none" colsep="0" rowsep="0">
+<tgroup align="left" colsep="0" rowsep="0" cols="1">
+<colspec colname="1" colwidth="217pt" align="center"/>
+<thead>
+<row>
+<entry namest="1" nameend="1" rowsep="1">TABLE 126</entry>
+</row>
+</thead>
+<tbody valign="top">
+<row>
+<entry namest="1" nameend="1" align="center" rowsep="1"/>
+</row>
+<row>
+<entry>Dose-dependent reduction of proliferation</entry>
+</row>
+<row>
+<entry>of TMD8 cells by modified oligonucleotides</entry>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="3">
+<colspec colname="1" colwidth="63pt" align="center"/>
+<colspec colname="2" colwidth="147pt" align="center"/>
+<colspec colname="3" colwidth="7pt" align="center"/>
+<tbody valign="top">
+<row>
+<entry>Compound</entry>
+<entry>IRF4 proliferation (% UTC)</entry>
+<entry/>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="5">
+<colspec colname="1" colwidth="63pt" align="center"/>
+<colspec colname="2" colwidth="28pt" align="center"/>
+<colspec colname="3" colwidth="42pt" align="center"/>
+<colspec colname="4" colwidth="35pt" align="center"/>
+<colspec colname="5" colwidth="49pt" align="center"/>
+<tbody valign="top">
+<row>
+<entry>Number</entry>
+<entry>50 nM</entry>
+<entry>200 nM</entry>
+<entry>1,000 nM</entry>
+<entry>5,000 nM</entry>
+</row>
+<row>
+<entry namest="1" nameend="5" align="center" rowsep="1"/>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="5">
+<colspec colname="1" colwidth="63pt" align="char" char="."/>
+<colspec colname="2" colwidth="28pt" align="char" char="."/>
+<colspec colname="3" colwidth="42pt" align="char" char="."/>
+<colspec colname="4" colwidth="35pt" align="char" char="."/>
+<colspec colname="5" colwidth="49pt" align="char" char="."/>
+<tbody valign="top">
+<row>
+<entry>792169</entry>
+<entry>93</entry>
+<entry>108</entry>
+<entry>102</entry>
+<entry>98</entry>
+</row>
+<row>
+<entry>690890</entry>
+<entry>110</entry>
+<entry>120</entry>
+<entry>118</entry>
+<entry>17</entry>
+</row>
+<row>
+<entry>882800</entry>
+<entry>132</entry>
+<entry>149</entry>
+<entry>108</entry>
+<entry>27</entry>
+</row>
+<row>
+<entry>695696</entry>
+<entry>125</entry>
+<entry>143</entry>
+<entry>94</entry>
+<entry>5</entry>
+</row>
+<row>
+<entry>695968</entry>
+<entry>85</entry>
+<entry>131</entry>
+<entry>131</entry>
+<entry>10</entry>
+</row>
+<row>
+<entry>695918</entry>
+<entry>139</entry>
+<entry>130</entry>
+<entry>122</entry>
+<entry>4</entry>
+</row>
+<row>
+<entry namest="1" nameend="5" align="center" rowsep="1"/>
+</row>
+</tbody>
+</tgroup>
+</table>
+</tables>
+</source>

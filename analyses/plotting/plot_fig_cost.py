@@ -19,6 +19,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+from analyses.plotting.style import panel_labels
+from analyses.logic.paper_pipeline import load_corrected_analysis
+
 matplotlib.use("Agg")
 
 _root = Path(__file__).resolve().parents[2]
@@ -32,7 +35,6 @@ IN_VIVO_STAGES = [2, 3, 4, 5, 6]
 
 # ── Style constants (match Fig 2) ──
 TEXT_SIZE = 16
-PANEL_LABEL_SIZE = 22
 
 # Logical endpoints: each maps to one or more pipeline stage indices.
 ENDPOINTS = [
@@ -255,7 +257,7 @@ def draw_animal_reduction(stages, baseline_row, tox_row):
         ))
 
     for j, total in enumerate(totals):
-        ax.text(x_pos[j], total + max(totals) * 0.02, f"{total}",
+        ax.text(x_pos[j], total + max(totals) * 0.02, f"{total:.1f}",
                 ha="center", va="bottom", fontsize=TEXT_SIZE, fontweight="bold")
 
     reduction = (1 - totals[1] / totals[0]) * 100
@@ -318,10 +320,11 @@ def main():
     pipeline = json.loads(Path(PIPELINE_PATH).read_text())
     stages = pipeline["stages"]
 
-    baseline_row = _find_row(ef_rows, is_baseline=True)
-    oligoai_row = _find_row(ef_rows, name="OligoAI")
-    tox_row = _find_row(ef_rows, group="tox_only")
-    combined_row = _find_row(ef_rows, group="combined")
+    corrected = load_corrected_analysis()["corrected_pipeline"]
+    baseline_row = corrected["baseline"]
+    oligoai_row = corrected["in_vitro"]
+    tox_row = corrected["in_vivo"]
+    combined_row = corrected["combined"]
 
     scenarios = [("Baseline", baseline_row)]
     if oligoai_row:
@@ -331,7 +334,10 @@ def main():
     if combined_row:
         scenarios.append(("OligoAI +\nXGBoost", combined_row))
 
-    ef_source = combined_row or tox_row or {}
+    ef_source = {"ef_by_stage": {
+        str(i): combined_row["proportions"][i] / baseline_row["proportions"][i]
+        for i in range(6)
+    }}
 
     fig, (ax_a, ax_b) = plt.subplots(
         1, 2, figsize=(18, 7), dpi=300,
@@ -341,9 +347,7 @@ def main():
     draw_enrichment_bars(ax_a, ef_source)
     draw_relative_cost_bars(ax_b, scenarios, stages)
 
-    for ax, letter in [(ax_a, "A"), (ax_b, "B")]:
-        ax.text(-0.08, 1.05, letter, transform=ax.transAxes,
-                fontsize=PANEL_LABEL_SIZE, fontweight="bold", va="bottom", ha="left")
+    panel_labels(fig, [(ax_a, "A"), (ax_b, "B")])
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out = OUT_DIR / "fig_cost"

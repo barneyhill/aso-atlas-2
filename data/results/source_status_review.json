@@ -1,0 +1,155 @@
+{
+  "scope": "Three frozen measurement tables with live review status; outcome/sequence and assay-identity reconciliation only, not full chemistry/context sign-off.",
+  "method": "Independent source-cell parsing plus inspection of source method paragraphs; no extraction scripts executed.",
+  "status_explanation": "Live runs show fresh extraction messages and timestamps. The verifier extraction handlers unconditionally set status=review and remove signed-off CSVs. No transition history survives, so the exact prior status and action cannot be established.",
+  "gold_ledger_sha256": "9d8c2aaa3e8afd06004876efc8ccb3e51b21e698182d38b079a618845454c3a7",
+  "tables_reconciled": 3,
+  "measurements_source_confirmed": 225,
+  "frozen_measurements_changed": 0,
+  "tables": [
+    {
+      "id": "US20210038631A1_t00001",
+      "patent": "US20210038631A1",
+      "xml_table": 1,
+      "printed_table_caption": "TABLE 1",
+      "frozen_map_status": "verified",
+      "live_snapshot_status": "review",
+      "disposition": "retain_frozen_measurements_source_confirmed",
+      "measurements_checked": 69,
+      "outcomes_correct": 69,
+      "sequences_correct": 69,
+      "assay_identities_correct": 69,
+      "source_assay_identity": {
+        "cell_line": "SK-MEL-28",
+        "dose_nm": 20000.0,
+        "target": "IRF4"
+      },
+      "blank_fields_pending_separate_context_review": {
+        "sugar_motif": 69,
+        "backbone_motif": 69,
+        "treatment_period_hrs": 69
+      },
+      "chemistry_and_complete_context_signed_off": false
+    },
+    {
+      "id": "US20240026353A1_t00016",
+      "patent": "US20240026353A1",
+      "xml_table": 16,
+      "printed_table_caption": "TABLE 5",
+      "frozen_map_status": "verified",
+      "live_snapshot_status": "review",
+      "disposition": "retain_frozen_measurements_source_confirmed",
+      "measurements_checked": 78,
+      "outcomes_correct": 78,
+      "sequences_correct": 78,
+      "assay_identities_correct": 78,
+      "source_assay_identity": {
+        "cell_line": "SH-SY5Y",
+        "dose_nm": 5000.0,
+        "target": "SCN2A"
+      },
+      "blank_fields_pending_separate_context_review": {
+        "sugar_motif": 78,
+        "backbone_motif": 78,
+        "treatment_period_hrs": 78
+      },
+      "chemistry_and_complete_context_signed_off": false
+    },
+    {
+      "id": "US20240026353A1_t00018",
+      "patent": "US20240026353A1",
+      "xml_table": 18,
+      "printed_table_caption": "TABLE 7",
+      "frozen_map_status": "verified",
+      "live_snapshot_status": "review",
+      "disposition": "retain_frozen_measurements_source_confirmed",
+      "measurements_checked": 78,
+      "outcomes_correct": 78,
+      "sequences_correct": 78,
+      "assay_identities_correct": 78,
+      "source_assay_identity": {
+        "cell_line": "SH-SY5Y",
+        "dose_nm": 5000.0,
+        "target": "SCN2A"
+      },
+      "blank_fields_pending_separate_context_review": {
+        "sugar_motif": 78,
+        "backbone_motif": 78,
+        "treatment_period_hrs": 78
+      },
+      "chemistry_and_complete_context_signed_off": false
+    }
+  ],
+  "other_live_review_tables_excluded": [
+    {
+      "id": "US20210038631A1_t00111",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00112",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00113",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00114",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00119",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00120",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00121",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00122",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00125",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00126",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00129",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    },
+    {
+      "id": "US20210038631A1_t00130",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "in_frozen_measurement_audit": false
+    }
+  ],
+  "subsequent_chemistry_context_completion": {
+    "status": "complete",
+    "drafted_by": "Codex agent",
+    "reviewer": "Barney Hill",
+    "human_verified": true,
+    "tables_completed": 3,
+    "measurements_completed": 225,
+    "tables_excluded": 12,
+    "evidence": "data/validation/source_status_review/completed/review.json"
+  }
+}

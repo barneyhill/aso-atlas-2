@@ -75,13 +75,24 @@ geneholdout-ef:
 ef-table: oligoai-efs
     uv run python -m analyses.logic.ef_table
 
-# ── Primary lineage-rescued Gold content-recall audit ──
-#    Connects each Gold readout to its frozen source/canonical raw row, follows
-#    the actual production deduplication group, and verifies the released winner.
+# ── Primary lineage-aware measurement audit ──
+#    Uses the versioned 22,000-measurement Gold ledger and frozen table map.
+#    Release scope is reconstructed from production lineage before outcomes are
+#    compared, yielding precision and recall over the same measurement population.
 audit:
-    uv run python analyses/validation/build_production_table_canonical_map.py
     uv run python analyses/validation/dedup_lineage.py
     uv run python analyses/validation/lineage_rescued_recall.py
+    uv run python -m analyses.validation.source_status_review
+
+# Recheck the three frozen tables whose later verifier runs show review status.
+# Uses versioned XML/run snapshots and checks the source-linked chemistry and context completion.
+audit-source-status:
+    uv run python -m analyses.validation.source_status_review
+
+# Refreshing the frozen source-table map requires the manually verified source
+# workspace and is intentionally separate from the reproducible primary audit.
+audit-refresh-source-map:
+    uv run python analyses/validation/build_production_table_canonical_map.py
 
 # Superseded release-wide/value-based matcher, retained only for provenance.
 legacy-audit:
@@ -96,14 +107,6 @@ stats:
     uv run python -m analyses.logic.models.threshold_sweep
     uv run python -m analyses.logic.models.s1_conditional_pipeline
     uv run python -m analyses.logic.models.ac_uncertainty
-
-# ── Data-backed Markdown blocks in the rebuttal ────────────
-rebuttal-tables:
-    uv run python -m analyses.logic.models.threshold_sweep
-    uv run python -m analyses.logic.models.s1_conditional_pipeline
-    uv run python -m analyses.logic.models.ac_uncertainty
-    uv run python -m analyses.render_rebuttal_tables
-    uv run pytest tests/test_rebuttal_tables.py tests/test_release_gene_reconciliation.py tests/test_paper_release_scope.py -q
 
 # ── Export (reads JSONs from data/results/) ──────────────
 export: ef-table
@@ -125,12 +128,11 @@ plots:
 compile:
     typst compile typst/main.typ
 
-# Regenerate every release-scoped corpus count and Figure 1, then compile exports.
+# Regenerate every release-scoped corpus count and Figure 1, then compile the PDF.
 paper-release:
     uv run python -m analyses.export_paper_numbers
     uv run python -m analyses.plotting.plot_fig_atlas
     typst compile typst/main.typ typst/main.pdf
-    uv run python typst/export_docx.py
     uv run pytest tests/test_paper_release_scope.py tests/test_release_gene_reconciliation.py -q
 
 export-models:

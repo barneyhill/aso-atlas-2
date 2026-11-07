@@ -551,7 +551,7 @@ def _row_separator(r: dict, next_r: dict) -> str:
         return "  table.hline(stroke: (paint: gray, thickness: 0.3pt)),"
 
 
-def render_typst(rows: list[dict], baseline_cost: float) -> str:
+def render_typst(rows: list[dict], baseline_cost: float, *, include_savings=True) -> str:
     """Main table: precision@K + savings."""
     rows = [r for r in rows if r.get("group") != "tox_only"]
     lines = [
@@ -604,7 +604,9 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
             bold = (not is_baseline and not is_combined and prec is not None
                     and idx in best_prec and prec == best_prec[idx])
             cells.append("  " + _fmt_prec_cell(prec, prec_std, bold))
-        if is_baseline:
+        if not include_savings:
+            pass
+        elif is_baseline:
             cells.append("  [0.0%]")
         else:
             sav = r.get("savings_pct", 0.0)
@@ -622,6 +624,13 @@ def render_typst(rows: list[dict], baseline_cost: float) -> str:
             lines.append(_row_separator(r, rows[i + 1]))
     lines.append("  table.hline(stroke: 0.8pt),")
     lines.append(")]")
+    if not include_savings:
+        lines = [line for line in lines if "table.vline(x: 7," not in line
+                 and "[*Savings*]" not in line]
+        lines = [line.replace(
+            "columns: (6em, auto, auto, auto, auto, auto, auto, auto)",
+            "columns: (6em, auto, auto, auto, auto, auto, auto)",
+        ) for line in lines]
     return "\n".join(lines) + "\n"
 
 
@@ -721,7 +730,8 @@ def main():
 
     TYPST_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    typst = render_typst(rows, baseline_cost=baseline["baseline"]["total_cost"])
+    typst = render_typst(rows, baseline_cost=baseline["baseline"]["total_cost"],
+                         include_savings=False)
     (TYPST_DATA_DIR / "ef_table.typ").write_text(typst)
     print(f"Wrote {TYPST_DATA_DIR / 'ef_table.typ'}")
 

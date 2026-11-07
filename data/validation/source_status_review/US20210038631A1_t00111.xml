@@ -1,0 +1,117 @@
+<source>
+<tables id="TABLE-US-00111" num="00111">
+<table frame="none" colsep="0" rowsep="0">
+<tgroup align="left" colsep="0" rowsep="0" cols="1">
+<colspec colname="1" colwidth="217pt" align="center"/>
+<thead>
+<row>
+<entry namest="1" nameend="1" rowsep="1">TABLE 111</entry>
+</row>
+</thead>
+<tbody valign="top">
+<row>
+<entry namest="1" nameend="1" align="center" rowsep="1"/>
+</row>
+<row>
+<entry>Dose-dependent reduction of KMS11 proliferation</entry>
+</row>
+<row>
+<entry>by modified oligonucleotides</entry>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="3">
+<colspec colname="1" colwidth="63pt" align="center"/>
+<colspec colname="2" colwidth="147pt" align="center"/>
+<colspec colname="3" colwidth="7pt" align="center"/>
+<tbody valign="top">
+<row>
+<entry>Compound</entry>
+<entry>IRF4 proliferation (% UTC)</entry>
+<entry/>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="5">
+<colspec colname="1" colwidth="63pt" align="center"/>
+<colspec colname="2" colwidth="21pt" align="center"/>
+<colspec colname="3" colwidth="49pt" align="center"/>
+<colspec colname="4" colwidth="28pt" align="center"/>
+<colspec colname="5" colwidth="56pt" align="center"/>
+<tbody valign="top">
+<row>
+<entry>Number</entry>
+<entry>8 nM</entry>
+<entry>40 nM</entry>
+<entry>200 nM</entry>
+<entry>1,000 nM</entry>
+</row>
+<row>
+<entry namest="1" nameend="5" align="center" rowsep="1"/>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="5">
+<colspec colname="1" colwidth="63pt" align="char" char="."/>
+<colspec colname="2" colwidth="21pt" align="char" char="."/>
+<colspec colname="3" colwidth="49pt" align="char" char="."/>
+<colspec colname="4" colwidth="28pt" align="char" char="."/>
+<colspec colname="5" colwidth="56pt" align="char" char="."/>
+<tbody valign="top">
+<row>
+<entry>690890</entry>
+<entry>93</entry>
+<entry>79</entry>
+<entry>22</entry>
+<entry>7</entry>
+</row>
+<row>
+<entry>935762</entry>
+<entry>89</entry>
+<entry>34</entry>
+<entry>9</entry>
+<entry>6</entry>
+</row>
+<row>
+<entry>935918</entry>
+<entry>85</entry>
+<entry>28</entry>
+<entry>8</entry>
+<entry>7</entry>
+</row>
+<row>
+<entry>936007</entry>
+<entry>93</entry>
+<entry>66</entry>
+<entry>20</entry>
+<entry>8</entry>
+</row>
+<row>
+<entry>970527</entry>
+<entry>92</entry>
+<entry>50</entry>
+<entry>11</entry>
+<entry>5</entry>
+</row>
+<row>
+<entry>882085</entry>
+<entry>97</entry>
+<entry>55</entry>
+<entry>11</entry>
+<entry>6</entry>
+</row>
+<row>
+<entry>882408</entry>
+<entry>95</entry>
+<entry>68</entry>
+<entry>25</entry>
+<entry>10</entry>
+</row>
+<row>
+<entry namest="1" nameend="5" align="center" rowsep="1"/>
+</row>
+</tbody>
+</tgroup>
+</table>
+</tables>
+</source>

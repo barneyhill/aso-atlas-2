@@ -99,6 +99,9 @@ def gold_measurements(gold_runs: Path) -> list[Measurement]:
 
 
 def _read_release(release: Path, name: str) -> pd.DataFrame:
+    flat = release / f"{name}.parquet"
+    if flat.exists():
+        return pd.read_parquet(flat)
     paths = [release / name / f"{split}.parquet" for split in SPLITS]
     missing = [path for path in paths if not path.exists()]
     if missing:

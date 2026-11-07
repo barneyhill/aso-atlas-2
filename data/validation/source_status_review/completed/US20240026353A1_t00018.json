@@ -1,0 +1,1594 @@
+{
+  "status": "verified",
+  "rows": [
+    {
+      "Compound ID": "909603",
+      "sequence": "GTCAACCTTACCAAGAGCAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "77",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909938",
+      "sequence": "ATTTCCTGTACAGGGACTAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "15",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909944",
+      "sequence": "ATTCCCTGGTAAAGAAGCGG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "75",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909950",
+      "sequence": "GCAATCCTATTAGCGCAAAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "88",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909956",
+      "sequence": "CCTATTGAAAGTAGTACCAT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "86",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909962",
+      "sequence": "CCGATTTTCGGACTCTGTCA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "86",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909968",
+      "sequence": "GCCAATGTCCTTTGCTCGAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "70",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909974",
+      "sequence": "CAGAGAGTCTCTTCGGCTGT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "65",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909980",
+      "sequence": "GCCTTGATGTAGGATCTTCC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "94",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909986",
+      "sequence": "GGTGGTATGGTTGGAAATAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "79",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909992",
+      "sequence": "CCATATCTGACTCGCTGCTG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "75",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "909998",
+      "sequence": "TCGGCGGGAGCTCCAATATC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "56",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910004",
+      "sequence": "CTTGAACTTCCGTACACAGT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "85",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910009",
+      "sequence": "CCACGCTTACATCAAACATC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "70",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910015",
+      "sequence": "GCACTCACTGTAGTTGTTGA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "92",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910021",
+      "sequence": "ACAGATATCCAAGTCCTACG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "66",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910027",
+      "sequence": "GCCCTCTGGATAATAATAGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "47",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910033",
+      "sequence": "GTCATATCGGTTTTCTCTGG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "60",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910039",
+      "sequence": "CATCGATACTATTTCTCCAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "53",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910045",
+      "sequence": "AGCCATTACGCCTCTGCTCT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "56",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910051",
+      "sequence": "CCTCCCCCCTTTAAATTGGT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "42",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910062",
+      "sequence": "GAATGAGGTCTTGGTAGAAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "75",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910068",
+      "sequence": "GCAACATGTTTGTACAGTCG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "85",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910074",
+      "sequence": "CTAGTGCCATATGGGTCAAT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "73",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910080",
+      "sequence": "CGTTCTTTATGGTAACAGCA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "84",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910086",
+      "sequence": "GGCTTGATTGTAATGTGGTT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "66",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910092",
+      "sequence": "GTAACTTTCCACTAGTCTAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "32",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910098",
+      "sequence": "TCTGACAGTCATTCGATGGT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "54",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910104",
+      "sequence": "CGCCAGTCTTCAGCAGTTTG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "24",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910110",
+      "sequence": "GGTGCCAATGATGTGCTCGG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "-12",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910116",
+      "sequence": "TCCCCGCTGCAGTAAGTGGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "-8",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910122",
+      "sequence": "CAGTAGTATTCCTCCAATCA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "11",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910128",
+      "sequence": "GTGGAGTGGCACTTCATTAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "49",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910134",
+      "sequence": "GTTAAGTAATGGTTGGCACC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "-12",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910140",
+      "sequence": "GTCAAGTTTTTGAACTGACC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "4",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910146",
+      "sequence": "GATCAGGACAAGCTATCAAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "36",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910152",
+      "sequence": "GTTACAAAAGTAGGGACTCA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "11",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910158",
+      "sequence": "GTCTATGCCATCCTGATATG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "15",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910164",
+      "sequence": "GAGGGATAGTGTCAGTCTTC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "33",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910170",
+      "sequence": "AGGAGGTTAGTCATGCAAGT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "30",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910176",
+      "sequence": "GAGTGCACCCCAAGGCTAGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "43",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910182",
+      "sequence": "GAGTTAAACCATAGAGCCAT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "64",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910188",
+      "sequence": "TCCCATGGTTGGTCCTAGCC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "17",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910194",
+      "sequence": "ATCCAGACCGTATTGCAACC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "27",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910200",
+      "sequence": "CTACCCAGTAGCCCCTGGTA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "-3",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910206",
+      "sequence": "GTTGGCACTATAACCAATGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "38",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910212",
+      "sequence": "TGCTCTGTCGACACCTGTCT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "44",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910218",
+      "sequence": "CACCGGCACTTCAGACTTGG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "18",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910224",
+      "sequence": "GTAGATCTGAATGTCTGGGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "26",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910230",
+      "sequence": "TTAGGACAAGCTATCACCAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "56",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910236",
+      "sequence": "GTAGCAGCTCTAGCCTCCCA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "61",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910242",
+      "sequence": "GTAGCTCGGACCCCCTGGCT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "58",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910248",
+      "sequence": "TCATCATTCAGATGCACGAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "80",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910254",
+      "sequence": "GGTCTAAACTCTGGTGCTAT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "80",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910260",
+      "sequence": "GGATGGTTCCTCCCCTTAGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "72",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910266",
+      "sequence": "ATTTCATGAGTGTCGCCATC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "83",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910272",
+      "sequence": "TCAATAACGGCAAGTCTGCT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "46",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910278",
+      "sequence": "TAGGTATTAAGGTTTCACTC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "79",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910284",
+      "sequence": "GAGGCTCGGGTCTCCCAGTG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "62",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910290",
+      "sequence": "ATCCATGAGTTATGCACGGA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "74",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910296",
+      "sequence": "GATATCTCAGGAGATGTCCT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "62",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910302",
+      "sequence": "GTGGTAACTCTACCCCAAAC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "67",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910308",
+      "sequence": "AGGTGGTTACCTCAGAGACC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "75",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910314",
+      "sequence": "GTGACTTGCTACCATAGAGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "83",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910320",
+      "sequence": "CTAGGCTGGCAGTCCCATCC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "65",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910326",
+      "sequence": "GCAACTACCCTCTCATCAGA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "83",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910332",
+      "sequence": "CCCATGCTGCTAGCAACTGA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "72",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910338",
+      "sequence": "AGTTATAGCGAATCAGTGGT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "60",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910344",
+      "sequence": "GCCCTATGGATAATACACCA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "85",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910350",
+      "sequence": "CTCCAGTGACATATTGCCCC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "57",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910356",
+      "sequence": "TTCGCCTTAGAGGCCTCCAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "86",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910362",
+      "sequence": "CATACAGTTGACTAATGTAG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "76",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910368",
+      "sequence": "TCTGTTGTGCGGACATAGTA",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "76",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910374",
+      "sequence": "TTTGCAGCGGAAAAGGTCTG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "42",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910380",
+      "sequence": "CAGGTCGAGGTATGGGTTAT",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "67",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910386",
+      "sequence": "TAGAATGACTAATACTCTGC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "76",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910392",
+      "sequence": "GGTAAGTAGTGTAAATAGGG",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "86",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    },
+    {
+      "Compound ID": "910398",
+      "sequence": "GACTCAACCCTGGAAGGTCC",
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cell_line": "SH-SY5Y",
+      "cell_line_species": "human",
+      "dosage_nm": "5000",
+      "target_RNA": "SCN2A",
+      "Inhibition_pct": "46",
+      "cells_per_well": "20000",
+      "transfection_method": "Electroporation",
+      "treatment_period_hrs": "24",
+      "measurement_note": "converted from %UTC; approximately 24 h; chemistry explicitly stated in preceding patent prose",
+      "cytosine_methylated": "yes"
+    }
+  ],
+  "chat": [
+    {
+      "who": "run",
+      "text": "inhibition: 78 rows"
+    },
+    {
+      "who": "review",
+      "text": "Patent paragraphs 0620 (chemistry) and 0622 (assay); see data/validation/source_status_review/completed/review.json (agent source review)"
+    }
+  ],
+  "problems": [
+    "single-dose screen (1 dose/compound) \u2014 exports to in_vitro_inhibition"
+  ],
+  "prov": {},
+  "raw": {
+    "0": {
+      "backbone_motif": "406"
+    },
+    "1": {
+      "backbone_motif": "407"
+    },
+    "2": {
+      "backbone_motif": "408"
+    },
+    "3": {
+      "backbone_motif": "409"
+    },
+    "4": {
+      "backbone_motif": "410"
+    },
+    "5": {
+      "backbone_motif": "411"
+    },
+    "6": {
+      "backbone_motif": "412"
+    },
+    "7": {
+      "backbone_motif": "413"
+    },
+    "8": {
+      "backbone_motif": "414"
+    },
+    "9": {
+      "backbone_motif": "415"
+    },
+    "10": {
+      "backbone_motif": "416"
+    },
+    "11": {
+      "backbone_motif": "417"
+    },
+    "12": {
+      "backbone_motif": "418"
+    },
+    "13": {
+      "backbone_motif": "419"
+    },
+    "14": {
+      "backbone_motif": "420"
+    },
+    "15": {
+      "backbone_motif": "421"
+    },
+    "16": {
+      "backbone_motif": "422"
+    },
+    "17": {
+      "backbone_motif": "423"
+    },
+    "18": {
+      "backbone_motif": "424"
+    },
+    "19": {
+      "backbone_motif": "425"
+    },
+    "20": {
+      "backbone_motif": "426"
+    },
+    "21": {
+      "backbone_motif": "427"
+    },
+    "22": {
+      "backbone_motif": "428"
+    },
+    "23": {
+      "backbone_motif": "429"
+    },
+    "24": {
+      "backbone_motif": "430"
+    },
+    "25": {
+      "backbone_motif": "431"
+    },
+    "26": {
+      "backbone_motif": "432"
+    },
+    "27": {
+      "backbone_motif": "433"
+    },
+    "28": {
+      "backbone_motif": "434"
+    },
+    "29": {
+      "backbone_motif": "435"
+    },
+    "30": {
+      "backbone_motif": "436"
+    },
+    "31": {
+      "backbone_motif": "437"
+    },
+    "32": {
+      "backbone_motif": "438"
+    },
+    "33": {
+      "backbone_motif": "439"
+    },
+    "34": {
+      "backbone_motif": "440"
+    },
+    "35": {
+      "backbone_motif": "441"
+    },
+    "36": {
+      "backbone_motif": "442"
+    },
+    "37": {
+      "backbone_motif": "443"
+    },
+    "38": {
+      "backbone_motif": "444"
+    },
+    "39": {
+      "backbone_motif": "445"
+    },
+    "40": {
+      "backbone_motif": "446"
+    },
+    "41": {
+      "backbone_motif": "447"
+    },
+    "42": {
+      "backbone_motif": "448"
+    },
+    "43": {
+      "backbone_motif": "449"
+    },
+    "44": {
+      "backbone_motif": "450"
+    },
+    "45": {
+      "backbone_motif": "451"
+    },
+    "46": {
+      "backbone_motif": "452"
+    },
+    "47": {
+      "backbone_motif": "453"
+    },
+    "48": {
+      "backbone_motif": "454"
+    },
+    "49": {
+      "backbone_motif": "455"
+    },
+    "50": {
+      "backbone_motif": "456"
+    },
+    "51": {
+      "backbone_motif": "457"
+    },
+    "52": {
+      "backbone_motif": "458"
+    },
+    "53": {
+      "backbone_motif": "459"
+    },
+    "54": {
+      "backbone_motif": "460"
+    },
+    "55": {
+      "backbone_motif": "461"
+    },
+    "56": {
+      "backbone_motif": "462"
+    },
+    "57": {
+      "backbone_motif": "463"
+    },
+    "58": {
+      "backbone_motif": "464"
+    },
+    "59": {
+      "backbone_motif": "465"
+    },
+    "60": {
+      "backbone_motif": "466"
+    },
+    "61": {
+      "backbone_motif": "467"
+    },
+    "62": {
+      "backbone_motif": "468"
+    },
+    "63": {
+      "backbone_motif": "469"
+    },
+    "64": {
+      "backbone_motif": "470"
+    },
+    "65": {
+      "backbone_motif": "471"
+    },
+    "66": {
+      "backbone_motif": "472"
+    },
+    "67": {
+      "backbone_motif": "473"
+    },
+    "68": {
+      "backbone_motif": "474"
+    },
+    "69": {
+      "backbone_motif": "475"
+    },
+    "70": {
+      "backbone_motif": "476"
+    },
+    "71": {
+      "backbone_motif": "477"
+    },
+    "72": {
+      "backbone_motif": "478"
+    },
+    "73": {
+      "backbone_motif": "479"
+    },
+    "74": {
+      "backbone_motif": "480"
+    },
+    "75": {
+      "backbone_motif": "481"
+    },
+    "76": {
+      "backbone_motif": "482"
+    },
+    "77": {
+      "backbone_motif": "483"
+    }
+  },
+  "klass": "inhibition",
+  "pyscript": "import re\nimport csv\nimport io\nimport xml.etree.ElementTree as ET\n\n\ndef _clean_text(text):\n    if text is None:\n        return \"\"\n    text = text.replace(\"\\u2003\", \" \")\n    text = text.replace(\"\\u2032\", \"'\")\n    text = text.replace(\"\\u2020\", \"\")\n    text = text.replace(\"\\u2021\", \"\")\n    text = re.sub(r\"\\s+\", \" \", text)\n    return text.strip()\n\n\ndef _get_row_cells(row_elem):\n    cells = []\n    for entry in row_elem.findall(\"entry\"):\n        txt = \"\".join(entry.itertext())\n        cells.append(_clean_text(txt))\n    return cells\n\n\ndef _is_spacer_row(cells):\n    if not cells:\n        return True\n    joined = \"\".join(cells).strip()\n    if joined == \"\":\n        return True\n    return False\n\n\ndef _to_nm(value, unit):\n    try:\n        v = float(value)\n    except ValueError:\n        return None\n    unit = unit.lower().strip()\n    if unit in (\"nm\",):\n        return _fmt_num(v)\n    if unit in (\"um\", \"\\u00b5m\", \"micromolar\"):\n        return _fmt_num(v * 1000)\n    if unit in (\"mm\",):\n        return _fmt_num(v * 1000000)\n    return _fmt_num(v)\n\n\ndef _fmt_num(v):\n    if v == int(v):\n        return str(int(v))\n    return str(v)\n\n\ndef _extract_compound_id(cell):\n    if not cell:\n        return None\n    m = re.search(r\"(\\d{4,7})\", cell)\n    if m:\n        return m.group(1)\n    return None\n\n\ndef _looks_like_sequence(cell):\n    if not cell:\n        return False\n    c = cell.strip().upper()\n    letters = re.sub(r\"[^ATGC]\", \"\", c)\n    return len(letters) >= 8\n\n\ndef _validate_sequence(cell):\n    if not cell:\n        return \"NA\"\n    c = cell.strip().upper()\n    letters = re.sub(r\"[^ATGC]\", \"\", c)\n    if len(letters) >= 8:\n        return c\n    return \"NA\"\n\n\ndef _is_number(s):\n    try:\n        float(s)\n        return True\n    except (ValueError, TypeError):\n        return False\n\n\ndef _parse_dose_header(cells_header_rows, ncols):\n    # Try to find concentration + unit info per column\n    # cells_header_rows: list of rows (each a list of cells), possibly ragged/shifted\n    # Returns dict: col_index -> concentration_in_nM (string) or None\n    col_conc = {}\n    unit_pattern = re.compile(r\"^(nM|uM|\\u00b5M|mM)$\", re.IGNORECASE)\n    num_unit_pattern = re.compile(r\"^([0-9]*\\.?[0-9]+)\\s*(nM|uM|\\u00b5M|mM)$\", re.IGNORECASE)\n\n    # Build aligned rows: right-align against ncols (data row length)\n    aligned_rows = []\n    for row in cells_header_rows:\n        offset = ncols - len(row)\n        if offset < 0:\n            offset = 0\n        aligned = [None] * ncols\n        for i, val in enumerate(row):\n            idx = i + offset\n            if idx < ncols:\n                aligned[idx] = val\n        aligned_rows.append(aligned)\n\n    # look for a row with plain numbers, and next row with units\n    for r_idx, row in enumerate(aligned_rows):\n        for c_idx, val in enumerate(row):\n            if val is None:\n                continue\n            m = num_unit_pattern.match(val.strip())\n            if m:\n                col_conc[c_idx] = _to_nm(m.group(1), m.group(2))\n                continue\n            if _is_number(val.strip()):\n                # look for unit in subsequent rows same column\n                for r2 in range(r_idx + 1, len(aligned_rows)):\n                    unit_val = aligned_rows[r2][c_idx] if c_idx < len(aligned_rows[r2]) else None\n                    if unit_val and unit_pattern.match(unit_val.strip()):\n                        col_conc[c_idx] = _to_nm(val.strip(), unit_val.strip())\n                        break\n    return col_conc\n\n\ndef _extract_all_rows_from_table(table_elem):\n    all_rows = []\n    for tgroup in table_elem.findall(\"tgroup\"):\n        tbody = tgroup.find(\"tbody\")\n        if tbody is None:\n            continue\n        for row in tbody.findall(\"row\"):\n            cells = _get_row_cells(row)\n            all_rows.append(cells)\n    return all_rows\n\n\ndef _find_header_and_data(rows):\n    # Determine max column count from rows that look like data (numeric compound id present)\n    data_row_indices = []\n    for i, row in enumerate(rows):\n        if _is_spacer_row(row):\n            continue\n        if len(row) >= 2 and re.match(r\"^\\d{4,7}\", row[0].strip()):\n            data_row_indices.append(i)\n    return data_row_indices\n\n\ndef xml_to_csv(xml_str: str) -> str:\n    xml_str = xml_str.replace(\"&#x2003;\", \" \")\n\n    # Try to parse XML; wrap in root if needed and fix unclosed tags\n    try:\n        # attempt direct parse by wrapping fragments\n        wrapped = \"<root>\" + xml_str + \"</root>\"\n        root = ET.fromstring(wrapped)\n    except ET.ParseError:\n        # try to fix common issues - truncated/unclosed tags - best effort\n        cleaned = re.sub(r\"<!--.*?-->\", \"\", xml_str, flags=re.DOTALL)\n        # remove any trailing incomplete tag fragments\n        cleaned = re.sub(r\"<[^>]*$\", \"\", cleaned)\n        try:\n            wrapped = \"<root>\" + cleaned + \"</root>\"\n            root = ET.fromstring(wrapped)\n        except ET.ParseError:\n            root = None\n\n    output_rows = []\n\n    if root is None:\n        return _build_csv(output_rows)\n\n    tables = root.findall(\".//tables\")\n    if not tables:\n        tables = root.findall(\".//table\")\n\n    for tables_elem in tables:\n        table_elems = tables_elem.findall(\".//table\") if tables_elem.tag == \"tables\" else [tables_elem]\n        if not table_elems:\n            table_elems = [tables_elem]\n\n        # gather all rows across all tgroups/tables within this tables block\n        all_rows = []\n        for t in table_elems:\n            all_rows.extend(_extract_all_rows_from_table(t))\n\n        if not all_rows:\n            continue\n\n        # find caption text for %UTC detection\n        caption_text = \" \".join([\" \".join(r) for r in all_rows[:8]]).lower()\n        is_utc = (\"% utc\" in caption_text or \"utc\" in caption_text or \"% control\" in caption_text or \"control)\" in caption_text) and \"inhibit\" not in caption_text\n\n        data_indices = _find_header_and_data(all_rows)\n        if not data_indices:\n            continue\n\n        ncols = max(len(all_rows[i]) for i in data_indices)\n\n        header_rows = []\n        first_data_idx = data_indices[0]\n        for i in range(first_data_idx):\n            row = all_rows[i]\n            if _is_spacer_row(row):\n                continue\n            joined = \" \".join(row).strip()\n            if joined.upper().startswith(\"TABLE\"):\n                continue\n            header_rows.append(row)\n\n        # determine column roles by scanning header rows text\n        header_flat_cols = {}\n        offset_rows = []\n        for row in header_rows:\n            offset = ncols - len(row)\n            if offset < 0:\n                offset = 0\n            aligned = [None] * ncols\n            for i, val in enumerate(row):\n                idx = i + offset\n                if idx < ncols:\n                    aligned[idx] = val\n            offset_rows.append(aligned)\n\n        col_text = [\"\" for _ in range(ncols)]\n        for aligned in offset_rows:\n            for idx, val in enumerate(aligned):\n                if val:\n                    col_text[idx] = (col_text[idx] + \" \" + val).strip()\n\n        seq_col = None\n        sugar_col = None\n        backbone_col = None\n        inhib_col = None\n        utc_col = None\n        compound_col = 0\n\n        for idx, txt in enumerate(col_text):\n            low = txt.lower()\n            if \"sequence\" in low:\n                seq_col = idx\n            if \"sugar\" in low or \"motif\" in low and \"sugar\" in low:\n                sugar_col = idx\n            if \"linkage\" in low or \"backbone\" in low:\n                backbone_col = idx\n            if \"inhibit\" in low:\n                inhib_col = idx\n            if \"utc\" in low or \"control\" in low:\n                utc_col = idx\n            if \"compound\" in low or \"isis\" in low:\n                compound_col = idx\n\n        # detect dose-response header (numeric concentrations across columns)\n        col_conc = _parse_dose_header(header_rows, ncols)\n        is_dose_response = len(col_conc) >= 2\n\n        for di in data_indices:\n            row = all_rows[di]\n            if len(row) < ncols:\n                row = row + [\"\"] * (ncols - len(row))\n\n            compound_raw = row[compound_col]\n            compound_id = _extract_compound_id(compound_raw)\n            if not compound_id:\n                continue\n\n            sequence = \"NA\"\n            if seq_col is not None and seq_col < len(row):\n                sequence = _validate_sequence(row[seq_col])\n\n            sugar_motif = \"NA\"\n            if sugar_col is not None and sugar_col < len(row):\n                val = row[sugar_col].strip()\n                sugar_motif = val if val else \"NA\"\n\n            backbone_motif = \"NA\"\n            if backbone_col is not None and backbone_col < len(row):\n                val = row[backbone_col].strip()\n                backbone_motif = val if val else \"NA\"\n\n            if is_dose_response:\n                for cidx, conc in col_conc.items():\n                    if cidx >= len(row):\n                        continue\n                    val = row[cidx].strip()\n                    if val == \"\" or not _is_number(val):\n                        continue\n                    if is_utc:\n                        try:\n                            pct = 100 - float(val)\n                        except ValueError:\n                            continue\n                        note = \"converted from %UTC\"\n                        pct_str = _fmt_num(pct)\n                    else:\n                        pct_str = val\n                        note = \"inhibition\"\n                    output_rows.append([\n                        compound_id, sequence, sugar_motif, backbone_motif,\n                        conc if conc is not None else \"NA\", pct_str, note\n                    ])\n            else:\n                pct_val = None\n                note = None\n                if inhib_col is not None and inhib_col < len(row) and row[inhib_col].strip() != \"\":\n                    v = row[inhib_col].strip()\n                    if _is_number(v):\n                        pct_val = v\n                        note = \"inhibition\"\n                elif utc_col is not None and utc_col < len(row) and row[utc_col].strip() != \"\":\n                    v = row[utc_col].strip()\n                    if _is_number(v):\n                        pct_val = _fmt_num(100 - float(v))\n                        note = \"converted from %UTC\"\n\n                if pct_val is None:\n                    # try last numeric-looking column as fallback\n                    for idx in range(len(row) - 1, -1, -1):\n                        v = row[idx].strip()\n                        if idx == compound_col:\n                            continue\n                        if _is_number(v):\n                            if is_utc:\n                                pct_val = _fmt_num(100 - float(v))\n                                note = \"converted from %UTC\"\n                            else:\n                                pct_val = v\n                                note = \"inhibition\"\n                            break\n\n                if pct_val is None:\n                    continue\n\n                output_rows.append([\n                    compound_id, sequence, sugar_motif, backbone_motif,\n                    \"NA\", pct_val, note\n                ])\n\n    return _build_csv(output_rows)\n\n\ndef _build_csv(rows):\n    output = io.StringIO()\n    writer = csv.writer(output, lineterminator=\"\\n\")\n    writer.writerow([\n        \"Compound ID\", \"sequence\", \"sugar_motif\", \"backbone_motif\",\n        \"dosage_nm\", \"Inhibition_pct\", \"measurement_note\"\n    ])\n\n    for row in rows:\n        compound_id = row[0]\n        if not re.match(r\"^\\d{4,7}$\", compound_id):\n            continue\n        if not _is_number(str(row[5])):\n            continue\n        writer.writerow(row)\n\n    return output.getvalue()\n",
+  "meta": {
+    "target_mrna": "SCN2A",
+    "target_gene": "SCN2A",
+    "cell_line": "SH-SY5Y",
+    "cell_line_species": "human",
+    "dosage": 5000,
+    "cells_per_well": 20000,
+    "transfection_method": "Electroporation",
+    "treatment_period_hrs": "24",
+    "cytosine_methylated": "yes"
+  },
+  "version": {
+    "main": "c2565956428c",
+    "runner": "4bc78ad4376e",
+    "model": "claude-sonnet-5",
+    "prompts": {
+      "inhibition": "63c9ee78e567",
+      "metadata": "b2c7c6c9c813",
+      "plasma": "7b72295ac6cb",
+      "sequence": "c09ee25d9f80",
+      "tolerability": "e1f572d9604a",
+      "xml_to_csv_script": "14530024e5d7"
+    }
+  },
+  "extractedAt": "2026-07-26T21:54:59.188Z",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Compound ID,sequence,sugar_motif,backbone_motif,dosage_nm,Inhibition_pct,measurement_note\n909603,GTCAACCTTACCAAGAGCAG,NA,406,NA,77,converted from %UTC\n909938,ATTTCCTGTACAGGGACTAC,NA,407,NA,15,converted from %UTC\n909944,ATTCCCTGGTAAAGAAGCGG,NA,408,NA,75,converted from %UTC\n909950,GCAATCCTATTAGCGCAAAC,NA,409,NA,88,converted from %UTC\n909956,CCTATTGAAAGTAGTACCAT,NA,410,NA,86,converted from %UTC\n909962,CCGATTTTCGGACTCTGTCA,NA,411,NA,86,converted from %UTC\n909968,GCCAATGTCCTTTGCTCGAC,NA,412,NA,70,converted from %UTC\n909974,CAGAGAGTCTCTTCGGCTGT,NA,413,NA,65,converted from %UTC\n909980,GCCTTGATGTAGGATCTTCC,NA,414,NA,94,converted from %UTC\n909986,GGTGGTATGGTTGGAAATAC,NA,415,NA,79,converted from %UTC\n909992,CCATATCTGACTCGCTGCTG,NA,416,NA,75,converted from %UTC\n909998,TCGGCGGGAGCTCCAATATC,NA,417,NA,56,converted from %UTC\n910004,CTTGAACTTCCGTACACAGT,NA,418,NA,85,converted from %UTC\n910009,CCACGCTTACATCAAACATC,NA,419,NA,70,converted from %UTC\n910015,GCACTCACTGTAGTTGTTGA,NA,420,NA,92,converted from %UTC\n910021,ACAGATATCCAAGTCCTACG,NA,421,NA,66,converted from %UTC\n910027,GCCCTCTGGATAATAATAGC,NA,422,NA,47,converted from %UTC\n910033,GTCATATCGGTTTTCTCTGG,NA,423,NA,60,converted from %UTC\n910039,CATCGATACTATTTCTCCAG,NA,424,NA,53,converted from %UTC\n910045,AGCCATTACGCCTCTGCTCT,NA,425,NA,56,converted from %UTC\n910051,CCTCCCCCCTTTAAATTGGT,NA,426,NA,42,converted from %UTC\n910062,GAATGAGGTCTTGGTAGAAC,NA,427,NA,75,converted from %UTC\n910068,GCAACATGTTTGTACAGTCG,NA,428,NA,85,converted from %UTC\n910074,CTAGTGCCATATGGGTCAAT,NA,429,NA,73,converted from %UTC\n910080,CGTTCTTTATGGTAACAGCA,NA,430,NA,84,converted from %UTC\n910086,GGCTTGATTGTAATGTGGTT,NA,431,NA,66,converted from %UTC\n910092,GTAACTTTCCACTAGTCTAC,NA,432,NA,32,converted from %UTC\n910098,TCTGACAGTCATTCGATGGT,NA,433,NA,54,converted from %UTC\n910104,CGCCAGTCTTCAGCAGTTTG,NA,434,NA,24,converted from %UTC\n910110,GGTGCCAATGATGTGCTCGG,NA,435,NA,-12,converted from %UTC\n910116,TCCCCGCTGCAGTAAGTGGC,NA,436,NA,-8,converted from %UTC\n910122,CAGTAGTATTCCTCCAATCA,NA,437,NA,11,converted from %UTC\n910128,GTGGAGTGGCACTTCATTAG,NA,438,NA,49,converted from %UTC\n910134,GTTAAGTAATGGTTGGCACC,NA,439,NA,-12,converted from %UTC\n910140,GTCAAGTTTTTGAACTGACC,NA,440,NA,4,converted from %UTC\n910146,GATCAGGACAAGCTATCAAG,NA,441,NA,36,converted from %UTC\n910152,GTTACAAAAGTAGGGACTCA,NA,442,NA,11,converted from %UTC\n910158,GTCTATGCCATCCTGATATG,NA,443,NA,15,converted from %UTC\n910164,GAGGGATAGTGTCAGTCTTC,NA,444,NA,33,converted from %UTC\n910170,AGGAGGTTAGTCATGCAAGT,NA,445,NA,30,converted from %UTC\n910176,GAGTGCACCCCAAGGCTAGC,NA,446,NA,43,converted from %UTC\n910182,GAGTTAAACCATAGAGCCAT,NA,447,NA,64,converted from %UTC\n910188,TCCCATGGTTGGTCCTAGCC,NA,448,NA,17,converted from %UTC\n910194,ATCCAGACCGTATTGCAACC,NA,449,NA,27,converted from %UTC\n910200,CTACCCAGTAGCCCCTGGTA,NA,450,NA,-3,converted from %UTC\n910206,GTTGGCACTATAACCAATGC,NA,451,NA,38,converted from %UTC\n910212,TGCTCTGTCGACACCTGTCT,NA,452,NA,44,converted from %UTC\n910218,CACCGGCACTTCAGACTTGG,NA,453,NA,18,converted from %UTC\n910224,GTAGATCTGAATGTCTGGGC,NA,454,NA,26,converted from %UTC\n910230,TTAGGACAAGCTATCACCAG,NA,455,NA,56,converted from %UTC\n910236,GTAGCAGCTCTAGCCTCCCA,NA,456,NA,61,converted from %UTC\n910242,GTAGCTCGGACCCCCTGGCT,NA,457,NA,58,converted from %UTC\n910248,TCATCATTCAGATGCACGAC,NA,458,NA,80,converted from %UTC\n910254,GGTCTAAACTCTGGTGCTAT,NA,459,NA,80,converted from %UTC\n910260,GGATGGTTCCTCCCCTTAGC,NA,460,NA,72,converted from %UTC\n910266,ATTTCATGAGTGTCGCCATC,NA,461,NA,83,converted from %UTC\n910272,TCAATAACGGCAAGTCTGCT,NA,462,NA,46,converted from %UTC\n910278,TAGGTATTAAGGTTTCACTC,NA,463,NA,79,converted from %UTC\n910284,GAGGCTCGGGTCTCCCAGTG,NA,464,NA,62,converted from %UTC\n910290,ATCCATGAGTTATGCACGGA,NA,465,NA,74,converted from %UTC\n910296,GATATCTCAGGAGATGTCCT,NA,466,NA,62,converted from %UTC\n910302,GTGGTAACTCTACCCCAAAC,NA,467,NA,67,converted from %UTC\n910308,AGGTGGTTACCTCAGAGACC,NA,468,NA,75,converted from %UTC\n910314,GTGACTTGCTACCATAGAGC,NA,469,NA,83,converted from %UTC\n910320,CTAGGCTGGCAGTCCCATCC,NA,470,NA,65,converted from %UTC\n910326,GCAACTACCCTCTCATCAGA,NA,471,NA,83,converted from %UTC\n910332,CCCATGCTGCTAGCAACTGA,NA,472,NA,72,converted from %UTC\n910338,AGTTATAGCGAATCAGTGGT,NA,473,NA,60,converted from %UTC\n910344,GCCCTATGGATAATACACCA,NA,474,NA,85,converted from %UTC\n910350,CTCCAGTGACATATTGCCCC,NA,475,NA,57,converted from %UTC\n910356,TTCGCCTTAGAGGCCTCCAG,NA,476,NA,86,converted from %UTC\n910362,CATACAGTTGACTAATGTAG,NA,477,NA,76,converted from %UTC\n910368,TCTGTTGTGCGGACATAGTA,NA,478,NA,76,converted from %UTC\n910374,TTTGCAGCGGAAAAGGTCTG,NA,479,NA,42,converted from %UTC\n910380,CAGGTCGAGGTATGGGTTAT,NA,480,NA,67,converted from %UTC\n910386,TAGAATGACTAATACTCTGC,NA,481,NA,76,converted from %UTC\n910392,GGTAAGTAGTGTAAATAGGG,NA,482,NA,86,converted from %UTC\n910398,GACTCAACCCTGGAAGGTCC,NA,483,NA,46,converted from %UTC\n"
+    }
+  ],
+  "chemistryReview": {
+    "reviewedAt": "2026-10-11T11:41:24.782076+00:00",
+    "reviewer": "Barney Hill",
+    "humanVerified": true,
+    "blanksOnly": true,
+    "sugar": {
+      "mode": "constant",
+      "value": "eeeeeddddddddddeeeee"
+    },
+    "backbone": {
+      "mode": "constant",
+      "value": "soooossssssssssooss"
+    },
+    "context": "Patent paragraphs 0620 (chemistry) and 0622 (assay); see data/validation/source_status_review/completed/review.json",
+    "sourceEvidence": {
+      "chemistry": {
+        "id": "p-0497",
+        "num": "0620",
+        "text": "The modified oligonucleotides in the tables below are 5-10-5 MOE gapmers with mixed PO/PS internucleoside linkages. The gapmers are 20 nucleosides in length, wherein the central gap segment consists of ten 2\u2032-\u03b2-D-deoxynucleosides and the 5\u2032 and 3\u2032 wing segments each consists of five 2\u2032-MOE modified nucleosides. The sugar motif for the gapmers is (from 5\u2032 to 3\u2032): eeeeeddddddddddeeeee; wherein \u2018d\u2019 represents a 2\u2032-\u03b2-D-deoxyribosyl sugar, and \u2018e\u2019 represents a 2\u2032-MOE sugar moiety. The internucleoside linkage motif for the gapmers is (from 5\u2032 to 3\u2032): soooossssssssssooss; wherein each \u2018o\u2019 represents a phosphodiester internucleoside linkage and each \u2018s\u2019 represents a phosphorothioate internucleoside linkage. Each cytosine residue is a 5-methyl cytosine."
+      },
+      "assay": {
+        "id": "p-0499",
+        "num": "0622",
+        "text": "Cultured SH-SY5Y cells were treated with modified oligonucleotide at a concentration of 4000 or 5000 nM using electroporation at a density of 20,000 cells per well. After a treatment period of approximately 24 hours, total RNA was isolated from the cells and SCN2A RNA levels were measured by quantitative real-time RTPCR. SCN2A RNA levels were measured by Human primer probe set RTS36041 (forward sequence CCTTGAACCTGAAGCCTGTT, designated herein as SEQ ID NO: 10; reverse sequence CGAACCAATTGTGCTCCACTA, designated herein as SEQ ID NO: 11; probe sequence TTCCACCAGAGTTTCCCTTTGCCT, designated herein as SEQ ID NO: 12). SCN2A RNA levels were normalized to total RNA content, as measured by RIBOGREEN\u00ae. Reduction of SCN2A RNA is presented in the tables below as percent SCN2A RNA amount relative to the amount in untreated control cells (% control). Each table represents results from an individual assay plate. The values marked with an \u201cT\u201d indicate that the modified oligonucleotide is complementary to the amplicon region of the primer probe set. Additional assays may be used to measure the potency and efficacy of the modified oligonucleotides complementary to the amplicon region."
+      }
+    },
+    "draftedBy": "Codex agent",
+    "verifiedAt": "2026-11-07"
+  },
+  "sourceReview": {
+    "reviewedAt": "2026-10-11T11:41:24.782076+00:00",
+    "reviewer": "Barney Hill",
+    "humanVerified": true,
+    "blanksOnly": true,
+    "sugar": {
+      "mode": "constant",
+      "value": "eeeeeddddddddddeeeee"
+    },
+    "backbone": {
+      "mode": "constant",
+      "value": "soooossssssssssooss"
+    },
+    "context": "Patent paragraphs 0620 (chemistry) and 0622 (assay); see data/validation/source_status_review/completed/review.json",
+    "sourceEvidence": {
+      "chemistry": {
+        "id": "p-0497",
+        "num": "0620",
+        "text": "The modified oligonucleotides in the tables below are 5-10-5 MOE gapmers with mixed PO/PS internucleoside linkages. The gapmers are 20 nucleosides in length, wherein the central gap segment consists of ten 2\u2032-\u03b2-D-deoxynucleosides and the 5\u2032 and 3\u2032 wing segments each consists of five 2\u2032-MOE modified nucleosides. The sugar motif for the gapmers is (from 5\u2032 to 3\u2032): eeeeeddddddddddeeeee; wherein \u2018d\u2019 represents a 2\u2032-\u03b2-D-deoxyribosyl sugar, and \u2018e\u2019 represents a 2\u2032-MOE sugar moiety. The internucleoside linkage motif for the gapmers is (from 5\u2032 to 3\u2032): soooossssssssssooss; wherein each \u2018o\u2019 represents a phosphodiester internucleoside linkage and each \u2018s\u2019 represents a phosphorothioate internucleoside linkage. Each cytosine residue is a 5-methyl cytosine."
+      },
+      "assay": {
+        "id": "p-0499",
+        "num": "0622",
+        "text": "Cultured SH-SY5Y cells were treated with modified oligonucleotide at a concentration of 4000 or 5000 nM using electroporation at a density of 20,000 cells per well. After a treatment period of approximately 24 hours, total RNA was isolated from the cells and SCN2A RNA levels were measured by quantitative real-time RTPCR. SCN2A RNA levels were measured by Human primer probe set RTS36041 (forward sequence CCTTGAACCTGAAGCCTGTT, designated herein as SEQ ID NO: 10; reverse sequence CGAACCAATTGTGCTCCACTA, designated herein as SEQ ID NO: 11; probe sequence TTCCACCAGAGTTTCCCTTTGCCT, designated herein as SEQ ID NO: 12). SCN2A RNA levels were normalized to total RNA content, as measured by RIBOGREEN\u00ae. Reduction of SCN2A RNA is presented in the tables below as percent SCN2A RNA amount relative to the amount in untreated control cells (% control). Each table represents results from an individual assay plate. The values marked with an \u201cT\u201d indicate that the modified oligonucleotide is complementary to the amplicon region of the primer probe set. Additional assays may be used to measure the potency and efficacy of the modified oligonucleotides complementary to the amplicon region."
+      }
+    },
+    "draftedBy": "Codex agent",
+    "verifiedAt": "2026-11-07"
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "scope": "Three frozen measurement tables with live review status; outcome/sequence and assay-identity reconciliation only, not full chemistry/context sign-off.",
+  "review_method": "Independent source-cell parsing plus inspection of source method paragraphs; no extraction scripts executed.",
+  "status_explanation": "Live runs show fresh extraction messages and timestamps. The verifier extraction handlers unconditionally set status=review and remove signed-off CSVs. No transition history survives, so the exact prior status and action cannot be established.",
+  "verifier_code_path": "/Users/barneyh/dphil/tox-patent-scrape/verify/main.js",
+  "verifier_code_sha256": "c438318ea86d58917452c6328a9cd54c8663d3703eb87936b2c3adc29f619dfe",
+  "tables": [
+    {
+      "id": "US20210038631A1_t00001",
+      "patent": "US20210038631A1",
+      "xml_table": 1,
+      "source_xml": "US20210038631A1_t00001.xml",
+      "run_snapshot": "US20210038631A1_t00001.json",
+      "original_patent_path": "/Users/barneyh/dphil/tox-patent-scrape/data/step2/US20210038631A1-20210211.XML",
+      "original_patent_sha256": "1b2eefc28dc371bbf27e2ebb93b1659d573205c539f6f9c9716e030914c7231e",
+      "original_run_path": "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00001.json",
+      "original_run_sha256": "91718fb7f2c6ba1f6f1e6797ecbb9ea746190c7cdcf68202a4ee3a6a5cb48f83",
+      "source_xml_sha256": "286d60034cb8cd803c3e427dc1921ff6ad1bff7f9232ecde10fd8228ff9647af",
+      "run_snapshot_sha256": "2b7e146e1546313bfc4c36089df1ce8e703e2d5461ed6646f64c948cc74cf7f2"
+    },
+    {
+      "id": "US20240026353A1_t00016",
+      "patent": "US20240026353A1",
+      "xml_table": 16,
+      "source_xml": "US20240026353A1_t00016.xml",
+      "run_snapshot": "US20240026353A1_t00016.json",
+      "original_patent_path": "/Users/barneyh/dphil/tox-patent-scrape/data/step2/US20240026353A1-20240125.XML",
+      "original_patent_sha256": "3b672f1b4b92b1214314962a4687739f378e644b7d04f8f0b48cecc6231938a1",
+      "original_run_path": "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20240026353A1_t00016.json",
+      "original_run_sha256": "3e793d467c05f1d7aa2f3915f54dc609d7c8b060fbed53d32c9363526583867f",
+      "source_xml_sha256": "d2b33f0659d328057b43578c327779f9d4fa5c89ea05387b15584eb959807722",
+      "run_snapshot_sha256": "2fc82de62fa05461fd63d578522f4231419201a46b0cb30fd2fa2c54bcd1fad5"
+    },
+    {
+      "id": "US20240026353A1_t00018",
+      "patent": "US20240026353A1",
+      "xml_table": 18,
+      "source_xml": "US20240026353A1_t00018.xml",
+      "run_snapshot": "US20240026353A1_t00018.json",
+      "original_patent_path": "/Users/barneyh/dphil/tox-patent-scrape/data/step2/US20240026353A1-20240125.XML",
+      "original_patent_sha256": "3b672f1b4b92b1214314962a4687739f378e644b7d04f8f0b48cecc6231938a1",
+      "original_run_path": "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20240026353A1_t00018.json",
+      "original_run_sha256": "ba44795ec7e116ab094dab91ed6888f8ab21ad8464aca8513b905ac6dce58b7c",
+      "source_xml_sha256": "f5d03e5b4ac933bb69a4fd7c167f2a5e6e7f65b63002cc332321194a90aa3807",
+      "run_snapshot_sha256": "434955db97c1ed5f850cba408094dd33917a0f9df41a22f45fd51e3152e035c8"
+    }
+  ],
+  "excluded_live_review_tables": [
+    {
+      "id": "US20210038631A1_t00111",
+      "patent": "US20210038631A1",
+      "xml_table": 111,
+      "source_xml": "US20210038631A1_t00111.xml",
+      "source_xml_sha256": "f76761b7f5d7b2630f1db48a7a2c9d113ab6b0dcf021e63fc25a9e63c546b780",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00112",
+      "patent": "US20210038631A1",
+      "xml_table": 112,
+      "source_xml": "US20210038631A1_t00112.xml",
+      "source_xml_sha256": "4122d1c322d8e138806d50231e8ed787fabce24943b9b2e4ee61c36679e779c6",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00113",
+      "patent": "US20210038631A1",
+      "xml_table": 113,
+      "source_xml": "US20210038631A1_t00113.xml",
+      "source_xml_sha256": "5e31aebabf69be8fc069b7b4a830240773331abb975424d86b1ec720eaa31218",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00114",
+      "patent": "US20210038631A1",
+      "xml_table": 114,
+      "source_xml": "US20210038631A1_t00114.xml",
+      "source_xml_sha256": "977970bbf3c6c930224dcd2e322370057022678fcf854baec3dbf4736a232d45",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00119",
+      "patent": "US20210038631A1",
+      "xml_table": 119,
+      "source_xml": "US20210038631A1_t00119.xml",
+      "source_xml_sha256": "0411c080cf1a12d8fbfb90a8a45db5270c339e85c204af7aabc99d3f8dc95333",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00120",
+      "patent": "US20210038631A1",
+      "xml_table": 120,
+      "source_xml": "US20210038631A1_t00120.xml",
+      "source_xml_sha256": "ef3a642fccf12ef3113ff3639e770dc4847a865b4073cfe0beb979921b5858d6",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00121",
+      "patent": "US20210038631A1",
+      "xml_table": 121,
+      "source_xml": "US20210038631A1_t00121.xml",
+      "source_xml_sha256": "b92d51d467a754d42347bb03144dd018216b4f6fc487b8f58c3ee5bc6577975e",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00122",
+      "patent": "US20210038631A1",
+      "xml_table": 122,
+      "source_xml": "US20210038631A1_t00122.xml",
+      "source_xml_sha256": "1102b94b19836ace1d480df476547d02b889ff0c695153bacb0773fa0a41e0a4",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00125",
+      "patent": "US20210038631A1",
+      "xml_table": 125,
+      "source_xml": "US20210038631A1_t00125.xml",
+      "source_xml_sha256": "616a8bff8cec993db929b58a9b7c58aa99c8b6b14ae977aa0c01184d3cde21b7",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00126",
+      "patent": "US20210038631A1",
+      "xml_table": 126,
+      "source_xml": "US20210038631A1_t00126.xml",
+      "source_xml_sha256": "b4dd9b999bb50f13400f374064fe09c3ea05052f684228973ef7c80263c73cf9",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00129",
+      "patent": "US20210038631A1",
+      "xml_table": 129,
+      "source_xml": "US20210038631A1_t00129.xml",
+      "source_xml_sha256": "1f204e220a05192cff49a1f4913f40f8ff1d16c06651de3d93bf1549f1a8f984",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    },
+    {
+      "id": "US20210038631A1_t00130",
+      "patent": "US20210038631A1",
+      "xml_table": 130,
+      "source_xml": "US20210038631A1_t00130.xml",
+      "source_xml_sha256": "aa97b2701ec74be7888a83901ab1fccce42d73cc6ed49b266cad008bedca948f",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown"
+    }
+  ]
+}

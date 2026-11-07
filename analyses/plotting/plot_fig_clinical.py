@@ -18,6 +18,8 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
+from analyses.plotting.style import panel_labels
+
 matplotlib.use("Agg")
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -166,11 +168,8 @@ def main():
     draw_neuro_panel(neuro, "Mouse", axes[1])
     draw_neuro_panel(neuro, "Rat", axes[2])
 
-    for i, letter in enumerate("ABC"):
-        axes[i].text(-0.08, 1.08, letter, transform=axes[i].transAxes,
-                     fontsize=14, fontweight="bold")
-
     plt.tight_layout()
+    panel_labels(fig, zip(axes, "ABC"))
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     svg_path = OUT_DIR / "fig_clinical.svg"

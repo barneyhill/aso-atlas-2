@@ -17,6 +17,7 @@ from matplotlib.patches import Circle, PathPatch, Wedge
 from matplotlib.path import Path as MPath
 from PIL import Image
 
+from analyses.plotting.style import panel_labels
 from analyses.utils.compounds import has_measurement
 
 _root = Path(__file__).resolve().parents[2]
@@ -360,12 +361,8 @@ def main():
     draw_gene_circle(in_vitro_df, dose_response_df, hepatictox_df, neurotox_df,
                      biomarker_cols, has_measurement, ax=ax_circle)
 
-    # Panel labels — use figure coords for vertical alignment
-    bb_b = ax_sankey.get_position()
-    bb_c = ax_circle.get_position()
-    label_y = max(bb_b.y1, bb_c.y1) + 0.01
-    fig.text(bb_b.x0, label_y, "B", fontsize=16, fontweight="bold", va="bottom")
-    fig.text(bb_c.x0, label_y, "C", fontsize=16, fontweight="bold", va="bottom")
+    # Panel A is supplied by the Figma composite, so only B and C are drawn here.
+    panel_labels(fig, [(ax_sankey, "B"), (ax_circle, "C")], gap=0.0)
 
     out_dir = _root / "typst/plots/fig_atlas"
     sankey_gene_path = out_dir / "sankey_gene_circle.svg"

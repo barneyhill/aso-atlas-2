@@ -306,6 +306,27 @@ def comparison_fields_equal(
     return True
 
 
+def comparison_fields_score(
+    left: Measurement,
+    right: Measurement,
+    rule: IdentityRule,
+) -> int:
+    """Count agreeing stated context fields without consulting outcomes."""
+
+    score = 0
+    for name in rule.comparison_fields:
+        left_value = left.identity.get(name)
+        right_value = right.identity.get(name)
+        if _missing(left_value) or _missing(right_value):
+            continue
+        normalizer = rule.normalizers.get(name, canonical_identity_value)
+        try:
+            score += int(normalizer(left_value) == normalizer(right_value))
+        except (TypeError, ValueError):
+            continue
+    return score
+
+
 def _check_unique_ids(records: Iterable[Measurement], side: str) -> None:
     ids = [str(record.measurement_id) for record in records]
     duplicates = sorted(key for key, count in Counter(ids).items() if count > 1)
@@ -318,6 +339,9 @@ def _pair_identity_bucket(
     atlas: list[Measurement],
     values_equal: Callable[[Measurement, Measurement], bool],
     context_equal: Callable[[Measurement, Measurement], bool],
+    context_score: Callable[[Measurement, Measurement], int],
+    *,
+    pairing: str,
 ) -> list[tuple[Measurement, Measurement]]:
     """Pair a fixed identity bucket with lexicographic multiset agreement.
 
@@ -327,11 +351,28 @@ def _pair_identity_bucket(
     pair or move a row into scope.
     """
 
-    gold = sorted(gold, key=lambda record: str(record.measurement_id))
-    atlas = sorted(atlas, key=lambda record: str(record.measurement_id))
+    if pairing not in {"value_then_context", "context_then_stable", "stable"}:
+        raise ValueError(f"unknown pairing strategy: {pairing!r}")
+    if pairing == "value_then_context":
+        gold = sorted(gold, key=lambda record: str(record.measurement_id))
+        atlas = sorted(atlas, key=lambda record: str(record.measurement_id))
     if not gold or not atlas:
         return []
     target_size = min(len(gold), len(atlas))
+    if pairing == "stable":
+        # The caller's occurrence order is the only admissible tie-break.  In
+        # particular, neither the measured outcome nor downstream context may
+        # decide which physical occurrences are paired for a lineage audit.
+        return list(zip(gold[:target_size], atlas[:target_size]))
+    if pairing == "context_then_stable":
+        weights = np.zeros((len(gold), len(atlas)), dtype=np.int64)
+        for gold_index, gold_record in enumerate(gold):
+            for atlas_index, atlas_record in enumerate(atlas):
+                weights[gold_index, atlas_index] = context_score(
+                    gold_record, atlas_record
+                )
+        gold_indices, atlas_indices = linear_sum_assignment(weights, maximize=True)
+        return [(gold[i], atlas[j]) for i, j in zip(gold_indices, atlas_indices)]
     value_weight = target_size + 1
     weights = np.zeros((len(gold), len(atlas)), dtype=np.int64)
     for gold_index, gold_record in enumerate(gold):
@@ -351,6 +392,7 @@ def match_measurements(
     scope: TableEquivalenceScope,
     rules: Mapping[str, IdentityRule],
     value_equal: Callable[[Any, Any], bool] = outcomes_equal,
+    pairing: str = "value_then_context",
 ) -> MatchResult:
     """Perform deterministic maximum-cardinality, one-to-one identity matching.
 
@@ -360,6 +402,11 @@ def match_measurements(
     because no edge crosses identity buckets.  Within an identity bucket only,
     value-correct measurements are paired first to report maximum multiset
     outcome agreement.  Dose/context comparison never changes this assignment.
+    ``pairing="context_then_stable"`` maximises agreement on individual stated
+    context fields while remaining independent of the measured outcome.
+    ``pairing="stable"`` instead preserves caller order within each fixed
+    identity bucket.  This is intended for provenance lineages, where an
+    outcome or downstream field must not select the physical row being traced.
     """
 
     gold_records = tuple(gold)
@@ -398,8 +445,13 @@ def match_measurements(
                 g_record, a_record, rules[g_record.endpoint]
             )
 
+        def contexts_score(g_record: Measurement, a_record: Measurement) -> int:
+            return comparison_fields_score(
+                g_record, a_record, rules[g_record.endpoint]
+            )
+
         for g_record, a_record in _pair_identity_bucket(
-            gs, ats, values_equal, contexts_equal
+            gs, ats, values_equal, contexts_equal, contexts_score, pairing=pairing
         ):
             rule = rules[g_record.endpoint]
             value_correct = bool(value_equal(g_record.outcome, a_record.outcome))

@@ -1,0 +1,982 @@
+<source>
+<p id="p-0405" num="0401">Cultured SK-MEL-28 cells at a density of 60,000 cells per well were transfected using electroporation with 20,000 nM concentration of modified oligonucleotide or no modified oligonucleotide for untreated controls. After approximately 24 hours, RNA was isolated from the cells and IRF4 mRNA levels were measured by quantitative real-time PCR. Human primer probe set RTS3114 (forward sequence AAGCCTTGGCGTTCTCAGACT, designated herein as SEQ ID NO: 3386; reverse sequence TCAGCTCCTTCACGAGGATTTC, designated herein as SEQ ID NO: 3387; probe sequence CCGGCTGCACATCTGCCTGTACTACC, designated herein as SEQ ID: 3388) was used to measure mRNA levels. IRF4 mRNA levels were adjusted according to total RNA content, as measured by RIBOGREEN&#xae;. Results are presented in the table below as percent control of the amount of IRF4 mRNA, relative to untreated control (UTC) cells.</p>
+<p id="p-0406" num="0402">The modified oligonucleotides in Table 1 are 5-10-5 MOE gapmers. The gapmers are 20 nucleobases in length, wherein the central gap segment comprises ten 2&#x2032;-deoxynucleosides and is flanked by wing segments on both the 5&#x2032; end and on the 3&#x2032; end comprising five 2&#x2032;-MOE nucleosides. The sugar motif for the gapmers is (from 5&#x2032; to 3&#x2032;): eeeeeddddddddddeeeee; wherein &#x2018;d&#x2019; represents a 2&#x2032;-deoxyribose sugar and &#x2018;e&#x2019; represents a 2&#x2032;-MOE modified sugar. Each internucleoside linkage is a phosphorothioate internucleoside linkage and each cytosine residue is a 5-methylcytosine. &#x201c;Start Site&#x201d; indicates the 5&#x2032;-most nucleoside to which the gapmer is complementary in the human nucleic acid sequence. &#x201c;Stop Site&#x201d; indicates the 3&#x2032;-most nucleoside to which the gapmer is complementary in the human nucleic acid sequence.</p>
+<p id="p-0407" num="0403">Each modified oligonucleotide listed in Table 1 below is complementary to human IRF4 nucleic acid sequences SEQ ID NO: 1 or SEQ ID NO: 2, as indicated. &#x2018;N/A&#x2019; indicates that the modified oligonucleotide is not complementary to that particular nucleic acid sequence with 100% complementarity. As shown below, modified oligonucleotides complementary to human IRF4 reduced the amount of human IRF4 mRNA.</p>
+<tables id="TABLE-US-00001" num="00001">
+<table frame="none" colsep="0" rowsep="0" pgwide="1" tabstyle="monospace">
+<tgroup align="left" colsep="0" rowsep="0" cols="1">
+<colspec colname="1" colwidth="378pt" align="center"/>
+<thead>
+<row>
+<entry namest="1" nameend="1" rowsep="1">TABLE&#x2003;1</entry>
+</row>
+</thead>
+<tbody valign="top">
+<row>
+<entry namest="1" nameend="1" align="center" rowsep="1"/>
+</row>
+<row>
+<entry>Percent&#x2003;control&#x2003;of&#x2003;human&#x2003;IRF4&#x2003;mRNA&#x2003;with&#x2003;5-10-5&#x2003;MOE&#x2003;gapmers</entry>
+</row>
+<row>
+<entry>with&#x2003;phosphorothioate&#x2003;internucleoside&#x2003;linkages</entry>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="8">
+<colspec colname="1" colwidth="42pt" align="center"/>
+<colspec colname="2" colwidth="49pt" align="center"/>
+<colspec colname="3" colwidth="42pt" align="center"/>
+<colspec colname="4" colwidth="49pt" align="center"/>
+<colspec colname="5" colwidth="42pt" align="center"/>
+<colspec colname="6" colwidth="91pt" align="left"/>
+<colspec colname="7" colwidth="35pt" align="left"/>
+<colspec colname="8" colwidth="28pt" align="left"/>
+<tbody valign="top">
+<row>
+<entry/>
+<entry>SEQ&#x2003;ID</entry>
+<entry>SEQ&#x2003;ID</entry>
+<entry>SEQ&#x2003;ID</entry>
+<entry>SEQ&#x2003;ID</entry>
+<entry/>
+<entry/>
+<entry/>
+</row>
+<row>
+<entry>Compound</entry>
+<entry>NO:&#x2003;1</entry>
+<entry>NO:&#x2003;1</entry>
+<entry>NO:&#x2003;2</entry>
+<entry>NO:&#x2003;2</entry>
+<entry/>
+<entry>IRF4</entry>
+<entry>SEQ</entry>
+</row>
+<row>
+<entry>Number</entry>
+<entry>Start&#x2003;Site</entry>
+<entry>Stop&#x2003;Site</entry>
+<entry>Start&#x2003;Site</entry>
+<entry>Stop&#x2003;Site</entry>
+<entry>Sequence</entry>
+<entry>(%&#x2003;UTC)</entry>
+<entry>ID&#x2003;NO</entry>
+</row>
+<row>
+<entry namest="1" nameend="8" align="center" rowsep="1"/>
+</row>
+</tbody>
+</tgroup>
+<tgroup align="left" colsep="0" rowsep="0" cols="8">
+<colspec colname="1" colwidth="42pt" align="center"/>
+<colspec colname="2" colwidth="49pt" align="center"/>
+<colspec colname="3" colwidth="42pt" align="center"/>
+<colspec colname="4" colwidth="49pt" align="center"/>
+<colspec colname="5" colwidth="42pt" align="center"/>
+<colspec colname="6" colwidth="91pt" align="left"/>
+<colspec colname="7" colwidth="35pt" align="center"/>
+<colspec colname="8" colwidth="28pt" align="center"/>
+<tbody valign="top">
+<row>
+<entry>434887</entry>
+<entry>&#x2003;164</entry>
+<entry>&#x2003;183</entry>
+<entry>&#x2003;5191</entry>
+<entry>&#x2003;5210</entry>
+<entry>GCAGCTCACCGCGCTCATGC</entry>
+<entry>57</entry>
+<entry>&#x2003;3</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434888</entry>
+<entry>&#x2003;175</entry>
+<entry>&#x2003;194</entry>
+<entry>&#x2003;5202</entry>
+<entry>&#x2003;5221</entry>
+<entry>TTCCCGTTGCCGCAGCTCAC</entry>
+<entry>34</entry>
+<entry>&#x2003;4</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434889</entry>
+<entry>&#x2003;190</entry>
+<entry>&#x2003;209</entry>
+<entry>&#x2003;5217</entry>
+<entry>&#x2003;5236</entry>
+<entry>AGCCACTGGCGGAGCTTCCC</entry>
+<entry>43</entry>
+<entry>&#x2003;5</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434890</entry>
+<entry>&#x2003;294</entry>
+<entry>&#x2003;313</entry>
+<entry>&#x2003;5321</entry>
+<entry>&#x2003;5340</entry>
+<entry>TGTAGTCCTGCTTGCCCGCG</entry>
+<entry>51</entry>
+<entry>&#x2003;6</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434891</entry>
+<entry>&#x2003;304</entry>
+<entry>&#x2003;323</entry>
+<entry>&#x2003;5331</entry>
+<entry>&#x2003;5350</entry>
+<entry>TCCTCGCGGTTGTAGTCCTG</entry>
+<entry>53</entry>
+<entry>&#x2003;7</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434892</entry>
+<entry>&#x2003;330</entry>
+<entry>&#x2003;349</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>CCCAAGCCTTGAAGAGCGCG</entry>
+<entry>44</entry>
+<entry>&#x2003;8</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434893</entry>
+<entry>&#x2003;367</entry>
+<entry>&#x2003;386</entry>
+<entry>&#x2003;6846</entry>
+<entry>&#x2003;6865</entry>
+<entry>TTGTCGATGCCTTCTCGGAA</entry>
+<entry>47</entry>
+<entry>&#x2003;9</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434894</entry>
+<entry>&#x2003;375</entry>
+<entry>&#x2003;394</entry>
+<entry>&#x2003;6854</entry>
+<entry>&#x2003;6873</entry>
+<entry>GGTCCGGCTTGTCGATGCCT</entry>
+<entry>40</entry>
+<entry>10</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434895</entry>
+<entry>&#x2003;430</entry>
+<entry>&#x2003;449</entry>
+<entry>&#x2003;6909</entry>
+<entry>&#x2003;6928</entry>
+<entry>TCAAAGTCATTGCTCTTGTT</entry>
+<entry>55</entry>
+<entry>11</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434896</entry>
+<entry>&#x2003;436</entry>
+<entry>&#x2003;455</entry>
+<entry>&#x2003;6915</entry>
+<entry>&#x2003;6934</entry>
+<entry>AGTTCCTCAAAGTCATTGCT</entry>
+<entry>42</entry>
+<entry>12</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434897</entry>
+<entry>&#x2003;442</entry>
+<entry>&#x2003;461</entry>
+<entry>&#x2003;6921</entry>
+<entry>&#x2003;6940</entry>
+<entry>TCAACCAGTTCCTCAAAGTC</entry>
+<entry>75</entry>
+<entry>13</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434898</entry>
+<entry>&#x2003;447</entry>
+<entry>&#x2003;466</entry>
+<entry>&#x2003;6926</entry>
+<entry>&#x2003;6945</entry>
+<entry>TCCGCTCAACCAGTTCCTCA</entry>
+<entry>32</entry>
+<entry>14</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434899</entry>
+<entry>&#x2003;474</entry>
+<entry>&#x2003;493</entry>
+<entry>&#x2003;6953</entry>
+<entry>&#x2003;6972</entry>
+<entry>TGTACGGGTCTGAGATGTCC</entry>
+<entry>44</entry>
+<entry>15</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434900</entry>
+<entry>&#x2003;532</entry>
+<entry>&#x2003;551</entry>
+<entry>&#x2003;7850</entry>
+<entry>&#x2003;7869</entry>
+<entry>TCCAGGGTGAGCTGCTTGGC</entry>
+<entry>43</entry>
+<entry>16</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434901</entry>
+<entry>&#x2003;555</entry>
+<entry>&#x2003;574</entry>
+<entry>&#x2003;7873</entry>
+<entry>&#x2003;7892</entry>
+<entry>GGCTCATGGACATCTGCGGG</entry>
+<entry>45</entry>
+<entry>17</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434902</entry>
+<entry>&#x2003;675</entry>
+<entry>&#x2003;694</entry>
+<entry>&#x2003;9165</entry>
+<entry>&#x2003;9184</entry>
+<entry>TTTCCGGGTGTGGCTGATCC</entry>
+<entry>36</entry>
+<entry>18</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434903</entry>
+<entry>&#x2003;690</entry>
+<entry>&#x2003;709</entry>
+<entry>&#x2003;9180</entry>
+<entry>&#x2003;9199</entry>
+<entry>GACATTGGTACGGGATTTCC</entry>
+<entry>38</entry>
+<entry>19</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434904</entry>
+<entry>&#x2003;732</entry>
+<entry>&#x2003;751</entry>
+<entry>&#x2003;9222</entry>
+<entry>&#x2003;9241</entry>
+<entry>CTGGGCCTTGCCAGTGGTGG</entry>
+<entry>59</entry>
+<entry>20</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434905</entry>
+<entry>&#x2003;739</entry>
+<entry>&#x2003;758</entry>
+<entry>&#x2003;9229</entry>
+<entry>&#x2003;9248</entry>
+<entry>TCACAAGCTGGGCCTTGCCA</entry>
+<entry>30</entry>
+<entry>21</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434906</entry>
+<entry>&#x2003;744</entry>
+<entry>&#x2003;763</entry>
+<entry>&#x2003;9234</entry>
+<entry>&#x2003;9253</entry>
+<entry>CATTTTCACAAGCTGGGCCT</entry>
+<entry>37</entry>
+<entry>22</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434907</entry>
+<entry>&#x2003;751</entry>
+<entry>&#x2003;770</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>TGGCAACCATTTTCACAAGC</entry>
+<entry>37</entry>
+<entry>23</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434908</entry>
+<entry>&#x2003;758</entry>
+<entry>&#x2003;777</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>TGTCACCTGGCAACCATTTT</entry>
+<entry>49</entry>
+<entry>24</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434909</entry>
+<entry>&#x2003;778</entry>
+<entry>&#x2003;797</entry>
+<entry>10843</entry>
+<entry>10862</entry>
+<entry>GCACAAGCATAAAAGGTTCC</entry>
+<entry>26</entry>
+<entry>25</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434916</entry>
+<entry>&#x2003;940</entry>
+<entry>&#x2003;959</entry>
+<entry>13493</entry>
+<entry>13512</entry>
+<entry>TGGGAGATCCGGCAGCCCTC</entry>
+<entry>66</entry>
+<entry>26</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434917</entry>
+<entry>1004</entry>
+<entry>1023</entry>
+<entry>13557</entry>
+<entry>13576</entry>
+<entry>GCCATTGTCCTCTGGGTAGG</entry>
+<entry>38</entry>
+<entry>27</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434918</entry>
+<entry>1042</entry>
+<entry>1061</entry>
+<entry>13595</entry>
+<entry>13614</entry>
+<entry>TCCAGGTGGCTCAGCAGCTT</entry>
+<entry>25</entry>
+<entry>28</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434919</entry>
+<entry>1063</entry>
+<entry>1082</entry>
+<entry>13616</entry>
+<entry>13635</entry>
+<entry>ATCCAGAGGACCACGCCCCT</entry>
+<entry>78</entry>
+<entry>29</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434920</entry>
+<entry>1068</entry>
+<entry>1087</entry>
+<entry>13621</entry>
+<entry>13640</entry>
+<entry>GGGCCATCCAGAGGACCACG</entry>
+<entry>36</entry>
+<entry>30</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434921</entry>
+<entry>1119</entry>
+<entry>1138</entry>
+<entry>13672</entry>
+<entry>13691</entry>
+<entry>CGTCCCAGTAGATCCTGCTC</entry>
+<entry>46</entry>
+<entry>31</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434922</entry>
+<entry>1187</entry>
+<entry>1206</entry>
+<entry>13740</entry>
+<entry>13759</entry>
+<entry>GTCAAAGAGCTTGCAGGTCT</entry>
+<entry>32</entry>
+<entry>32</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434923</entry>
+<entry>1192</entry>
+<entry>1211</entry>
+<entry>13745</entry>
+<entry>13764</entry>
+<entry>TGTGTGTCAAAGAGCTTGCA</entry>
+<entry>17</entry>
+<entry>33</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434924</entry>
+<entry>1344</entry>
+<entry>1363</entry>
+<entry>19461</entry>
+<entry>19480</entry>
+<entry>GTTGTCTGGCTAGCAGAGGT</entry>
+<entry>33</entry>
+<entry>34</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434925</entry>
+<entry>1364</entry>
+<entry>1383</entry>
+<entry>19481</entry>
+<entry>19500</entry>
+<entry>TTGTTGAGCAAAATAATATA</entry>
+<entry>97</entry>
+<entry>35</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434926</entry>
+<entry>1391</entry>
+<entry>1410</entry>
+<entry>19508</entry>
+<entry>19527</entry>
+<entry>GTAGCCCCTCAGGAAATGTC</entry>
+<entry>15</entry>
+<entry>36</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434927</entry>
+<entry>1420</entry>
+<entry>1439</entry>
+<entry>19537</entry>
+<entry>19556</entry>
+<entry>TCTGGATTGCTGATGTGTTC</entry>
+<entry>46</entry>
+<entry>37</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434928</entry>
+<entry>1430</entry>
+<entry>1449</entry>
+<entry>19547</entry>
+<entry>19566</entry>
+<entry>GTGGTAATCTTCTGGATTGC</entry>
+<entry>42</entry>
+<entry>38</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434929</entry>
+<entry>1450</entry>
+<entry>1469</entry>
+<entry>19567</entry>
+<entry>19586</entry>
+<entry>GAGGAATGGCGGATAGATCT</entry>
+<entry>63</entry>
+<entry>39</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434930</entry>
+<entry>1707</entry>
+<entry>1726</entry>
+<entry>19824</entry>
+<entry>19843</entry>
+<entry>CACTAAAGTCAAATATTTAC</entry>
+<entry>88</entry>
+<entry>40</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434931</entry>
+<entry>1712</entry>
+<entry>1731</entry>
+<entry>19829</entry>
+<entry>19848</entry>
+<entry>GCTTTCACTAAAGTCAAATA</entry>
+<entry>29</entry>
+<entry>41</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434932</entry>
+<entry>1821</entry>
+<entry>1840</entry>
+<entry>19938</entry>
+<entry>19957</entry>
+<entry>CAGATGTCACTGATTTTCCA</entry>
+<entry>41</entry>
+<entry>42</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434933</entry>
+<entry>1826</entry>
+<entry>1845</entry>
+<entry>19943</entry>
+<entry>19962</entry>
+<entry>CCAATCAGATGTCACTGATT</entry>
+<entry>44</entry>
+<entry>43</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434934</entry>
+<entry>1838</entry>
+<entry>1857</entry>
+<entry>19955</entry>
+<entry>19974</entry>
+<entry>TAAGCTCATCTGCCAATCAG</entry>
+<entry>71</entry>
+<entry>44</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434935</entry>
+<entry>2196</entry>
+<entry>2215</entry>
+<entry>20313</entry>
+<entry>20332</entry>
+<entry>CCAAGGCTACAGGCACGGCT</entry>
+<entry>29</entry>
+<entry>45</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434936</entry>
+<entry>2234</entry>
+<entry>2253</entry>
+<entry>20351</entry>
+<entry>20370</entry>
+<entry>ACACCAGGAAACCGCTGGCA</entry>
+<entry>37</entry>
+<entry>46</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434937</entry>
+<entry>2293</entry>
+<entry>2312</entry>
+<entry>20410</entry>
+<entry>20429</entry>
+<entry>CTTCCAGGAAAGGCCAAGGA</entry>
+<entry>23</entry>
+<entry>47</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434938</entry>
+<entry>2356</entry>
+<entry>2375</entry>
+<entry>20473</entry>
+<entry>20492</entry>
+<entry>TGTCCCATCCAAGAGTAGCG</entry>
+<entry>30</entry>
+<entry>48</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434939</entry>
+<entry>2662</entry>
+<entry>2681</entry>
+<entry>20779</entry>
+<entry>20798</entry>
+<entry>CTTCCAGTGGTGGGTCCTGG</entry>
+<entry>53</entry>
+<entry>49</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434940</entry>
+<entry>2705</entry>
+<entry>2724</entry>
+<entry>20822</entry>
+<entry>20841</entry>
+<entry>AACAGCCCACTGAGTGTGCA</entry>
+<entry>43</entry>
+<entry>50</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434941</entry>
+<entry>2711</entry>
+<entry>2730</entry>
+<entry>20828</entry>
+<entry>20847</entry>
+<entry>AGCAGAAACAGCCCACTGAG</entry>
+<entry>58</entry>
+<entry>51</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434942</entry>
+<entry>3435</entry>
+<entry>3454</entry>
+<entry>21552</entry>
+<entry>21571</entry>
+<entry>CTGGGTACATGGCAGTGGAG</entry>
+<entry>27</entry>
+<entry>52</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434943</entry>
+<entry>3805</entry>
+<entry>3824</entry>
+<entry>21922</entry>
+<entry>21941</entry>
+<entry>GCATTTTCCAGAAAATTCAG</entry>
+<entry>33</entry>
+<entry>53</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434944</entry>
+<entry>4477</entry>
+<entry>4496</entry>
+<entry>22594</entry>
+<entry>22613</entry>
+<entry>CCCAGAGTTGTTCCACCCCT</entry>
+<entry>21</entry>
+<entry>54</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434945</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>22826</entry>
+<entry>22845</entry>
+<entry>GCTGGCCACAGAGGACTTCG</entry>
+<entry>21</entry>
+<entry>55</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434946</entry>
+<entry>4737</entry>
+<entry>4756</entry>
+<entry>22854</entry>
+<entry>22873</entry>
+<entry>GCCTTCACGCACCATTCAGA</entry>
+<entry>52</entry>
+<entry>56</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434947</entry>
+<entry>4812</entry>
+<entry>4831</entry>
+<entry>22929</entry>
+<entry>22948</entry>
+<entry>CCACCTGCATCGAGATCAGT</entry>
+<entry>31</entry>
+<entry>57</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434948</entry>
+<entry>4818</entry>
+<entry>4837</entry>
+<entry>22935</entry>
+<entry>22954</entry>
+<entry>GGAGATCCACCTGCATCGAG</entry>
+<entry>32</entry>
+<entry>58</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434949</entry>
+<entry>5035</entry>
+<entry>5054</entry>
+<entry>23152</entry>
+<entry>23171</entry>
+<entry>GGAAGTGGACCCCATTGCCT</entry>
+<entry>17</entry>
+<entry>59</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434952</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>18834</entry>
+<entry>18853</entry>
+<entry>ATCTAAGGCAAGCTGAATGC</entry>
+<entry>67</entry>
+<entry>60</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434953</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>18839</entry>
+<entry>18858</entry>
+<entry>ACAGCATCTAAGGCAAGCTG</entry>
+<entry>38</entry>
+<entry>61</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434954</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>18845</entry>
+<entry>18864</entry>
+<entry>GAATTTACAGCATCTAAGGC</entry>
+<entry>52</entry>
+<entry>62</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434955</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>18850</entry>
+<entry>18869</entry>
+<entry>TTCCTGAATTTACAGCATCT</entry>
+<entry>21</entry>
+<entry>63</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434957</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>&#x2003;5359</entry>
+<entry>&#x2003;5378</entry>
+<entry>GCCGGAGACCTTGAAGAGCG</entry>
+<entry>94</entry>
+<entry>64</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434958</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>&#x2003;7480</entry>
+<entry>&#x2003;7499</entry>
+<entry>ACTGGTCAGAATCTTGAAAA</entry>
+<entry>94</entry>
+<entry>65</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434959</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>&#x2003;9101</entry>
+<entry>&#x2003;9120</entry>
+<entry>GTTGTGAACCTGCTAAAGGA</entry>
+<entry>90</entry>
+<entry>66</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434960</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>10818</entry>
+<entry>10837</entry>
+<entry>CCTGGCAACCTGCATTTGCA</entry>
+<entry>43</entry>
+<entry>67</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434961</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>10823</entry>
+<entry>10842</entry>
+<entry>TGTCACCTGGCAACCTGCAT</entry>
+<entry>45</entry>
+<entry>68</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434962</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>12030</entry>
+<entry>12049</entry>
+<entry>GGGCAGGTTTCATTTCATTT</entry>
+<entry>33</entry>
+<entry>69</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434963</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>13414</entry>
+<entry>13433</entry>
+<entry>GCCGGCAGTCTGCAAACACA</entry>
+<entry>58</entry>
+<entry>70</entry>
+</row>
+<row>
+<entry> </entry>
+</row>
+<row>
+<entry>434964</entry>
+<entry>N/A</entry>
+<entry>N/A</entry>
+<entry>19448</entry>
+<entry>19467</entry>
+<entry>CAGAGGTTCTACCTTTAATA</entry>
+<entry>50</entry>
+<entry>71</entry>
+</row>
+<row>
+<entry namest="1" nameend="8" align="center" rowsep="1"/>
+</row>
+</tbody>
+</tgroup>
+</table>
+</tables>
+</source>

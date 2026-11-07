@@ -1,0 +1,161 @@
+{
+  "reviewed_at": "2026-10-11T11:41:24.782076+00:00",
+  "reviewer": "Barney Hill",
+  "human_verified": true,
+  "method": "Direct source-cell and patent-prose cross-reference",
+  "tables": [
+    {
+      "id": "US20210038631A1_t00001",
+      "rows": 69,
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "sssssssssssssssssss",
+      "cytosine_methylated": "yes",
+      "treatment_period_hrs": 24,
+      "treatment_period_approximate": true,
+      "source_evidence": {
+        "chemistry": {
+          "id": "p-0406",
+          "num": "0402",
+          "text": "The modified oligonucleotides in Table 1 are 5-10-5 MOE gapmers. The gapmers are 20 nucleobases in length, wherein the central gap segment comprises ten 2\u2032-deoxynucleosides and is flanked by wing segments on both the 5\u2032 end and on the 3\u2032 end comprising five 2\u2032-MOE nucleosides. The sugar motif for the gapmers is (from 5\u2032 to 3\u2032): eeeeeddddddddddeeeee; wherein \u2018d\u2019 represents a 2\u2032-deoxyribose sugar and \u2018e\u2019 represents a 2\u2032-MOE modified sugar. Each internucleoside linkage is a phosphorothioate internucleoside linkage and each cytosine residue is a 5-methylcytosine. \u201cStart Site\u201d indicates the 5\u2032-most nucleoside to which the gapmer is complementary in the human nucleic acid sequence. \u201cStop Site\u201d indicates the 3\u2032-most nucleoside to which the gapmer is complementary in the human nucleic acid sequence."
+        },
+        "assay": {
+          "id": "p-0405",
+          "num": "0401",
+          "text": "Cultured SK-MEL-28 cells at a density of 60,000 cells per well were transfected using electroporation with 20,000 nM concentration of modified oligonucleotide or no modified oligonucleotide for untreated controls. After approximately 24 hours, RNA was isolated from the cells and IRF4 mRNA levels were measured by quantitative real-time PCR. Human primer probe set RTS3114 (forward sequence AAGCCTTGGCGTTCTCAGACT, designated herein as SEQ ID NO: 3386; reverse sequence TCAGCTCCTTCACGAGGATTTC, designated herein as SEQ ID NO: 3387; probe sequence CCGGCTGCACATCTGCCTGTACTACC, designated herein as SEQ ID: 3388) was used to measure mRNA levels. IRF4 mRNA levels were adjusted according to total RNA content, as measured by RIBOGREEN\u00ae. Results are presented in the table below as percent control of the amount of IRF4 mRNA, relative to untreated control (UTC) cells."
+        }
+      },
+      "completed_run_sha256": "34eb9ed441a3a1eabe8f8d8ffe15a398112b89bb48376c4e952baf57aa3ab1d0"
+    },
+    {
+      "id": "US20240026353A1_t00016",
+      "rows": 78,
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cytosine_methylated": "yes",
+      "treatment_period_hrs": 24,
+      "treatment_period_approximate": true,
+      "source_evidence": {
+        "chemistry": {
+          "id": "p-0497",
+          "num": "0620",
+          "text": "The modified oligonucleotides in the tables below are 5-10-5 MOE gapmers with mixed PO/PS internucleoside linkages. The gapmers are 20 nucleosides in length, wherein the central gap segment consists of ten 2\u2032-\u03b2-D-deoxynucleosides and the 5\u2032 and 3\u2032 wing segments each consists of five 2\u2032-MOE modified nucleosides. The sugar motif for the gapmers is (from 5\u2032 to 3\u2032): eeeeeddddddddddeeeee; wherein \u2018d\u2019 represents a 2\u2032-\u03b2-D-deoxyribosyl sugar, and \u2018e\u2019 represents a 2\u2032-MOE sugar moiety. The internucleoside linkage motif for the gapmers is (from 5\u2032 to 3\u2032): soooossssssssssooss; wherein each \u2018o\u2019 represents a phosphodiester internucleoside linkage and each \u2018s\u2019 represents a phosphorothioate internucleoside linkage. Each cytosine residue is a 5-methyl cytosine."
+        },
+        "assay": {
+          "id": "p-0499",
+          "num": "0622",
+          "text": "Cultured SH-SY5Y cells were treated with modified oligonucleotide at a concentration of 4000 or 5000 nM using electroporation at a density of 20,000 cells per well. After a treatment period of approximately 24 hours, total RNA was isolated from the cells and SCN2A RNA levels were measured by quantitative real-time RTPCR. SCN2A RNA levels were measured by Human primer probe set RTS36041 (forward sequence CCTTGAACCTGAAGCCTGTT, designated herein as SEQ ID NO: 10; reverse sequence CGAACCAATTGTGCTCCACTA, designated herein as SEQ ID NO: 11; probe sequence TTCCACCAGAGTTTCCCTTTGCCT, designated herein as SEQ ID NO: 12). SCN2A RNA levels were normalized to total RNA content, as measured by RIBOGREEN\u00ae. Reduction of SCN2A RNA is presented in the tables below as percent SCN2A RNA amount relative to the amount in untreated control cells (% control). Each table represents results from an individual assay plate. The values marked with an \u201cT\u201d indicate that the modified oligonucleotide is complementary to the amplicon region of the primer probe set. Additional assays may be used to measure the potency and efficacy of the modified oligonucleotides complementary to the amplicon region."
+        }
+      },
+      "completed_run_sha256": "e7174d94d2097fb37bcaf20d14442e8cd2e0abe9654cb1237058c529c8a2dba7"
+    },
+    {
+      "id": "US20240026353A1_t00018",
+      "rows": 78,
+      "sugar_motif": "eeeeeddddddddddeeeee",
+      "backbone_motif": "soooossssssssssooss",
+      "cytosine_methylated": "yes",
+      "treatment_period_hrs": 24,
+      "treatment_period_approximate": true,
+      "source_evidence": {
+        "chemistry": {
+          "id": "p-0497",
+          "num": "0620",
+          "text": "The modified oligonucleotides in the tables below are 5-10-5 MOE gapmers with mixed PO/PS internucleoside linkages. The gapmers are 20 nucleosides in length, wherein the central gap segment consists of ten 2\u2032-\u03b2-D-deoxynucleosides and the 5\u2032 and 3\u2032 wing segments each consists of five 2\u2032-MOE modified nucleosides. The sugar motif for the gapmers is (from 5\u2032 to 3\u2032): eeeeeddddddddddeeeee; wherein \u2018d\u2019 represents a 2\u2032-\u03b2-D-deoxyribosyl sugar, and \u2018e\u2019 represents a 2\u2032-MOE sugar moiety. The internucleoside linkage motif for the gapmers is (from 5\u2032 to 3\u2032): soooossssssssssooss; wherein each \u2018o\u2019 represents a phosphodiester internucleoside linkage and each \u2018s\u2019 represents a phosphorothioate internucleoside linkage. Each cytosine residue is a 5-methyl cytosine."
+        },
+        "assay": {
+          "id": "p-0499",
+          "num": "0622",
+          "text": "Cultured SH-SY5Y cells were treated with modified oligonucleotide at a concentration of 4000 or 5000 nM using electroporation at a density of 20,000 cells per well. After a treatment period of approximately 24 hours, total RNA was isolated from the cells and SCN2A RNA levels were measured by quantitative real-time RTPCR. SCN2A RNA levels were measured by Human primer probe set RTS36041 (forward sequence CCTTGAACCTGAAGCCTGTT, designated herein as SEQ ID NO: 10; reverse sequence CGAACCAATTGTGCTCCACTA, designated herein as SEQ ID NO: 11; probe sequence TTCCACCAGAGTTTCCCTTTGCCT, designated herein as SEQ ID NO: 12). SCN2A RNA levels were normalized to total RNA content, as measured by RIBOGREEN\u00ae. Reduction of SCN2A RNA is presented in the tables below as percent SCN2A RNA amount relative to the amount in untreated control cells (% control). Each table represents results from an individual assay plate. The values marked with an \u201cT\u201d indicate that the modified oligonucleotide is complementary to the amplicon region of the primer probe set. Additional assays may be used to measure the potency and efficacy of the modified oligonucleotides complementary to the amplicon region."
+        }
+      },
+      "completed_run_sha256": "16fad615623ab98f759350b1c5ecc87a34991efb983d2d1b82f5244009c1e78a"
+    }
+  ],
+  "excluded_tables": [
+    {
+      "id": "US20210038631A1_t00111",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 111 Dose-dependent reduction of KMS11 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 93 79 22 7 935762 89 34 9 6 935918 85 28 8 7 936007 93 66 20 8 970527 92 50 11 5 88208"
+    },
+    {
+      "id": "US20210038631A1_t00112",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 112 Dose-dependent reduction of KMS11 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 98 82 26 9 882800 87 48 16 9 969933 93 86 79 78 1012795 89 25 4 1 1012821 98 47 22 5 1"
+    },
+    {
+      "id": "US20210038631A1_t00113",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 113 Dose-dependent reduction of KMS11 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 91 67 21 7 1014393 89 45 15 9 1014394 91 70 26 11 1014834 86 43 12 6 1015716 92 78 32 "
+    },
+    {
+      "id": "US20210038631A1_t00114",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 114 Dose-dependent reduction of KMS11 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 90 77 22 8 935658 91 51 11 7 935696 86 29 7 6 935898 96 82 56 38 935928 94 45 9 7 9359"
+    },
+    {
+      "id": "US20210038631A1_t00119",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 119 Dose-dependent reduction of H929 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 94 69 32 12 935762 71 27 16 3 935918 87 58 26 2 936007 89 64 26 3 970527 95 58 15 1 882"
+    },
+    {
+      "id": "US20210038631A1_t00120",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 120 Dose-dependent reduction of H929 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 73 75 21 6 882800 89 87 30 4 969933 92 90 77 77 1012795 89 86 36 4 1012821 95 86 41 13 "
+    },
+    {
+      "id": "US20210038631A1_t00121",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 121 Dose-dependent reduction of H929 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 86 74 48 30 1014393 95 65 30 2 1014394 77 53 35 6 1014834 89 61 34 2 1015716 99 74 31 2"
+    },
+    {
+      "id": "US20210038631A1_t00122",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 122 Dose-dependent reduction of H929 proliferation by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 8 nM 40 nM 200 nM 1,000 nM 690890 92 79 52 30 935658 95 62 23 7 935696 84 60 32 3 935898 101 87 62 26 935928 75 50 25 6 9"
+    },
+    {
+      "id": "US20210038631A1_t00125",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 125 Dose-dependent reduction of proliferation of U2932 cells by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 50 nM 200 nM 1,000 nM 5,000 nM 792169 99 115 111 75 690890 111 109 63 2 882800 113 103 40 2 695696 107 111 77 1"
+    },
+    {
+      "id": "US20210038631A1_t00126",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 126 Dose-dependent reduction of proliferation of TMD8 cells by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 50 nM 200 nM 1,000 nM 5,000 nM 792169 93 108 102 98 690890 110 120 118 17 882800 132 149 108 27 695696 125 143 9"
+    },
+    {
+      "id": "US20210038631A1_t00129",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 129 Dose-dependent reduction of proliferation of Karpas299 cells by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 50 nM 200 nM 1,000 nM 5,000 nM 549148 99 106 106 89 609408 105 91 31 22 609416 104 119 72 59"
+    },
+    {
+      "id": "US20210038631A1_t00130",
+      "disposition": "exclude_cell_proliferation_not_target_RNA_knockdown",
+      "source_caption": "TABLE 130 Dose-dependent reduction of proliferation of SupM2 cells by modified oligonucleotides Compound IRF4 proliferation (% UTC) Number 16 nM 80 nM 400 nM 2,000 nM 549148 93 97 94 85 609408 93 96 55 3 609416 93 98 49 15"
+    }
+  ],
+  "apply_inputs": {
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00001.json": "91718fb7f2c6ba1f6f1e6797ecbb9ea746190c7cdcf68202a4ee3a6a5cb48f83",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20240026353A1_t00016.json": "3e793d467c05f1d7aa2f3915f54dc609d7c8b060fbed53d32c9363526583867f",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20240026353A1_t00018.json": "ba44795ec7e116ab094dab91ed6888f8ab21ad8464aca8513b905ac6dce58b7c",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00111.json": "117bf2e1c6d39b6e62eb13d18afe9d7ddb551adb99b159f8955f79a171534bf9",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00112.json": "b102ea96ed9fb23f5b270eb162b5852fb131850a831417e7df56c334cb1424c8",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00113.json": "012a5fab9c1e955629870ff1fd9f484e0a7fa77a4ba4a6222a211add17698b82",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00114.json": "2c9700a973fd05f81cfc070eb812e0dfecc53f3416dc53aac8f663fc1664dac0",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/verified/US20210038631A1_t00119.csv": "6e80f010c0dc83061342d581895b6f8884ebac07a29e8d0b6490d1d7a4b2dc82",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00119.json": "f7bad3d63afdfc1a3291f9376bc9383b7f6c6671d46844e23dc025dc03ee1465",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00120.json": "72b5f38695fe5c2b38e8cfb29aa58a79c15851bf2c9afa1e1dd5b42b1588e6bf",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00121.json": "ce2df4761541ef975e8527cac9f223336e792e66696bd675d553177872ca085d",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00122.json": "3976cff5c68e30360f1abd3661e22f69002c86a20921e0b059687c99d7857a7a",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/verified/US20210038631A1_t00125.csv": "63f15eaaf9003e667b37e6c02a4750d34a9f313b516f1b83e977113b651b9ace",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00125.json": "f3e14872fb0f1c0f82d21e4410a9e0574b33955a950d263e3a635c76e716731b",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/verified/US20210038631A1_t00126.csv": "3264a32704195451561fb46ffd8c0ee28e423e5ac3c7003fcdb9c6830e51e001",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00126.json": "f0b3e6368ba07eb7014449ff7c973462179691e8bc5b1d27f5f55e2998539a72",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00129.json": "e98ff80dad6dbfb86799f6eb648e1d636251df5465c0ab8c17fe49f86f5846eb",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/verified/US20210038631A1_t00130.csv": "920c5b289f7e1b296329dd2f7df5817f1b70d89383c7f438b2ba33f0be42cd60",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/runs/US20210038631A1_t00130.json": "5ab9e17ffb697883d0e76e3b426808b31d6a2b9efc7aa571b68a1cec87c28e73",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/classifications.csv": "a447485f75625863d2a0ac58f832a0f2974dca20e78b7a20ffc9d643b04a6065",
+    "/Users/barneyh/dphil/tox-patent-scrape/verify/data/chemistry_review.json": "7139dba46dc2ffd60227ee614cb8bf34490b4264a92872adb3240a3a5ec6aad5"
+  },
+  "drafted_by": "Codex agent",
+  "human_verified_at": "2026-11-07"
+}

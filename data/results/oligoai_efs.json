@@ -36,13 +36,13 @@
     "base_rate": 0.3122,
     "n": 4820,
     "n_selected": 964,
-    "enrichment_factor_std": 0.18161552797049038,
+    "enrichment_factor_std": 0.18782758050935972,
     "fold_efs": [
       1.748,
       1.915,
-      2.082,
+      2.096,
       1.77,
-      1.604
+      1.6
     ],
     "fold_precs": [
       0.4341,
@@ -54,9 +54,9 @@
     "fold_base_rates": [
       0.2484,
       0.2376,
-      0.1845,
+      0.1833,
       0.4355,
-      0.4418
+      0.4429
     ],
     "n_folds": 5,
     "source": "5-fold GroupKFold patent split with HELM-level dedup (seed=42); K=0.20 (top-20% selection); primary point estimate pooled across OOF predictions"
@@ -91,9 +91,9 @@
         "efficacy_ef": 2.197,
         "efficacy_precision": 0.3432,
         "efficacy_base_rate": 0.1562,
-        "potency_ef": 2.082,
+        "potency_ef": 2.096,
         "potency_precision": 0.3841,
-        "potency_base_rate": 0.1845,
+        "potency_base_rate": 0.1833,
         "n_efficacy": 22800,
         "n_potency": 824
       },
@@ -113,9 +113,9 @@
         "efficacy_ef": 2.696,
         "efficacy_precision": 0.2188,
         "efficacy_base_rate": 0.0811,
-        "potency_ef": 1.604,
+        "potency_ef": 1.6,
         "potency_precision": 0.7086,
-        "potency_base_rate": 0.4418,
+        "potency_base_rate": 0.4429,
         "n_efficacy": 23808,
         "n_potency": 876
       }

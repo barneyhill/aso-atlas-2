@@ -169,7 +169,7 @@ def main() -> None:
     print(json.dumps({
         key: report[key] for key in (
             "primary_status", "gold_readouts_scored", "scoped_atlas_readouts",
-            "precision_pct", "precision_ci95", "recall_pct", "recall_ci95",
+            "precision_pct", "recall_pct",
             "identity_precision_pct", "identity_recall_pct",
             "value_accuracy_given_identity_match_pct",
             "context_accuracy_given_identity_match_pct",

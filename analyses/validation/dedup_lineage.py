@@ -390,6 +390,14 @@ def replay_endpoint(endpoint: str, raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.
 
 
 def _release_rows(endpoint: str) -> pd.DataFrame:
+    flat = RELEASE / f"{endpoint}.parquet"
+    if flat.exists():
+        frame = pd.read_parquet(flat)
+        frame["release_split"] = "complete"
+        frame["release_row_id"] = [
+            f"{endpoint}:release:complete:{i}" for i in range(len(frame))
+        ]
+        return frame
     parts = []
     for split in ["train", "validation", "test"]:
         path = RELEASE / endpoint / f"{split}.parquet"
@@ -437,9 +445,10 @@ def reconcile_endpoint(
     )
     if release["pipeline_group_id"].duplicated().any():
         raise AssertionError(f"{endpoint}: release pipeline keys are not unique")
-    expected_release = set(
-        processed.loc[processed["HELM Annotation"].notna(), "pipeline_group_id"]
-    )
+    # The complete Atlas release retains processed measurements without a
+    # resolvable HELM structure.  Chemistry-dependent analyses filter those
+    # rows downstream, but the validation audit must reconcile all outcomes.
+    expected_release = set(processed["pipeline_group_id"])
     release_ids = set(release["pipeline_group_id"])
     if expected_release != release_ids:
         raise AssertionError(
@@ -532,7 +541,11 @@ def _public_lineage_columns(df: pd.DataFrame) -> pd.DataFrame:
     columns = [
         "endpoint", "raw_row_id", "source_file", "source_row_number", "USPTO ID", "Table Number",
         "Compound ID", "HELM Annotation", "Inhibition_pct", "dosage_nm",
-        "FOB_score", "dosage_ug", *BIOMARKERS,
+        "cell_line", "FOB_score", "dosage_ug", "species", "species_strain",
+        "administration_method", "tolerability_score_type", "latency_time_hours",
+        "dosage_mg_per_kg", "num_doses", "dosing_period_days",
+        "measurement_source", "adminstration_method",
+        *BIOMARKERS, *(f"_clean_{name}" for name in BIOMARKERS),
         "pipeline_group_id", "pipeline_key_json",
         "eligible_for_pipeline_group", "discard_reason", "disposition",
         "is_pipeline_representative", "winner_raw_row_id", "winner_patent",
@@ -580,6 +593,10 @@ def generate(output_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         for filename in PROCESSED_FILES.values()
     })
     for endpoint in PIPELINE_KEYS:
+        flat = RELEASE / f"{endpoint}.parquet"
+        if flat.exists():
+            hashes[str(flat.relative_to(ROOT))] = _sha256(flat)
+            continue
         for split in ("train", "validation", "test"):
             path = RELEASE / endpoint / f"{split}.parquet"
             hashes[str(path.relative_to(ROOT))] = _sha256(path)

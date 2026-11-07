@@ -300,14 +300,6 @@ def _pct(numerator: int, denominator: int) -> float | None:
     return round(100 * numerator / denominator, 2) if denominator else None
 
 
-def _ci95(numerator: int, denominator: int) -> dict[str, float] | None:
-    """Wilson 95% interval for a reported binomial proportion."""
-    if not denominator:
-        return None
-    _, low, high = legacy.wilson(numerator, denominator)
-    return {"low_pct": round(low, 2), "high_pct": round(high, 2)}
-
-
 def _class_label(scope: FrozenCanonicalScope, record: Measurement) -> EquivalenceClass:
     table_class = scope.table_scope.class_for(record.table_ref)
     if table_class is None:
@@ -479,8 +471,6 @@ def score_canonical_source(
                 ],
                 "precision_pct": _pct(cell["value_correct"], cell["atlas"]),
                 "recall_pct": _pct(cell["value_correct"], cell["gold"]),
-                "precision_ci95": _ci95(cell["value_correct"], cell["atlas"]),
-                "recall_ci95": _ci95(cell["value_correct"], cell["gold"]),
                 "fully_correct_measurements": cell["value_correct"],
                 "fully_correct_measurement_precision_pct": _pct(
                     cell["value_correct"], cell["atlas"]
@@ -527,8 +517,6 @@ def score_canonical_source(
         # rates remain separate diagnostics below.
         "precision_pct": _pct(summary["value_correct"], len(scoped_atlas)),
         "recall_pct": _pct(summary["value_correct"], len(scored_gold)),
-        "precision_ci95": _ci95(summary["value_correct"], len(scoped_atlas)),
-        "recall_ci95": _ci95(summary["value_correct"], len(scored_gold)),
         "fully_correct_measurements": summary["value_correct"],
         "fully_correct_measurement_precision_pct": _pct(
             summary["value_correct"], len(scoped_atlas)

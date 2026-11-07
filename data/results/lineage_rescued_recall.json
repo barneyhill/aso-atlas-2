@@ -1,207 +1,385 @@
 {
   "status": "complete",
-  "estimand": "fraction of verified Gold readout occurrences whose content reaches a released row through an exact source/canonical raw-collation and production-group lineage",
-  "matching_guardrail": "content is searched only inside the Gold table's frozen production-equivalence class; unrelated release-wide value matches are never credited",
-  "overall": {
-    "recovered": 20795,
-    "gold_readouts": 22000,
-    "recall_pct": 94.52,
-    "ci95": {
-      "low_pct": 94.21,
-      "high_pct": 94.82
-    }
+  "inputs": {
+    "release_version": "2.0",
+    "release_commit": null,
+    "gold_ledger": "data/validation/canonical_source_match_ledger.csv",
+    "gold_ledger_sha256": "9d8c2aaa3e8afd06004876efc8ccb3e51b21e698182d38b079a618845454c3a7",
+    "table_mapping": "data/validation/production_table_canonical_map.csv",
+    "table_mapping_sha256": "aaab566a2a5a725ef7e284f5a186816508d768c5e44b2615290dce3aa49f403c",
+    "lineage_summary": "data/validation/dedup_lineage/summary.json",
+    "lineage_summary_sha256": "46af8d185d8d931a7e2cdb721ed880ec5cd3a00e07d7759351be2f4cb6744f86"
   },
-  "directly_retained": 8902,
-  "rescued_through_deduplication": 11893,
-  "losses_by_reason": {
-    "content_not_preserved_in_winner": 11,
-    "eligible_group_not_released": 158,
-    "filtered_before_deduplication": 88,
-    "no_raw_collation_lineage": 562,
-    "raw_row_found_but_content_differs": 386
+  "method": {
+    "unit": "one logical measurement: one inhibition value, one FOB score vector, or one biomarker value",
+    "scope": "all measurements from 311 verified patent tables, evaluated against their fixed production-canonical table mappings",
+    "lineage": "all final-release measurements in production groups reached from each mapped canonical table are included",
+    "pairing": "one-to-one within mapped table, endpoint, channel and compound; scope and pairing cardinality are outcome-blind; repeated indistinguishable occurrences use multiset outcome agreement",
+    "precision_denominator": "all final-release measurement values contributed by the source rows of the audited table mappings",
+    "recall_denominator": "all 22,000 manually verified patent measurements"
   },
+  "table_mapping": {
+    "verified_tables": 311,
+    "present_canonical_mappings": 309,
+    "absent_mappings": 2
+  },
+  "patent_measurements": 22000,
+  "atlas_measurements": 21020,
+  "identity_matched": 20999,
+  "missing_patent_measurements": 1001,
+  "extra_atlas_measurements": 21,
+  "outcome_correct": 20990,
+  "outcome_incorrect": 9,
+  "outcome_precision_pct": 99.86,
+  "outcome_recall_pct": 95.41,
+  "context_correct": 18709,
+  "context_incorrect": 2290,
+  "context_accuracy_pct": 89.09,
+  "all_fields_correct": 18700,
+  "all_fields_precision_pct": 88.96,
+  "all_fields_recall_pct": 85.0,
   "by_endpoint": {
     "hepatotox": {
-      "recovered": 854,
-      "gold_readouts": 1226,
-      "recall_pct": 69.66,
-      "ci95": {
-        "low_pct": 67.03,
-        "high_pct": 72.17
-      }
+      "patent_measurements": 1226,
+      "atlas_measurements": 974,
+      "identity_matched": 974,
+      "missing_patent_measurements": 252,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 974,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 100.0,
+      "outcome_recall_pct": 79.45,
+      "context_correct": 0,
+      "context_incorrect": 974,
+      "context_accuracy_pct": 0.0,
+      "all_fields_correct": 0,
+      "all_fields_precision_pct": 0.0,
+      "all_fields_recall_pct": 0.0
     },
     "inhibition": {
-      "recovered": 19288,
-      "gold_readouts": 20104,
-      "recall_pct": 95.94,
-      "ci95": {
-        "low_pct": 95.66,
-        "high_pct": 96.21
-      }
+      "patent_measurements": 20104,
+      "atlas_measurements": 19383,
+      "identity_matched": 19364,
+      "missing_patent_measurements": 740,
+      "extra_atlas_measurements": 19,
+      "outcome_correct": 19364,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 99.9,
+      "outcome_recall_pct": 96.32,
+      "context_correct": 18226,
+      "context_incorrect": 1138,
+      "context_accuracy_pct": 94.12,
+      "all_fields_correct": 18226,
+      "all_fields_precision_pct": 94.03,
+      "all_fields_recall_pct": 90.66
     },
     "neurotox": {
-      "recovered": 653,
-      "gold_readouts": 670,
-      "recall_pct": 97.46,
-      "ci95": {
-        "low_pct": 95.97,
-        "high_pct": 98.41
-      }
-    }
-  },
-  "by_assay_readout": {
-    "ALT": {
-      "recovered": 224,
-      "gold_readouts": 308,
-      "recall_pct": 72.73,
-      "ci95": {
-        "low_pct": 67.5,
-        "high_pct": 77.4
-      }
-    },
-    "FOB score": {
-      "recovered": 653,
-      "gold_readouts": 670,
-      "recall_pct": 97.46,
-      "ci95": {
-        "low_pct": 95.97,
-        "high_pct": 98.41
-      }
-    },
-    "inhibition": {
-      "recovered": 19288,
-      "gold_readouts": 20104,
-      "recall_pct": 95.94,
-      "ci95": {
-        "low_pct": 95.66,
-        "high_pct": 96.21
-      }
-    },
-    "other hepatic biomarker": {
-      "recovered": 630,
-      "gold_readouts": 918,
-      "recall_pct": 68.63,
-      "ci95": {
-        "low_pct": 65.55,
-        "high_pct": 71.55
-      }
+      "patent_measurements": 670,
+      "atlas_measurements": 663,
+      "identity_matched": 661,
+      "missing_patent_measurements": 9,
+      "extra_atlas_measurements": 2,
+      "outcome_correct": 652,
+      "outcome_incorrect": 9,
+      "outcome_precision_pct": 98.34,
+      "outcome_recall_pct": 97.31,
+      "context_correct": 483,
+      "context_incorrect": 178,
+      "context_accuracy_pct": 73.07,
+      "all_fields_correct": 474,
+      "all_fields_precision_pct": 71.49,
+      "all_fields_recall_pct": 70.75
     }
   },
   "by_table_format": {
     "dose-series": {
-      "recovered": 7207,
-      "gold_readouts": 7890,
-      "recall_pct": 91.34,
-      "ci95": {
-        "low_pct": 90.7,
-        "high_pct": 91.94
-      }
+      "patent_measurements": 7890,
+      "atlas_measurements": 7301,
+      "identity_matched": 7282,
+      "missing_patent_measurements": 608,
+      "extra_atlas_measurements": 19,
+      "outcome_correct": 7282,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 99.74,
+      "outcome_recall_pct": 92.29,
+      "context_correct": 6854,
+      "context_incorrect": 428,
+      "context_accuracy_pct": 94.12,
+      "all_fields_correct": 6854,
+      "all_fields_precision_pct": 93.88,
+      "all_fields_recall_pct": 86.87
     },
     "single-dose": {
-      "recovered": 13588,
-      "gold_readouts": 14110,
-      "recall_pct": 96.3,
-      "ci95": {
-        "low_pct": 95.98,
-        "high_pct": 96.6
-      }
+      "patent_measurements": 14110,
+      "atlas_measurements": 13719,
+      "identity_matched": 13717,
+      "missing_patent_measurements": 393,
+      "extra_atlas_measurements": 2,
+      "outcome_correct": 13708,
+      "outcome_incorrect": 9,
+      "outcome_precision_pct": 99.92,
+      "outcome_recall_pct": 97.15,
+      "context_correct": 11855,
+      "context_incorrect": 1862,
+      "context_accuracy_pct": 86.43,
+      "all_fields_correct": 11846,
+      "all_fields_precision_pct": 86.35,
+      "all_fields_recall_pct": 83.95
     }
   },
   "by_table_layout": {
     "multi-column melt": {
-      "recovered": 1469,
-      "gold_readouts": 1840,
-      "recall_pct": 79.84,
-      "ci95": {
-        "low_pct": 77.94,
-        "high_pct": 81.61
-      }
+      "patent_measurements": 1840,
+      "atlas_measurements": 1588,
+      "identity_matched": 1588,
+      "missing_patent_measurements": 252,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 1588,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 100.0,
+      "outcome_recall_pct": 86.3,
+      "context_correct": 472,
+      "context_incorrect": 1116,
+      "context_accuracy_pct": 29.72,
+      "all_fields_correct": 472,
+      "all_fields_precision_pct": 29.72,
+      "all_fields_recall_pct": 25.65
     },
     "single measurement column": {
-      "recovered": 19326,
-      "gold_readouts": 20160,
-      "recall_pct": 95.86,
-      "ci95": {
-        "low_pct": 95.58,
-        "high_pct": 96.13
-      }
+      "patent_measurements": 20160,
+      "atlas_measurements": 19432,
+      "identity_matched": 19411,
+      "missing_patent_measurements": 749,
+      "extra_atlas_measurements": 21,
+      "outcome_correct": 19402,
+      "outcome_incorrect": 9,
+      "outcome_precision_pct": 99.85,
+      "outcome_recall_pct": 96.24,
+      "context_correct": 18237,
+      "context_incorrect": 1174,
+      "context_accuracy_pct": 93.95,
+      "all_fields_correct": 18228,
+      "all_fields_precision_pct": 93.8,
+      "all_fields_recall_pct": 90.42
     }
   },
   "by_unit_conversion": {
     "% control \u2192 % inhibition": {
-      "recovered": 10923,
-      "gold_readouts": 11126,
-      "recall_pct": 98.18,
-      "ci95": {
-        "low_pct": 97.91,
-        "high_pct": 98.41
-      }
+      "patent_measurements": 11126,
+      "atlas_measurements": 10970,
+      "identity_matched": 10951,
+      "missing_patent_measurements": 175,
+      "extra_atlas_measurements": 19,
+      "outcome_correct": 10951,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 99.83,
+      "outcome_recall_pct": 98.43,
+      "context_correct": 10911,
+      "context_incorrect": 40,
+      "context_accuracy_pct": 99.63,
+      "all_fields_correct": 10911,
+      "all_fields_precision_pct": 99.46,
+      "all_fields_recall_pct": 98.07
     },
     "no outcome conversion": {
-      "recovered": 8365,
-      "gold_readouts": 8978,
-      "recall_pct": 93.17,
-      "ci95": {
-        "low_pct": 92.63,
-        "high_pct": 93.68
-      }
+      "patent_measurements": 8978,
+      "atlas_measurements": 8413,
+      "identity_matched": 8413,
+      "missing_patent_measurements": 565,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 8413,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 100.0,
+      "outcome_recall_pct": 93.71,
+      "context_correct": 7315,
+      "context_incorrect": 1098,
+      "context_accuracy_pct": 86.95,
+      "all_fields_correct": 7315,
+      "all_fields_precision_pct": 86.95,
+      "all_fields_recall_pct": 81.48
     },
     "not applicable (toxicity endpoint)": {
-      "recovered": 1507,
-      "gold_readouts": 1896,
-      "recall_pct": 79.48,
-      "ci95": {
-        "low_pct": 77.61,
-        "high_pct": 81.24
-      }
+      "patent_measurements": 1896,
+      "atlas_measurements": 1637,
+      "identity_matched": 1635,
+      "missing_patent_measurements": 261,
+      "extra_atlas_measurements": 2,
+      "outcome_correct": 1626,
+      "outcome_incorrect": 9,
+      "outcome_precision_pct": 99.33,
+      "outcome_recall_pct": 85.76,
+      "context_correct": 483,
+      "context_incorrect": 1152,
+      "context_accuracy_pct": 29.54,
+      "all_fields_correct": 474,
+      "all_fields_precision_pct": 28.96,
+      "all_fields_recall_pct": 25.0
     }
   },
   "by_chemistry_class": {
     "5-10-5 MOE gapmer": {
-      "recovered": 2342,
-      "gold_readouts": 2700,
-      "recall_pct": 86.74,
-      "ci95": {
-        "low_pct": 85.41,
-        "high_pct": 87.97
-      }
+      "patent_measurements": 7236,
+      "atlas_measurements": 6806,
+      "identity_matched": 6805,
+      "missing_patent_measurements": 431,
+      "extra_atlas_measurements": 1,
+      "outcome_correct": 6803,
+      "outcome_incorrect": 2,
+      "outcome_precision_pct": 99.96,
+      "outcome_recall_pct": 94.02,
+      "context_correct": 6336,
+      "context_incorrect": 469,
+      "context_accuracy_pct": 93.11,
+      "all_fields_correct": 6334,
+      "all_fields_precision_pct": 93.06,
+      "all_fields_recall_pct": 87.53
     },
     "MOE gapmer (other wing)": {
-      "recovered": 1449,
-      "gold_readouts": 1555,
-      "recall_pct": 93.18,
-      "ci95": {
-        "low_pct": 91.82,
-        "high_pct": 94.33
-      }
+      "patent_measurements": 1555,
+      "atlas_measurements": 1455,
+      "identity_matched": 1455,
+      "missing_patent_measurements": 100,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 1448,
+      "outcome_incorrect": 7,
+      "outcome_precision_pct": 99.52,
+      "outcome_recall_pct": 93.12,
+      "context_correct": 1376,
+      "context_incorrect": 79,
+      "context_accuracy_pct": 94.57,
+      "all_fields_correct": 1369,
+      "all_fields_precision_pct": 94.09,
+      "all_fields_recall_pct": 88.04
     },
     "cEt gapmer": {
-      "recovered": 790,
-      "gold_readouts": 963,
-      "recall_pct": 82.04,
-      "ci95": {
-        "low_pct": 79.48,
-        "high_pct": 84.33
-      }
+      "patent_measurements": 963,
+      "atlas_measurements": 838,
+      "identity_matched": 838,
+      "missing_patent_measurements": 125,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 838,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 100.0,
+      "outcome_recall_pct": 87.02,
+      "context_correct": 605,
+      "context_incorrect": 233,
+      "context_accuracy_pct": 72.2,
+      "all_fields_correct": 605,
+      "all_fields_precision_pct": 72.2,
+      "all_fields_recall_pct": 62.82
     },
     "mixed MOE/cEt": {
-      "recovered": 4190,
-      "gold_readouts": 4424,
-      "recall_pct": 94.71,
-      "ci95": {
-        "low_pct": 94.01,
-        "high_pct": 95.33
-      }
+      "patent_measurements": 4424,
+      "atlas_measurements": 4202,
+      "identity_matched": 4192,
+      "missing_patent_measurements": 232,
+      "extra_atlas_measurements": 10,
+      "outcome_correct": 4192,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 99.76,
+      "outcome_recall_pct": 94.76,
+      "context_correct": 3258,
+      "context_incorrect": 934,
+      "context_accuracy_pct": 77.72,
+      "all_fields_correct": 3258,
+      "all_fields_precision_pct": 77.53,
+      "all_fields_recall_pct": 73.64
     },
     "unknown / not stated": {
-      "recovered": 12024,
-      "gold_readouts": 12358,
-      "recall_pct": 97.3,
-      "ci95": {
-        "low_pct": 97.0,
-        "high_pct": 97.57
-      }
+      "patent_measurements": 7822,
+      "atlas_measurements": 7719,
+      "identity_matched": 7709,
+      "missing_patent_measurements": 113,
+      "extra_atlas_measurements": 10,
+      "outcome_correct": 7709,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 99.87,
+      "outcome_recall_pct": 98.56,
+      "context_correct": 7134,
+      "context_incorrect": 575,
+      "context_accuracy_pct": 92.54,
+      "all_fields_correct": 7134,
+      "all_fields_precision_pct": 92.42,
+      "all_fields_recall_pct": 91.2
     }
   },
-  "gold_readouts_reconciled": 22000
+  "by_assay_readout": {
+    "ALT": {
+      "patent_measurements": 308,
+      "atlas_measurements": 255,
+      "identity_matched": 255,
+      "missing_patent_measurements": 53,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 255,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 100.0,
+      "outcome_recall_pct": 82.79,
+      "context_correct": 0,
+      "context_incorrect": 255,
+      "context_accuracy_pct": 0.0,
+      "all_fields_correct": 0,
+      "all_fields_precision_pct": 0.0,
+      "all_fields_recall_pct": 0.0
+    },
+    "FOB score": {
+      "patent_measurements": 670,
+      "atlas_measurements": 663,
+      "identity_matched": 661,
+      "missing_patent_measurements": 9,
+      "extra_atlas_measurements": 2,
+      "outcome_correct": 652,
+      "outcome_incorrect": 9,
+      "outcome_precision_pct": 98.34,
+      "outcome_recall_pct": 97.31,
+      "context_correct": 483,
+      "context_incorrect": 178,
+      "context_accuracy_pct": 73.07,
+      "all_fields_correct": 474,
+      "all_fields_precision_pct": 71.49,
+      "all_fields_recall_pct": 70.75
+    },
+    "inhibition": {
+      "patent_measurements": 20104,
+      "atlas_measurements": 19383,
+      "identity_matched": 19364,
+      "missing_patent_measurements": 740,
+      "extra_atlas_measurements": 19,
+      "outcome_correct": 19364,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 99.9,
+      "outcome_recall_pct": 96.32,
+      "context_correct": 18226,
+      "context_incorrect": 1138,
+      "context_accuracy_pct": 94.12,
+      "all_fields_correct": 18226,
+      "all_fields_precision_pct": 94.03,
+      "all_fields_recall_pct": 90.66
+    },
+    "other hepatic biomarker": {
+      "patent_measurements": 918,
+      "atlas_measurements": 719,
+      "identity_matched": 719,
+      "missing_patent_measurements": 199,
+      "extra_atlas_measurements": 0,
+      "outcome_correct": 719,
+      "outcome_incorrect": 0,
+      "outcome_precision_pct": 100.0,
+      "outcome_recall_pct": 78.32,
+      "context_correct": 0,
+      "context_incorrect": 719,
+      "context_accuracy_pct": 0.0,
+      "all_fields_correct": 0,
+      "all_fields_precision_pct": 0.0,
+      "all_fields_recall_pct": 0.0
+    }
+  },
+  "stratification": {
+    "scope": "labels derived from verified Gold rows and original USPTO XML",
+    "source_tables_labelled": 311,
+    "tables_requiring_percent_control_conversion": 164,
+    "tables_requiring_dose_unit_conversion": 0,
+    "dose_unit_conversion_note": "No audited table states an input dose in uM or mM; dose-unit conversion accuracy is therefore not estimable in this four-patent corpus.",
+    "chemistry_compounds_labelled": 7357,
+    "chemistry_compounds_total": 10758
+  }
 }

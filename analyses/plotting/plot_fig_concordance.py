@@ -32,6 +32,7 @@ from analyses.utils.compounds import (
     compound_max_inhibition,
     compound_mean_biomarker,
 )
+from analyses.plotting.style import panel_labels
 from analyses.utils.models import mean_of_array
 
 matplotlib.use("Agg")
@@ -511,8 +512,6 @@ def main():
     gs_a = gs[0].subgridspec(1, 4, wspace=0.35)
     axes_a = [fig.add_subplot(gs_a[0, i]) for i in range(4)]
     draw_selection_bias(axes_a, metrics, id_sets)
-    axes_a[0].text(-0.15, 1.15, "A", transform=axes_a[0].transAxes,
-                   fontsize=14, fontweight="bold")
 
     # Row 2: B (cross-assay corr), C (FOB heatmap), D (biomarker corr), E (base corr)
     gs_bot = gs[1].subgridspec(
@@ -538,12 +537,8 @@ def main():
     )
     ax_e.set_title("Cross-species bFOB concordance", fontsize=9, pad=6)
 
-    # Align B/C/D/E labels at the same figure-y (highest axis top)
-    fig.canvas.draw()
-    label_y = max(ax.get_position().y1 for ax in [ax_b, ax_c, ax_d, ax_e])
-    for ax, letter in [(ax_b, "B"), (ax_c, "C"), (ax_d, "D"), (ax_e, "E")]:
-        x = ax.get_position().x0 - 0.02
-        fig.text(x, label_y + 0.02, letter, fontsize=14, fontweight="bold")
+    panel_labels(fig, [(axes_a[0], "A")])
+    panel_labels(fig, [(ax_b, "B"), (ax_c, "C"), (ax_d, "D"), (ax_e, "E")])
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUT_DIR / "fig_concordance.svg"

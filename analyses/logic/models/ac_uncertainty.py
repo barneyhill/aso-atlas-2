@@ -88,6 +88,31 @@ def _savings(base_rates, precisions, costs, *, use_ceil=False, target=1):
     return 100.0 * (1.0 - model / baseline)
 
 
+def expected_pipeline(base_rates, precisions, costs):
+    """Retain the unrounded stage counts behind the corrected projection."""
+    rates = np.asarray(base_rates, dtype=float).copy()
+    for stage, precision in precisions.items():
+        if precision is not None:
+            rates[int(stage)] = np.clip(precision, 1e-12, 1.0)
+    counts = np.ones(len(rates) + 1)
+    for stage in range(len(rates) - 1, -1, -1):
+        counts[stage] = counts[stage + 1] / rates[stage]
+    stage_costs = counts[:-1] * costs
+    return {
+        "proportions": rates.tolist(),
+        "asos_at_stage": counts.tolist(),
+        "costs_per_stage": stage_costs.tolist(),
+        "total_cost": float(stage_costs.sum()),
+        "n_initial": float(counts[0]),
+        "animals": float(4 * counts[2:-1].sum()),
+    }
+
+
+def _histogram(values):
+    counts, edges = np.histogram(values, bins=50)
+    return {"counts": counts.tolist(), "edges": edges.tolist()}
+
+
 def _conditional_factors(s1):
     """Return fixed baseline/model uplifts keyed by downstream stage."""
     baseline, model = {}, {}
@@ -201,6 +226,19 @@ def compute():
         ),
         "combined_pct": corrected_full,
     }
+    corrected_pipeline = {
+        "baseline": expected_pipeline(base_corrected, {}, costs),
+        "in_vitro": expected_pipeline(
+            base_corrected, {k: v for k, v in canonical_corrected.items() if k < 2}, costs,
+        ),
+        "in_vivo": expected_pipeline(
+            base_corrected, {k: v for k, v in canonical_corrected.items() if k >= 2}, costs,
+        ),
+        "combined": expected_pipeline(base_corrected, canonical_corrected, costs),
+    }
+    baseline_cost = corrected_pipeline["baseline"]["total_cost"]
+    for scenario in corrected_pipeline.values():
+        scenario["savings_pct"] = 100 * (1 - scenario["total_cost"] / baseline_cost)
     ceiling_vs_expected = []
     for target in (1, 2, 5, 10, 20):
         ceiling = _savings(
@@ -295,6 +333,14 @@ def compute():
         in_vivo = {int(k): v for k, v in row["in_vivo_precisions"].items()}
         both = {**in_vitro, **in_vivo}
 
+        if row["K"] == 0.20:
+            for stage, precision in both.items():
+                if precision != canonical_marginal[stage]:
+                    raise ValueError(
+                        f"K=20% precision at stage {stage} does not reproduce "
+                        f"the paper: {precision} vs {canonical_marginal[stage]}"
+                    )
+
         def corrected_savings(precs):
             _, corrected = _apply_fixed_correction(
                 base_marginal, precs, baseline_factors, model_factors,
@@ -308,6 +354,16 @@ def compute():
             "combined_pct": corrected_savings(both),
             "conditional_uplifts": "fixed at pooled K=0.20 point estimates",
         })
+
+    # Both calculations combine all held-out predictions, so the K=20% row
+    # must reproduce the paper's primary result exactly.
+    k20 = next(row for row in corrected_k_sensitivity if row["K"] == 0.20)
+    for key in ("in_vitro_only_pct", "in_vivo_only_pct", "combined_pct"):
+        if k20[key] != corrected_ordering[key]:
+            raise ValueError(
+                f"K=20% sensitivity does not reproduce {key}: "
+                f"{k20[key]} vs {corrected_ordering[key]}"
+            )
 
     # Ordinary nonparametric bootstrap of each stage's observed binary pass/fail
     # records. For binary values, the resampled number of passes has exactly this
@@ -476,6 +532,11 @@ def compute():
         },
         "canonical": canonical,
         "corrected_ordering": corrected_ordering,
+        "corrected_pipeline": corrected_pipeline,
+        "sensitivity_histograms": {
+            "joint_model_and_baseline": _histogram(joint_savings),
+            "stage_costs": _histogram(cost_savings),
+        },
         "corrected_stage_contributions": stage_contributions,
         "corrected_ceiling_vs_expected": ceiling_vs_expected,
         "corrected_cross_fold_combinations": {

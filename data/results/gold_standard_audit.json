@@ -75,23 +75,17 @@
     "anywhere_in_release": {
       "k": 20967,
       "n": 22000,
-      "pct": 95.3,
-      "ci_lo": 95.02,
-      "ci_hi": 95.58
+      "pct": 95.3
     },
     "same_patent_only": {
       "k": 7137,
       "n": 22000,
-      "pct": 32.44,
-      "ci_lo": 31.83,
-      "ci_hi": 33.06
+      "pct": 32.44
     },
     "same_patent_and_table": {
       "k": 7042,
       "n": 22000,
-      "pct": 32.01,
-      "ci_lo": 31.4,
-      "ci_hi": 32.63
+      "pct": 32.01
     },
     "chance_floor_permuted_values": {
       "mean_pct": 1.8,
@@ -104,9 +98,7 @@
     "corroborated": {
       "k": 7142,
       "n": 7198,
-      "pct": 99.22,
-      "ci_lo": 98.99,
-      "ci_hi": 99.4
+      "pct": 99.22
     },
     "released_rows_audited": 7198,
     "released_rows_for_compounds_absent_from_gold": 1,
@@ -118,30 +110,22 @@
       "dose_response": {
         "k": 2960,
         "n": 3014,
-        "pct": 98.21,
-        "ci_lo": 97.67,
-        "ci_hi": 98.62
+        "pct": 98.21
       },
       "hepatotoxicity": {
         "k": 649,
         "n": 649,
-        "pct": 100.0,
-        "ci_lo": 99.41,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "in_vitro_inhibition": {
         "k": 2885,
         "n": 2885,
-        "pct": 100.0,
-        "ci_lo": 99.87,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "neurotoxicity": {
         "k": 648,
         "n": 650,
-        "pct": 99.69,
-        "ci_lo": 98.89,
-        "ci_hi": 99.92
+        "pct": 99.69
       }
     },
     "stratified": [
@@ -151,23 +135,17 @@
           "in vitro inhibition": {
             "k": 5845,
             "n": 5899,
-            "pct": 99.08,
-            "ci_lo": 98.81,
-            "ci_hi": 99.3
+            "pct": 99.08
           },
           "neurotoxicity": {
             "k": 648,
             "n": 650,
-            "pct": 99.69,
-            "ci_lo": 98.89,
-            "ci_hi": 99.92
+            "pct": 99.69
           },
           "hepatotoxicity": {
             "k": 649,
             "n": 649,
-            "pct": 100.0,
-            "ci_lo": 99.41,
-            "ci_hi": 100.0
+            "pct": 100.0
           }
         }
       },
@@ -177,16 +155,12 @@
           "single-dose": {
             "k": 4070,
             "n": 4072,
-            "pct": 99.95,
-            "ci_lo": 99.82,
-            "ci_hi": 99.99
+            "pct": 99.95
           },
           "dose-series": {
             "k": 3072,
             "n": 3126,
-            "pct": 98.27,
-            "ci_lo": 97.75,
-            "ci_hi": 98.67
+            "pct": 98.27
           }
         }
       },
@@ -196,16 +170,12 @@
           "single measurement column": {
             "k": 5874,
             "n": 5930,
-            "pct": 99.06,
-            "ci_lo": 98.78,
-            "ci_hi": 99.27
+            "pct": 99.06
           },
           "multi-column melt": {
             "k": 1268,
             "n": 1268,
-            "pct": 100.0,
-            "ci_lo": 99.7,
-            "ci_hi": 100.0
+            "pct": 100.0
           }
         }
       },
@@ -215,16 +185,12 @@
           "% control -> % inhibition": {
             "k": 3463,
             "n": 3463,
-            "pct": 100.0,
-            "ci_lo": 99.89,
-            "ci_hi": 100.0
+            "pct": 100.0
           },
           "no conversion": {
             "k": 2382,
             "n": 2436,
-            "pct": 97.78,
-            "ci_lo": 97.12,
-            "ci_hi": 98.3
+            "pct": 97.78
           }
         }
       },
@@ -234,30 +200,22 @@
           "5-10-5 MOE gapmer": {
             "k": 3049,
             "n": 3051,
-            "pct": 99.93,
-            "ci_lo": 99.76,
-            "ci_hi": 99.98
+            "pct": 99.93
           },
           "cET gapmer": {
             "k": 2381,
             "n": 2431,
-            "pct": 97.94,
-            "ci_lo": 97.3,
-            "ci_hi": 98.44
+            "pct": 97.94
           },
           "mixed MOE/cET": {
             "k": 1296,
             "n": 1300,
-            "pct": 99.69,
-            "ci_lo": 99.21,
-            "ci_hi": 99.88
+            "pct": 99.69
           },
           "MOE gapmer (other wing)": {
             "k": 416,
             "n": 416,
-            "pct": 100.0,
-            "ci_lo": 99.08,
-            "ci_hi": 100.0
+            "pct": 100.0
           }
         }
       },
@@ -267,30 +225,22 @@
           "US20210038631A1 (IRF4)": {
             "k": 2818,
             "n": 2818,
-            "pct": 100.0,
-            "ci_lo": 99.86,
-            "ci_hi": 100.0
+            "pct": 100.0
           },
           "US20190160090A1 (AGT)": {
             "k": 1779,
             "n": 1833,
-            "pct": 97.05,
-            "ci_lo": 96.18,
-            "ci_hi": 97.74
+            "pct": 97.05
           },
           "US20240026353A1 (SCN2A)": {
             "k": 1476,
             "n": 1476,
-            "pct": 100.0,
-            "ci_lo": 99.74,
-            "ci_hi": 100.0
+            "pct": 100.0
           },
           "US20160251655A1 (C9ORF72)": {
             "k": 1069,
             "n": 1071,
-            "pct": 99.81,
-            "ci_lo": 99.32,
-            "ci_hi": 99.95
+            "pct": 99.81
           }
         }
       }
@@ -704,37 +654,27 @@
       "hepatotoxicity / multi-column melt": {
         "k": 840,
         "n": 1215,
-        "pct": 69.14,
-        "ci_lo": 66.48,
-        "ci_hi": 71.67
+        "pct": 69.14
       },
       "hepatotoxicity / single measurement column": {
         "k": 10,
         "n": 11,
-        "pct": 90.91,
-        "ci_lo": 62.26,
-        "ci_hi": 98.38
+        "pct": 90.91
       },
       "in vitro inhibition / multi-column melt": {
         "k": 621,
         "n": 625,
-        "pct": 99.36,
-        "ci_lo": 98.37,
-        "ci_hi": 99.75
+        "pct": 99.36
       },
       "in vitro inhibition / single measurement column": {
         "k": 18839,
         "n": 19479,
-        "pct": 96.71,
-        "ci_lo": 96.45,
-        "ci_hi": 96.96
+        "pct": 96.71
       },
       "neurotoxicity / single measurement column": {
         "k": 657,
         "n": 670,
-        "pct": 98.06,
-        "ci_lo": 96.71,
-        "ci_hi": 98.86
+        "pct": 98.06
       }
     }
   },
@@ -826,30 +766,22 @@
     "filtering_recall": {
       "k": 21815,
       "n": 22000,
-      "pct": 99.16,
-      "ci_lo": 99.03,
-      "ci_hi": 99.27
+      "pct": 99.16
     },
     "extraction_recall_of_retained": {
       "k": 20967,
       "n": 21815,
-      "pct": 96.11,
-      "ci_lo": 95.85,
-      "ci_hi": 96.36
+      "pct": 96.11
     },
     "end_to_end_recall": {
       "k": 20967,
       "n": 22000,
-      "pct": 95.3,
-      "ci_lo": 95.02,
-      "ci_hi": 95.58
+      "pct": 95.3
     },
     "unexplained_omissions": {
       "k": 304,
       "n": 22000,
-      "pct": 1.38,
-      "ci_lo": 1.24,
-      "ci_hi": 1.54
+      "pct": 1.38
     },
     "by_rule": {
       "retained and present": 20967,
@@ -1032,9 +964,7 @@
       "correct": {
         "k": 11007,
         "n": 11007,
-        "pct": 100.0,
-        "ci_lo": 99.97,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "counts": {
         "converted correctly (% inhibition)": 11007,
@@ -1130,23 +1060,17 @@
         "in vitro inhibition": {
           "k": 19460,
           "n": 20104,
-          "pct": 96.8,
-          "ci_lo": 96.54,
-          "ci_hi": 97.03
+          "pct": 96.8
         },
         "hepatotoxicity": {
           "k": 850,
           "n": 1226,
-          "pct": 69.33,
-          "ci_lo": 66.69,
-          "ci_hi": 71.85
+          "pct": 69.33
         },
         "neurotoxicity": {
           "k": 657,
           "n": 670,
-          "pct": 98.06,
-          "ci_lo": 96.71,
-          "ci_hi": 98.86
+          "pct": 98.06
         }
       }
     },
@@ -1156,51 +1080,37 @@
         "ALT": {
           "k": 224,
           "n": 308,
-          "pct": 72.73,
-          "ci_lo": 67.5,
-          "ci_hi": 77.4
+          "pct": 72.73
         },
         "AST": {
           "k": 215,
           "n": 297,
-          "pct": 72.39,
-          "ci_lo": 67.04,
-          "ci_hi": 77.16
+          "pct": 72.39
         },
         "TBIL": {
           "k": 182,
           "n": 264,
-          "pct": 68.94,
-          "ci_lo": 63.12,
-          "ci_hi": 74.22
+          "pct": 68.94
         },
         "BUN": {
           "k": 181,
           "n": 264,
-          "pct": 68.56,
-          "ci_lo": 62.73,
-          "ci_hi": 73.86
+          "pct": 68.56
         },
         "ALB": {
           "k": 30,
           "n": 44,
-          "pct": 68.18,
-          "ci_lo": 53.44,
-          "ci_hi": 80.0
+          "pct": 68.18
         },
         "CREA": {
           "k": 9,
           "n": 29,
-          "pct": 31.03,
-          "ci_lo": 17.28,
-          "ci_hi": 49.23
+          "pct": 31.03
         },
         "PC_ratio": {
           "k": 9,
           "n": 20,
-          "pct": 45.0,
-          "ci_lo": 25.82,
-          "ci_hi": 65.79
+          "pct": 45.0
         }
       }
     },
@@ -1210,16 +1120,12 @@
         "single-dose": {
           "k": 13365,
           "n": 14110,
-          "pct": 94.72,
-          "ci_lo": 94.34,
-          "ci_hi": 95.08
+          "pct": 94.72
         },
         "dose-series": {
           "k": 7602,
           "n": 7890,
-          "pct": 96.35,
-          "ci_lo": 95.91,
-          "ci_hi": 96.74
+          "pct": 96.35
         }
       }
     },
@@ -1229,16 +1135,12 @@
         "single measurement column": {
           "k": 19506,
           "n": 20160,
-          "pct": 96.76,
-          "ci_lo": 96.5,
-          "ci_hi": 96.99
+          "pct": 96.76
         },
         "multi-column melt": {
           "k": 1461,
           "n": 1840,
-          "pct": 79.4,
-          "ci_lo": 77.49,
-          "ci_hi": 81.19
+          "pct": 79.4
         }
       }
     },
@@ -1248,16 +1150,12 @@
         "% control -> % inhibition": {
           "k": 11031,
           "n": 11126,
-          "pct": 99.15,
-          "ci_lo": 98.96,
-          "ci_hi": 99.3
+          "pct": 99.15
         },
         "no conversion": {
           "k": 8429,
           "n": 8978,
-          "pct": 93.89,
-          "ci_lo": 93.37,
-          "ci_hi": 94.36
+          "pct": 93.89
         }
       }
     },
@@ -1267,9 +1165,7 @@
         "dose stated in nM": {
           "k": 19460,
           "n": 20104,
-          "pct": 96.8,
-          "ci_lo": 96.54,
-          "ci_hi": 97.03
+          "pct": 96.8
         }
       }
     },
@@ -1279,30 +1175,22 @@
         "5-10-5 MOE gapmer": {
           "k": 7447,
           "n": 7658,
-          "pct": 97.24,
-          "ci_lo": 96.85,
-          "ci_hi": 97.59
+          "pct": 97.24
         },
         "cET gapmer": {
           "k": 7215,
           "n": 7316,
-          "pct": 98.62,
-          "ci_lo": 98.33,
-          "ci_hi": 98.86
+          "pct": 98.62
         },
         "mixed MOE/cET": {
           "k": 4464,
           "n": 4967,
-          "pct": 89.87,
-          "ci_lo": 89.0,
-          "ci_hi": 90.68
+          "pct": 89.87
         },
         "MOE gapmer (other wing)": {
           "k": 1841,
           "n": 1886,
-          "pct": 97.61,
-          "ci_lo": 96.82,
-          "ci_hi": 98.21
+          "pct": 97.61
         }
       }
     },
@@ -1312,30 +1200,22 @@
         "US20210038631A1 (IRF4)": {
           "k": 8514,
           "n": 8711,
-          "pct": 97.74,
-          "ci_lo": 97.4,
-          "ci_hi": 98.03
+          "pct": 97.74
         },
         "US20240026353A1 (SCN2A)": {
           "k": 4623,
           "n": 4668,
-          "pct": 99.04,
-          "ci_lo": 98.71,
-          "ci_hi": 99.28
+          "pct": 99.04
         },
         "US20190160090A1 (AGT)": {
           "k": 4090,
           "n": 4414,
-          "pct": 92.66,
-          "ci_lo": 91.85,
-          "ci_hi": 93.39
+          "pct": 92.66
         },
         "US20160251655A1 (C9ORF72)": {
           "k": 3740,
           "n": 4207,
-          "pct": 88.9,
-          "ci_lo": 87.91,
-          "ci_hi": 89.81
+          "pct": 88.9
         }
       }
     }
@@ -1527,16 +1407,12 @@
       "raw": {
         "k": 564,
         "n": 564,
-        "pct": 100.0,
-        "ci_lo": 99.32,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "after_vocabulary": {
         "k": 564,
         "n": 564,
-        "pct": 100.0,
-        "ci_lo": 99.32,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 564,
@@ -1554,16 +1430,12 @@
       "raw": {
         "k": 564,
         "n": 564,
-        "pct": 100.0,
-        "ci_lo": 99.32,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "after_vocabulary": {
         "k": 564,
         "n": 564,
-        "pct": 100.0,
-        "ci_lo": 99.32,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 564,
@@ -1581,16 +1453,12 @@
       "raw": {
         "k": 24,
         "n": 564,
-        "pct": 4.26,
-        "ci_lo": 2.88,
-        "ci_hi": 6.25
+        "pct": 4.26
       },
       "after_vocabulary": {
         "k": 24,
         "n": 564,
-        "pct": 4.26,
-        "ci_lo": 2.88,
-        "ci_hi": 6.25
+        "pct": 4.26
       },
       "coverage": {
         "both_state_it": 564,
@@ -1643,16 +1511,12 @@
       "raw": {
         "k": 527,
         "n": 530,
-        "pct": 99.43,
-        "ci_lo": 98.35,
-        "ci_hi": 99.81
+        "pct": 99.43
       },
       "after_vocabulary": {
         "k": 527,
         "n": 530,
-        "pct": 99.43,
-        "ci_lo": 98.35,
-        "ci_hi": 99.81
+        "pct": 99.43
       },
       "coverage": {
         "both_state_it": 530,
@@ -1701,16 +1565,12 @@
       "raw": {
         "k": 0,
         "n": 564,
-        "pct": 0.0,
-        "ci_lo": 0.0,
-        "ci_hi": 0.68
+        "pct": 0.0
       },
       "after_vocabulary": {
         "k": 561,
         "n": 564,
-        "pct": 99.47,
-        "ci_lo": 98.45,
-        "ci_hi": 99.82
+        "pct": 99.47
       },
       "coverage": {
         "both_state_it": 564,
@@ -1759,16 +1619,12 @@
       "raw": {
         "k": 5848,
         "n": 5855,
-        "pct": 99.88,
-        "ci_lo": 99.75,
-        "ci_hi": 99.94
+        "pct": 99.88
       },
       "after_vocabulary": {
         "k": 5848,
         "n": 5855,
-        "pct": 99.88,
-        "ci_lo": 99.75,
-        "ci_hi": 99.94
+        "pct": 99.88
       },
       "coverage": {
         "both_state_it": 5855,
@@ -1821,16 +1677,12 @@
       "raw": {
         "k": 5606,
         "n": 5920,
-        "pct": 94.7,
-        "ci_lo": 94.1,
-        "ci_hi": 95.24
+        "pct": 94.7
       },
       "after_vocabulary": {
         "k": 5919,
         "n": 5920,
-        "pct": 99.98,
-        "ci_lo": 99.9,
-        "ci_hi": 100.0
+        "pct": 99.98
       },
       "coverage": {
         "both_state_it": 5920,
@@ -1861,16 +1713,12 @@
       "raw": {
         "k": 5904,
         "n": 5920,
-        "pct": 99.73,
-        "ci_lo": 99.56,
-        "ci_hi": 99.83
+        "pct": 99.73
       },
       "after_vocabulary": {
         "k": 5904,
         "n": 5920,
-        "pct": 99.73,
-        "ci_lo": 99.56,
-        "ci_hi": 99.83
+        "pct": 99.73
       },
       "coverage": {
         "both_state_it": 5920,
@@ -1923,16 +1771,12 @@
       "raw": {
         "k": 5766,
         "n": 5766,
-        "pct": 100.0,
-        "ci_lo": 99.93,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "after_vocabulary": {
         "k": 5766,
         "n": 5766,
-        "pct": 100.0,
-        "ci_lo": 99.93,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 5766,
@@ -1950,16 +1794,12 @@
       "raw": {
         "k": 5920,
         "n": 5920,
-        "pct": 100.0,
-        "ci_lo": 99.94,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "after_vocabulary": {
         "k": 5920,
         "n": 5920,
-        "pct": 100.0,
-        "ci_lo": 99.94,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 5920,
@@ -1977,16 +1817,12 @@
       "raw": {
         "k": 5918,
         "n": 5920,
-        "pct": 99.97,
-        "ci_lo": 99.88,
-        "ci_hi": 99.99
+        "pct": 99.97
       },
       "after_vocabulary": {
         "k": 5918,
         "n": 5920,
-        "pct": 99.97,
-        "ci_lo": 99.88,
-        "ci_hi": 99.99
+        "pct": 99.97
       },
       "coverage": {
         "both_state_it": 5920,
@@ -2028,16 +1864,12 @@
       "raw": {
         "k": 550,
         "n": 621,
-        "pct": 88.57,
-        "ci_lo": 85.82,
-        "ci_hi": 90.84
+        "pct": 88.57
       },
       "after_vocabulary": {
         "k": 550,
         "n": 621,
-        "pct": 88.57,
-        "ci_lo": 85.82,
-        "ci_hi": 90.84
+        "pct": 88.57
       },
       "coverage": {
         "both_state_it": 621,
@@ -2082,16 +1914,12 @@
       "raw": {
         "k": 0,
         "n": 496,
-        "pct": 0.0,
-        "ci_lo": 0.0,
-        "ci_hi": 0.77
+        "pct": 0.0
       },
       "after_vocabulary": {
         "k": 496,
         "n": 496,
-        "pct": 100.0,
-        "ci_lo": 99.23,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 496,
@@ -2109,16 +1937,12 @@
       "raw": {
         "k": 500,
         "n": 500,
-        "pct": 100.0,
-        "ci_lo": 99.24,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "after_vocabulary": {
         "k": 500,
         "n": 500,
-        "pct": 100.0,
-        "ci_lo": 99.24,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 500,
@@ -2136,16 +1960,12 @@
       "raw": {
         "k": 0,
         "n": 0,
-        "pct": 0.0,
-        "ci_lo": 0.0,
-        "ci_hi": 0.0
+        "pct": 0.0
       },
       "after_vocabulary": {
         "k": 0,
         "n": 0,
-        "pct": 0.0,
-        "ci_lo": 0.0,
-        "ci_hi": 0.0
+        "pct": 0.0
       },
       "coverage": {
         "both_state_it": 0,
@@ -2163,16 +1983,12 @@
       "raw": {
         "k": 0,
         "n": 653,
-        "pct": 0.0,
-        "ci_lo": 0.0,
-        "ci_hi": 0.58
+        "pct": 0.0
       },
       "after_vocabulary": {
         "k": 653,
         "n": 653,
-        "pct": 100.0,
-        "ci_lo": 99.42,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "coverage": {
         "both_state_it": 653,
@@ -2190,16 +2006,12 @@
       "raw": {
         "k": 525,
         "n": 532,
-        "pct": 98.68,
-        "ci_lo": 97.31,
-        "ci_hi": 99.36
+        "pct": 98.68
       },
       "after_vocabulary": {
         "k": 525,
         "n": 532,
-        "pct": 98.68,
-        "ci_lo": 97.31,
-        "ci_hi": 99.36
+        "pct": 98.68
       },
       "coverage": {
         "both_state_it": 532,
@@ -2243,23 +2055,17 @@
     "sequence": {
       "k": 10752,
       "n": 10755,
-      "pct": 99.97,
-      "ci_lo": 99.92,
-      "ci_hi": 99.99
+      "pct": 99.97
     },
     "sugar_motif_where_stated": {
       "k": 4675,
       "n": 4677,
-      "pct": 99.96,
-      "ci_lo": 99.84,
-      "ci_hi": 99.99
+      "pct": 99.96
     },
     "linkage_motif_where_stated": {
       "k": 2066,
       "n": 2075,
-      "pct": 99.57,
-      "ci_lo": 99.18,
-      "ci_hi": 99.77
+      "pct": 99.57
     },
     "selection_sensitivity": {
       "note": "headline figures above require EVERY Atlas annotation for the compound to agree. The permissive variant, scoring the best-agreeing annotation, is shown for comparison; the two differ only because 3 compounds carry more than one HELM.",
@@ -2267,75 +2073,55 @@
       "sequence_best_agreeing": {
         "k": 10755,
         "n": 10755,
-        "pct": 100.0,
-        "ci_lo": 99.96,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "sugar_best_agreeing": {
         "k": 4677,
         "n": 4677,
-        "pct": 100.0,
-        "ci_lo": 99.92,
-        "ci_hi": 100.0
+        "pct": 100.0
       },
       "linkage_best_agreeing": {
         "k": 2068,
         "n": 2075,
-        "pct": 99.66,
-        "ci_lo": 99.31,
-        "ci_hi": 99.84
+        "pct": 99.66
       }
     },
     "helm_denominator_note": "helm_exact and helm_ignoring_5mec are computed only where the patent states BOTH the sugar and the linkage motif, so a full HELM can be built at all. That is a minority of compounds; the coverage block below gives how often each motif is stated.",
     "helm_exact": {
       "k": 988,
       "n": 1696,
-      "pct": 58.25,
-      "ci_lo": 55.89,
-      "ci_hi": 60.58
+      "pct": 58.25
     },
     "helm_ignoring_5mec": {
       "k": 1689,
       "n": 1696,
-      "pct": 99.59,
-      "ci_lo": 99.15,
-      "ci_hi": 99.8
+      "pct": 99.59
     },
     "unique_sequence_in_atlas": {
       "k": 10752,
       "n": 10755,
-      "pct": 99.97,
-      "ci_lo": 99.92,
-      "ci_hi": 99.99
+      "pct": 99.97
     },
     "coverage": {
       "sugar_motif_stated_in_patent": {
         "k": 4677,
         "n": 10755,
-        "pct": 43.49,
-        "ci_lo": 42.55,
-        "ci_hi": 44.43
+        "pct": 43.49
       },
       "linkage_motif_stated_in_patent": {
         "k": 2075,
         "n": 10755,
-        "pct": 19.29,
-        "ci_lo": 18.56,
-        "ci_hi": 20.05
+        "pct": 19.29
       },
       "cytosine_methylation_stated_in_table": {
         "k": 1120,
         "n": 10755,
-        "pct": 10.41,
-        "ci_lo": 9.85,
-        "ci_hi": 11.01
+        "pct": 10.41
       },
       "atlas_annotates_5meC": {
         "k": 9203,
         "n": 10755,
-        "pct": 85.57,
-        "ci_lo": 84.89,
-        "ci_hi": 86.22
+        "pct": 85.57
       }
     },
     "note": "The dominant HELM discrepancy is 5-methyl-cytosine, which the patents state once in prose ('each cytosine residue is a 5-methyl cytosine') rather than per compound in the table. helm_exact vs helm_ignoring_5mec isolates that single normalisation error mode."

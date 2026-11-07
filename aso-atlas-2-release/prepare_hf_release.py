@@ -5,13 +5,12 @@ Single source of truth for the release. Reads the 4 canonical parquets and emits
   aso-atlas-2-release/
     <config>.parquet                          complete endpoint datasets
     release_manifest.json                     every quotable count
-    croissant.json                            Croissant 1.1 core + NeurIPS RAI
+    croissant.json                            Croissant 1.1 core + RAI
                                               metadata, with pinned files/hashes
     README.md                                 dataset card generated from the manifest
 
-The separate folds/ directory contains only the exact endpoint-specific fold
-assignments used for the submitted paper. No additional recommended partition
-is generated.
+The separate folds/ directory contains frozen endpoint-specific benchmark fold
+assignments. No additional recommended partition is generated.
 
     uv run python aso-atlas-2-release/prepare_hf_release.py
 """
@@ -35,18 +34,16 @@ PROCESSED = Path("data/oligostack/processed")
 RELEASE = Path("aso-atlas-2-release")
 CARD_TEMPLATE = RELEASE / "card_template.md"
 
-RELEASE_VERSION = "neurips-rebuttal"
-# One identifier shared by the dataset card, the Croissant metadata, and the git
-# tag in *both* repositories, so the AC's "which snapshot is this?" has one answer.
-RELEASE_TAG = RELEASE_VERSION
+RELEASE_VERSION = "2.0"
+# Keep machine-readable resource URLs pinned to the original immutable release tag.
+# The reader-facing dataset version remains the simpler "2.0".
+RELEASE_TAG = "neurips-rebuttal"
 CODE_REPO = "https://github.com/barneyhill/aso-atlas-2"
 HF_REPO = "https://huggingface.co/datasets/barneyhill/aso-atlas-2"
 DATASET_DOI = "https://doi.org/10.57967/hf/8687"
 # Initial public availability of the dataset. Version-specific identity is
 # carried separately by version and the pinned release URLs.
 DATE_PUBLISHED = "2026-04-30"
-MANUSCRIPT_REF = "neurips-submission"
-MANUSCRIPT_COMMIT = "ff973af"
 
 CANONICAL_FILES = {
     "in_vitro_inhibition": "in_vitro_inhibition_processed.parquet",
@@ -165,7 +162,7 @@ def readouts(name: str, df: pd.DataFrame) -> int:
 
 
 def gene_symbol_map() -> pd.Series:
-    """Return the transcript-to-gene mapping used by the submitted manuscript."""
+    """Return the transcript-to-gene mapping used for release counts."""
     invitro = pd.read_parquet(
         PROCESSED / "in_vitro_inhibition_processed_with_genomic_data.parquet",
         columns=["target_RNA", "gene_symbol"],
@@ -183,7 +180,7 @@ def gene_symbol_map() -> pd.Series:
 
 
 def named_target_genes(df: pd.DataFrame, gene_map: pd.Series) -> set[str]:
-    """Resolve non-null target identifiers to the manuscript's named-gene unit."""
+    """Resolve non-null target identifiers to the release's named-gene unit."""
     targets = df["target_RNA"].dropna().unique()
     return {str(gene_map.get(target, target)) for target in targets}
 
@@ -237,7 +234,7 @@ def build_croissant(manifest: dict) -> dict:
             "description": (
                 "Version-pinned assay records."
                 if is_parquet else
-                "Exact endpoint-specific paper benchmark fold assignments."
+                "Frozen endpoint-specific benchmark fold assignments."
             ),
             "contentUrl": (
                 f"{HF_REPO}/resolve/{RELEASE_TAG}/{rel.as_posix()}?download=true"
@@ -513,8 +510,6 @@ def main() -> None:
         "version": RELEASE_VERSION,
         "release_tag": RELEASE_TAG,
         "code_repo": CODE_REPO,
-        "manuscript_commit": MANUSCRIPT_COMMIT,
-        "manuscript_ref": MANUSCRIPT_REF,
         "unit_definition": (
             "A row is one assay record. A measurement (assay readout) is one non-null "
             "assay value: in vitro inhibition and dose-response rows carry one readout "
@@ -523,8 +518,8 @@ def main() -> None:
         ),
         "gene_definition": (
             "A named target gene is one unique non-null target_RNA after resolving "
-            "transcript identifiers to gene symbols with the same genomic annotation "
-            "mapping used by the submitted manuscript."
+            "transcript identifiers to gene symbols with the release's genomic "
+            "annotation mapping."
         ),
         "compound_definition": (
             "A unique HELM compound is one unique non-null HELM Annotation. Rows without "
@@ -532,8 +527,8 @@ def main() -> None:
             "unique-HELM-compound and model-benchmark counts."
         ),
         "linkage_definition": (
-            "Cross-category linkage retains the submitted source-identifier unit: a "
-            "distinct Compound ID reported in at least two of the four assay categories. "
+            "Cross-category linkage uses the source-reported identifier unit: a distinct "
+            "Compound ID reported in at least two of the four assay categories. "
             f"By this definition, {cross_category_linkage['source_ids_in_multiple_categories']:,} "
             f"of {cross_category_linkage['total_source_ids']:,} source Compound IDs "
             f"({cross_category_linkage['pct_in_multiple_categories']:.1f}%) are linked."
@@ -546,8 +541,8 @@ def main() -> None:
         "paper_benchmark_folds": {
             "directory": "folds/",
             "role": (
-                "Exact endpoint-specific five-fold assignments used for the submitted "
-                "paper's benchmark results."
+                "Frozen endpoint-specific five-fold assignments for reproducible "
+                "benchmark evaluation."
             ),
             "oligogym_endpoints": [
                 "in_vitro_inhibition", "potency", "mouse_hepatic",
@@ -568,10 +563,10 @@ def main() -> None:
     manifest["paper_cross_reference"] = {
         "paper_assay_readouts": processed_readouts,
         "note": (
-            "The manuscript and release count assay readouts over every processed row. "
+            "The release counts assay readouts over every processed row. "
             "Rows whose HELM could not be resolved remain public and are marked "
             "model_eligible=false; chemistry-aware model analyses use the resolved "
-            "subset, while cross-category linkage uses the submitted source Compound ID unit."
+            "subset, while cross-category linkage uses the source-reported Compound ID unit."
         ),
         "delta": processed_readouts - totals["released_assay_readouts"],
         "paper_named_target_genes": len(processed_genes),
@@ -584,7 +579,7 @@ def main() -> None:
 
     croissant = build_croissant(manifest)
     (RELEASE / "croissant.json").write_text(json.dumps(croissant, indent=2) + "\n")
-    print(f"Wrote {RELEASE / 'croissant.json'} (Croissant 1.1 + NeurIPS RAI)")
+    print(f"Wrote {RELEASE / 'croissant.json'} (Croissant 1.1 + RAI)")
 
     (RELEASE / "README.md").write_text(render_card(manifest))
     print(f"Wrote {RELEASE / 'README.md'} (generated — do not hand-edit)")
@@ -631,30 +626,13 @@ def render_card(m: dict) -> str:
     )
 
     t = m["totals"]
-    xref = m.get("paper_cross_reference")
-    xref_line = ""
-    if xref:
-        xref_line = (
-            f"The submitted manuscript and tagged `{m['version']}` snapshot both contain "
-            f"{xref['paper_assay_readouts']:,} processed readouts. Of these, "
-            f"{t['unresolved_helm_readouts']:,} lack a resolvable HELM annotation and are "
-            f"retained with `model_eligible=false`; the remaining "
-            f"{t['model_eligible_assay_readouts']:,} readouts form the chemistry-aware "
-            "modelling subset. The manuscript's "
-            "1,125 count refers to table-bearing source documents entering extraction; "
-            f"{t['patents']:,} USPTO filings contribute data to the complete release and "
-            f"{t['model_eligible_patents']:,} contribute to its HELM-resolved subset."
-        )
-
     tokens = {
         "<<CONFIGS_YAML>>": "\n".join(cfg_yaml),
         "<<VERSION>>": m["version"],
         "<<RELEASE_TAG>>": m["release_tag"],
         "<<CODE_REPO>>": m["code_repo"],
-        "<<MANUSCRIPT_COMMIT>>": m["manuscript_commit"],
-        "<<MANUSCRIPT_REF>>": m["manuscript_ref"],
         "<<SUMMARY_TABLE>>": "\n".join(table),
-        "<<PAPER_XREF>>": xref_line,
+        "<<PAPER_XREF>>": "",
         "<<TOTAL_READOUTS>>": f"{t['released_assay_readouts']:,}",
         "<<TOTAL_COMPOUNDS>>": f"{t['compounds']:,}",
         "<<TOTAL_PATENTS>>": f"{t['patents']:,}",

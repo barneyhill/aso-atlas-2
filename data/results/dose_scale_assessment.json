@@ -9,10 +9,6 @@
   "both_dose_missing": 0,
   "thousand_fold_errors": 0,
   "thousand_fold_error_rate_pct": 0.0,
-  "thousand_fold_error_rate_ci95": {
-    "low_pct": 0.0,
-    "high_pct": 0.0442
-  },
   "exact_dose_agreements": 8592,
   "other_dose_discrepancies": 99,
   "by_endpoint": {

@@ -1,18 +1,16 @@
 {
   "name": "ASO Atlas 2.0",
-  "version": "neurips-rebuttal",
+  "version": "2.0",
   "release_tag": "neurips-rebuttal",
   "code_repo": "https://github.com/barneyhill/aso-atlas-2",
-  "manuscript_commit": "ff973af",
-  "manuscript_ref": "neurips-submission",
   "unit_definition": "A row is one assay record. A measurement (assay readout) is one non-null assay value: in vitro inhibition and dose-response rows carry one readout each, a hepatotoxicity row carries up to 7 (one per biomarker channel), and a neurotoxicity row carries one FOB readout.",
-  "gene_definition": "A named target gene is one unique non-null target_RNA after resolving transcript identifiers to gene symbols with the same genomic annotation mapping used by the submitted manuscript.",
+  "gene_definition": "A named target gene is one unique non-null target_RNA after resolving transcript identifiers to gene symbols with the release's genomic annotation mapping.",
   "compound_definition": "A unique HELM compound is one unique non-null HELM Annotation. Rows without a resolvable HELM remain in the assay corpus but are excluded from unique-HELM-compound and model-benchmark counts.",
-  "linkage_definition": "Cross-category linkage retains the submitted source-identifier unit: a distinct Compound ID reported in at least two of the four assay categories. By this definition, 15,339 of 168,537 source Compound IDs (9.1%) are linked.",
+  "linkage_definition": "Cross-category linkage uses the source-reported identifier unit: a distinct Compound ID reported in at least two of the four assay categories. By this definition, 15,339 of 168,537 source Compound IDs (9.1%) are linked.",
   "model_eligibility_definition": "model_eligible is true exactly when HELM Annotation is non-null. These rows form the chemistry-aware modelling subset; false rows remain valid assay readouts for corpus and phenotype-frequency analyses.",
   "paper_benchmark_folds": {
     "directory": "folds/",
-    "role": "Exact endpoint-specific five-fold assignments used for the submitted paper's benchmark results.",
+    "role": "Frozen endpoint-specific five-fold assignments for reproducible benchmark evaluation.",
     "oligogym_endpoints": [
       "in_vitro_inhibition",
       "potency",
@@ -100,7 +98,7 @@
   },
   "paper_cross_reference": {
     "paper_assay_readouts": 295007,
-    "note": "The manuscript and release count assay readouts over every processed row. Rows whose HELM could not be resolved remain public and are marked model_eligible=false; chemistry-aware model analyses use the resolved subset, while cross-category linkage uses the submitted source Compound ID unit.",
+    "note": "The release counts assay readouts over every processed row. Rows whose HELM could not be resolved remain public and are marked model_eligible=false; chemistry-aware model analyses use the resolved subset, while cross-category linkage uses the source-reported Compound ID unit.",
     "delta": 0,
     "paper_named_target_genes": 430,
     "released_named_target_genes": 430,

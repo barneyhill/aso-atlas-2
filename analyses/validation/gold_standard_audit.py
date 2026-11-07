@@ -262,18 +262,6 @@ def vocab(v):
     return s
 
 
-def wilson(k, n, z=1.96):
-    """Wilson score interval. Normal-approximation CIs are useless at the 100%
-    and small-n cells this audit is full of."""
-    if n == 0:
-        return (0.0, 0.0, 0.0)
-    p = k / n
-    d = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / d
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return (100 * p, 100 * max(0.0, centre - half), 100 * min(1.0, centre + half))
-
-
 def cid_of(v):
     m = re.search(r"\d{4,7}", str(v if v is not None else ""))
     return m.group() if m else None
@@ -758,8 +746,7 @@ def chemistry_class(helm):
 # ── main analysis ────────────────────────────────────────────────────────────
 
 def rate(k, n):
-    p, lo, hi = wilson(k, n)
-    return {"k": k, "n": n, "pct": round(p, 2), "ci_lo": round(lo, 2), "ci_hi": round(hi, 2)}
+    return {"k": k, "n": n, "pct": round(100 * k / n, 2) if n else 0.0}
 
 
 def main(seed=2026, n_perm=20):
@@ -1589,7 +1576,7 @@ def main(seed=2026, n_perm=20):
 
 def summarise(rep):
     c, rc, pr = rep["corpus"], rep["recall"], rep["precision"]
-    f = lambda d: f'{d["pct"]:.1f}% [{d["ci_lo"]:.1f}-{d["ci_hi"]:.1f}] ({d["k"]}/{d["n"]})'
+    f = lambda d: f'{d["pct"]:.1f}% ({d["k"]}/{d["n"]})'
     print(f'\ncorpus: {c["verified_tables_total"]} verified tables, '
           f'{c["gold_measurements_total"]:,} measurements, {c["gold_compounds"]:,} compounds')
     for p in c["patents"]:

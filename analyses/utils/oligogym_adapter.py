@@ -45,18 +45,6 @@ def _mock_missing_deps():
         sys.modules["tabpfn"] = m
 
 
-_mock_missing_deps()
-
-from oligogym.features import KMersCounts, OneHotEncoder  # noqa: E402
-from oligogym.models import (  # noqa: E402
-    MLP,
-    CatBoostModel,
-    LinearModel,
-    NearestNeighborsModel,
-    RandomForestModel,
-    XGBoostModel,
-)
-
 # ---------------------------------------------------------------------------
 # HELM conversion
 # ---------------------------------------------------------------------------
@@ -304,9 +292,13 @@ DATASETS = {
 # Featurizer configs
 # ---------------------------------------------------------------------------
 
-FEATURIZER_CONFIGS = {
-    "OneHot_full": (OneHotEncoder, {"encode_components": ["base", "sugar", "phosphate"]}),
-}
+def _featurizer_configs():
+    _mock_missing_deps()
+    from oligogym.features import OneHotEncoder
+    return {
+        "OneHot_full": (OneHotEncoder, {"encode_components": ["base", "sugar", "phosphate"]}),
+    }
+
 
 
 def is_compatible(feat_name: str, model_name: str) -> bool:
@@ -320,11 +312,26 @@ def is_compatible(feat_name: str, model_name: str) -> bool:
 # rows are directly comparable.
 # ---------------------------------------------------------------------------
 
-MODEL_CONFIGS: dict[str, tuple[type, list[dict]]] = {
-    "Linear": (LinearModel, [{"type": "ridge"}]),
-    "Random Forest": (RandomForestModel, [{"n_estimators": 500, "max_depth": 20}]),
-    "XGBoost": (XGBoostModel, [{"n_estimators": 500, "max_depth": 10}]),
-    "KNN": (NearestNeighborsModel, [{"n_neighbors": 10}]),
-    "CatBoost": (CatBoostModel, [{"iterations": 500}]),
-    "MLP": (MLP, [{"hidden_dims": [128, 128], "dropout": 0.25}]),
-}
+def _model_configs():
+    _mock_missing_deps()
+    from oligogym.models import (
+        MLP, CatBoostModel, LinearModel, NearestNeighborsModel,
+        RandomForestModel, XGBoostModel,
+    )
+    return {
+        "Linear": (LinearModel, [{"type": "ridge"}]),
+        "Random Forest": (RandomForestModel, [{"n_estimators": 500, "max_depth": 20}]),
+        "XGBoost": (XGBoostModel, [{"n_estimators": 500, "max_depth": 10}]),
+        "KNN": (NearestNeighborsModel, [{"n_neighbors": 10}]),
+        "CatBoost": (CatBoostModel, [{"iterations": 500}]),
+        "MLP": (MLP, [{"hidden_dims": [128, 128], "dropout": 0.25}]),
+    }
+
+
+def __getattr__(name):
+    # Dataset loading and saved-prediction audits require no training libraries.
+    if name == "FEATURIZER_CONFIGS":
+        return _featurizer_configs()
+    if name == "MODEL_CONFIGS":
+        return _model_configs()
+    raise AttributeError(name)

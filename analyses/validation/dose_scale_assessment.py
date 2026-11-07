@@ -26,19 +26,6 @@ def _dose(identity_json: str):
     return json.loads(identity_json).get("dose")
 
 
-def _wilson_errors(k: int, n: int, z: float = 1.959963984540054) -> dict:
-    if n == 0:
-        return {"low_pct": None, "high_pct": None}
-    p = k / n
-    denominator = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / denominator
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denominator
-    return {
-        "low_pct": round(100 * max(0.0, centre - half), 4),
-        "high_pct": round(100 * min(1.0, centre + half), 4),
-    }
-
-
 def assess(ledger: pd.DataFrame) -> dict:
     gold = ledger[
         ledger["side"].eq("gold")
@@ -111,7 +98,6 @@ def assess(ledger: pd.DataFrame) -> dict:
         "both_dose_missing": int(counts["both_missing"]),
         "thousand_fold_errors": int(errors),
         "thousand_fold_error_rate_pct": round(100 * errors / denominator, 4),
-        "thousand_fold_error_rate_ci95": _wilson_errors(errors, denominator),
         "exact_dose_agreements": int(counts["exact_agreement"]),
         "other_dose_discrepancies": int(counts["other_dose_discrepancy"]),
         "by_endpoint": {

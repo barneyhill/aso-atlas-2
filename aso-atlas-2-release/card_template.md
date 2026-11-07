@@ -22,68 +22,68 @@ configs:
 
 # ASO Atlas 2.0
 
-A benchmark dataset for evaluating antisense oligonucleotide (ASO) prediction across the preclinical pipeline.
+A dataset of patent-reported antisense oligonucleotide (ASO) experiments for studying
+in vitro activity, dose response, hepatotoxicity and neurotoxicity across the preclinical
+pipeline. It is designed for research benchmarking, exploratory modelling and analysis
+of the published ASO assay landscape.
 
-**Snapshot `<<VERSION>>`.** The dataset revision, release-build code and Croissant metadata
-are pinned by the tag `<<RELEASE_TAG>>`; the submitted manuscript remains pinned to its
-submission commit:
+## At a glance
 
-| Artifact | Pinned at |
-|---|---|
-| Dataset revision (this repo) | `<<RELEASE_TAG>>` |
-| Code | [`<<CODE_REPO>>`](<<CODE_REPO>>/tree/<<RELEASE_TAG>>), tag `<<RELEASE_TAG>>` |
-| Manuscript source | commit `<<MANUSCRIPT_COMMIT>>` (`<<MANUSCRIPT_REF>>`) |
-| NeurIPS Croissant metadata | [`croissant.json`](croissant.json), Croissant 1.1 core + RAI, pinned to `<<RELEASE_TAG>>` |
+- **<<TOTAL_READOUTS>> assay readouts** from **<<TOTAL_PATENTS>> USPTO patent filings**
+- **<<TOTAL_COMPOUNDS>> unique, chemistry-resolved ASOs** represented in HELM notation
+- **<<TOTAL_GENES>> named target genes**
+- Four ready-to-load configurations covering in vitro efficacy and in vivo safety
+- Patent-grouped cross-validation folds for leakage-controlled benchmarking
 
-Every count on this card is generated from `release_manifest.json`; none is maintained by hand.
-
-## Dataset Summary
-
-ASO Atlas 2.0 contains <<TOTAL_READOUTS>> assay readouts targeting <<TOTAL_GENES>> named
-genes and contributed by <<TOTAL_PATENTS>> USPTO patent filings. Of these,
-<<MODEL_READOUTS>> readouts have a resolved HELM annotation and span
-<<TOTAL_COMPOUNDS>> unique HELM compounds; <<UNRESOLVED_READOUTS>> readouts retain the
-reported assay outcome but lack resolvable chemistry.
-
-A readout is one non-null assay value. In vitro and neurotoxicity observations carry one
-readout; a hepatotoxicity observation can carry up to seven biomarker readouts.
 <<GENE_DEFINITION>>
-<<COMPOUND_DEFINITION>>
-<<LINKAGE_DEFINITION>>
-<<MODEL_ELIGIBILITY_DEFINITION>>
 
-### Paper-count reconciliation
+## Quick start
 
-<<PAPER_XREF>>
+```python
+from datasets import load_dataset
 
-The dataset spans four preclinical assay types that mirror the sequential screening pipeline used in ASO drug development:
+dataset = load_dataset(
+    "barneyhill/aso-atlas-2",
+    "in_vitro_inhibition",
+    split="full",
+)
+print(dataset[0])
+```
+
+Replace `in_vitro_inhibition` with `dose_response`, `hepatotoxicity` or
+`neurotoxicity` to load another assay type.
+
+## What's included
+
+Each configuration is a separate table because the experimental endpoints and schemas
+differ. Together they cover four stages commonly encountered in preclinical ASO
+evaluation:
 
 <<SUMMARY_TABLE>>
 
-## Paper benchmark folds
+Of the <<TOTAL_READOUTS>> readouts, <<MODEL_READOUTS>> have a resolved HELM annotation.
+The remaining <<UNRESOLVED_READOUTS>> retain a reported assay outcome but cannot be used
+directly by chemistry-aware models.
 
-The `folds/` directory contains the **exact endpoint-specific five-fold assignments used
-for every benchmark reported in the submitted paper**. These are the reproduction
-partitions: six OligoGym endpoint files are checked against the frozen test-group
-membership saved by the submitted run, and `oligoai_folds.csv.gz` is derived from the
-five frozen OligoAI training files. See `folds/README.md` for schemas and fold sizes.
+## Benchmark folds
 
-The paper built each model-ready endpoint separately before applying patent-level
-`GroupKFold`, so the fold number for a patent can differ between endpoints and between
-OligoGym and OligoAI. Those differences are preserved rather than replaced by a new
-common assignment. In every file, fold `k` is the paper's test set for CV run `k`; the
-other four folds are its training set.
+The [`folds/`](folds/) directory provides frozen, endpoint-specific five-fold assignments
+for reproducible evaluation with OligoGym and OligoAI. The splits group observations by
+source patent to reduce train-test leakage.
 
-## Review snapshots
+Each model-ready endpoint was constructed separately before patent-level `GroupKFold` was
+applied. A patent's fold number can therefore differ between endpoints and between
+OligoGym and OligoAI. In each file, rows assigned to fold `k` are the test set for run
+`k`; the other four folds form the training set. See [`folds/README.md`](folds/README.md)
+for schemas and fold sizes.
 
-| Snapshot | Change |
-|---------|--------|
-| `neurips-submission` | Preserved legacy revision of the unversioned snapshot originally available during review. Its card reported pre-filter counts that described neither its files nor the manuscript. |
-| `neurips-rebuttal` | Reconciled review snapshot. Includes all 295,007 valid processed readouts, marks the 4,166 readouts without resolved HELM as `model_eligible=false`, supplies the exact submitted-paper folds, and retains the submitted source `Compound ID` unit for cross-category linkage. |
+## Versioning and reproducibility
 
-No measurement value was edited in preparing the rebuttal snapshot. It preserves the
-complete processed assay corpus and exact paper folds while making the readout,
-model-eligibility and compound-identity units explicit.
+This card describes **ASO Atlas 2.0**. The data tables, generated counts and machine-readable
+metadata are released together. The source and release-building code is available in the
+[ASO Atlas 2 repository](<<CODE_REPO>>), and [`croissant.json`](croissant.json) provides
+Croissant 1.1 core + RAI metadata. The dataset has a persistent Hugging Face DOI:
+[`10.57967/hf/8687`](https://doi.org/10.57967/hf/8687).
 
 ## Data Fields
 
@@ -195,8 +195,8 @@ included here; no patient-level source fields are released.
 ## Intended uses
 
 The established uses are research benchmarking and exploratory model development for
-patent-derived ASO in vitro efficacy and preclinical toxicity endpoints. Use the supplied
-patent-grouped paper folds to reproduce or extend the submitted results. The measurements
+patent-derived ASO in vitro efficacy and preclinical toxicity endpoints. The supplied
+patent-grouped folds support reproducible, leakage-controlled evaluation. The measurements
 represent outcomes reported in patents, not independently replicated biological truth.
 
 This dataset is **not validated for clinical decision-making, prediction of human safety,
